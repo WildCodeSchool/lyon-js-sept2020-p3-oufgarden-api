@@ -1,6 +1,8 @@
 const userRouter = require('express').Router();
-const { handleGetUsers } = require('../controllers/users');
+const asyncHandler = require('express-async-handler');
+const { handleGetUsers, handleGetOneUser } = require('../controllers/users');
 
-userRouter.get('/', handleGetUsers);
+userRouter.get('/', asyncHandler(handleGetUsers));
+userRouter.get('/:id', asyncHandler(handleGetOneUser));
 
 module.exports = { userRouter };
