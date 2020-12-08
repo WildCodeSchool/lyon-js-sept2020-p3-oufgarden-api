@@ -21,9 +21,8 @@ const getOneUser = async (id, failIfNotFound = true) => {
 
 const validate = async (attributes, options = { udpatedRessourceId: null }) => {
   const { udpatedRessourceId } = options;
-  const forUpdate = !!udpatedRessourceId; // Le !! permet de tranformer en booleen ????
+  const forUpdate = !!udpatedRessourceId;
   // Creation du schema pour la validation via Joi
-  console.log(attributes, forUpdate);
   const schema = Joi.object().keys({
     firstname: Joi.string().min(0).max(30),
     lastname: Joi.string().min(0).max(30),
