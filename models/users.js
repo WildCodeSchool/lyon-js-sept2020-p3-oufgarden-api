@@ -27,9 +27,10 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
     firstname: Joi.string().min(0).max(30),
     lastname: Joi.string().min(0).max(30),
     email: forUpdate ? Joi.string().email() : Joi.string().email().required(),
-    encrypted_password: Joi.string()
+    password: Joi.string()
       .pattern(new RegExp('^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$'))
-      .required(),
+      .required()
+      .label("Password doesn't match requirement"),
     //  Carreful ! ESlint n'aime pas les '\' Attention au Regex //
     is_admin: Joi.number().integer().min(0).max(1).required(),
   });
@@ -50,7 +51,7 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
     }
     if (shouldThrow) {
       throw new ValidationError([
-        { message: 'email already taken', path: ['email'], type: 'unique' },
+        { message: 'email_taken', path: ['email'], type: 'unique' },
       ]);
     }
   }
