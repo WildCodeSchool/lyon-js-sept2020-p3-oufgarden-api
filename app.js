@@ -3,6 +3,7 @@ const cors = require('cors');
 const swaggerUi = require('swagger-ui-express');
 const YAML = require('yamljs');
 const { inTestEnv, inProdEnv, SERVER_PORT } = require('./env');
+const handleValidationEror = require('./middlewares/handleValidationError');
 
 const app = express();
 
@@ -22,7 +23,7 @@ require('./routes')(app);
 
 // post-route middlewares
 app.set('x-powered-by', false);
-
+app.use(handleValidationEror);
 // server setup
 const server = app.listen(SERVER_PORT, () => {
   if (!inTestEnv) {
