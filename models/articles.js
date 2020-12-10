@@ -26,32 +26,21 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
   const forUpdate = !!udpatedRessourceId;
   // Creation du schema pour la validation via Joi
   const schema = Joi.object().keys({
-    title: Joi.string().min(0).max(150).required(),
-    content: Joi.string(),
-    url: Joi.string().min(0).max(150).required(),
-    created_at: Joi.date().required(),
+    title: forUpdate
+      ? Joi.string().min(0).max(150)
+      : Joi.string().min(0).max(150).required(),
+    content: forUpdate ? Joi.string() : Joi.string().required(),
+    url: forUpdate
+      ? Joi.string().min(0).max(150)
+      : Joi.string().min(0).max(150).required(),
+    created_at: forUpdate ? Joi.any() : Joi.date().required(),
+    updated_at: forUpdate ? Joi.date().required() : Joi.any(),
   });
 
   const { error } = schema.validate(attributes, {
     abortEarly: false,
   });
   if (error) throw new ValidationError(error.details);
-  // if (attributes.email) {
-  //   let shouldThrow = false;
-  //   if (forUpdate) {
-  //     const toUpdate = await getOneUser(udpatedRessourceId);
-  //     shouldThrow =
-  //       !(toUpdate.email === attributes.email) &&
-  //       (await emailAlreadyExists(attributes.email));
-  //   } else {
-  //     shouldThrow = await emailAlreadyExists(attributes.email);
-  //   }
-  //   if (shouldThrow) {
-  //     throw new ValidationError([
-  //       { message: 'email_taken', path: ['email'], type: 'unique' },
-  //     ]);
-  //   }
-  // }
 };
 
 const createArticle = async (newAttributes) => {
@@ -68,16 +57,17 @@ const getArticles = async () => {
   return db.query('SELECT * FROM article');
 };
 
-// const updateUser = async (id, newAttributes) => {
-//   await validate(newAttributes, { udpatedRessourceId: id });
-//   const namedAttributes = definedAttributesToSqlSet(newAttributes);
-//   return db
-//     .query(`UPDATE user SET ${namedAttributes} WHERE id = :id`, {
-//       ...newAttributes,
-//       id,
-//     })
-//     .then(() => getOneUser(id));
-// };
+const updateArticle = async (id, newAttributes) => {
+  await validate(newAttributes, { udpatedRessourceId: id });
+  const namedAttributes = definedAttributesToSqlSet(newAttributes);
+  return db
+    .query(`UPDATE article SET ${namedAttributes} WHERE id = :id`, {
+      ...newAttributes,
+      id,
+    })
+    .then(() => getOneArticle(id));
+};
+
 // const removeUser = async (id, failIfNotFound = true) => {
 //   const res = await db.query('DELETE FROM user WHERE id = ?', [id]);
 //   if (res.affectedRows !== 0) {
@@ -91,5 +81,6 @@ module.exports = {
   getArticles,
   getOneArticle,
   createArticle,
-  // updateUser, removeUser
+  updateArticle,
+  // removeUser
 };

@@ -2,7 +2,7 @@ const {
   getArticles,
   getOneArticle,
   createArticle,
-  // updateUser,
+  updateArticle,
   // removeUser,
 } = require('../models/articles.js');
 
@@ -16,27 +16,28 @@ module.exports.handleGetOneArticle = async (req, res) => {
 };
 
 module.exports.handleCreateArticle = async (req, res) => {
-  const { title, content, url, date } = req.body;
+  const { title, content, url, created_at, updated_at } = req.body;
   const data = await createArticle({
     title,
     content,
     url,
-    created_at: date,
+    created_at,
+    updated_at,
   });
   return res.status(201).send(data);
 };
 
-//   module.exports.handleUpdateUser = async (req, res) => {
-//     const { firstname, lastname, email, password, is_admin } = req.body;
-//     const data = await updateUser(req.params.id, {
-//       firstname,
-//       lastname,
-//       email,
-//       password,
-//       is_admin,
-//     });
-//     return res.status(200).send(data);
-//   };
+module.exports.handleUpdateArticle = async (req, res) => {
+  const { title, content, url, created_at, updated_at } = req.body;
+  const data = await updateArticle(req.params.id, {
+    title,
+    content,
+    url,
+    created_at,
+    updated_at,
+  });
+  return res.status(200).send(data);
+};
 
 //   module.exports.handleDeleteUser = async (req, res) => {
 //     await removeUser(req.params.id);
