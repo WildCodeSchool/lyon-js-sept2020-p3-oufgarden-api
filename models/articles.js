@@ -1,7 +1,7 @@
-// const Joi = require('joi');
+const Joi = require('joi');
 const db = require('../db');
-const { RecordNotFoundError } = require('../error-types');
-// const definedAttributesToSqlSet = require('../helpers/definedAttributesToSQLSet.js');
+const { RecordNotFoundError, ValidationError } = require('../error-types');
+const definedAttributesToSqlSet = require('../helpers/definedAttributesToSQLSet.js');
 
 // const emailAlreadyExists = async (email) => {
 //   const rows = await db.query('SELECT * FROM user WHERE email = ?', [email]);
@@ -20,52 +20,49 @@ const getOneArticle = async (id, failIfNotFound = true) => {
   return null;
 };
 
-// const validate = async (attributes, options = { udpatedRessourceId: null }) => {
-//   const { udpatedRessourceId } = options;
-//   const forUpdate = !!udpatedRessourceId;
-//   // Creation du schema pour la validation via Joi
-//   const schema = Joi.object().keys({
-//     firstname: Joi.string().min(0).max(30),
-//     lastname: Joi.string().min(0).max(30),
-//     email: forUpdate ? Joi.string().email() : Joi.string().email().required(),
-//     password: Joi.string()
-//       .pattern(new RegExp('^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$'))
-//       .required()
-//       .label("Password doesn't match requirement"),
-//     //  Carreful ! ESlint n'aime pas les '\' Attention au Regex //
-//     is_admin: Joi.number().integer().min(0).max(1).required(),
-//   });
+const validate = async (attributes, options = { udpatedRessourceId: null }) => {
+  const { udpatedRessourceId } = options;
+  // eslint-disable-next-line no-unused-vars
+  const forUpdate = !!udpatedRessourceId;
+  // Creation du schema pour la validation via Joi
+  const schema = Joi.object().keys({
+    title: Joi.string().min(0).max(150).required(),
+    content: Joi.string(),
+    url: Joi.string().min(0).max(150).required(),
+    created_at: Joi.date().required(),
+  });
 
-//   const { error } = schema.validate(attributes, {
-//     abortEarly: false,
-//   });
-//   if (error) throw new ValidationError(error.details);
-//   if (attributes.email) {
-//     let shouldThrow = false;
-//     if (forUpdate) {
-//       const toUpdate = await getOneUser(udpatedRessourceId);
-//       shouldThrow =
-//         !(toUpdate.email === attributes.email) &&
-//         (await emailAlreadyExists(attributes.email));
-//     } else {
-//       shouldThrow = await emailAlreadyExists(attributes.email);
-//     }
-//     if (shouldThrow) {
-//       throw new ValidationError([
-//         { message: 'email_taken', path: ['email'], type: 'unique' },
-//       ]);
-//     }
-//   }
-// };
-// const createUser = async (newAttributes) => {
-//   await validate(newAttributes);
-//   return db
-//     .query(
-//       `INSERT INTO user SET ${definedAttributesToSqlSet(newAttributes)}`,
-//       newAttributes
-//     )
-//     .then((res) => getOneUser(res.insertId));
-// };
+  const { error } = schema.validate(attributes, {
+    abortEarly: false,
+  });
+  if (error) throw new ValidationError(error.details);
+  // if (attributes.email) {
+  //   let shouldThrow = false;
+  //   if (forUpdate) {
+  //     const toUpdate = await getOneUser(udpatedRessourceId);
+  //     shouldThrow =
+  //       !(toUpdate.email === attributes.email) &&
+  //       (await emailAlreadyExists(attributes.email));
+  //   } else {
+  //     shouldThrow = await emailAlreadyExists(attributes.email);
+  //   }
+  //   if (shouldThrow) {
+  //     throw new ValidationError([
+  //       { message: 'email_taken', path: ['email'], type: 'unique' },
+  //     ]);
+  //   }
+  // }
+};
+
+const createArticle = async (newAttributes) => {
+  await validate(newAttributes);
+  return db
+    .query(
+      `INSERT INTO article SET ${definedAttributesToSqlSet(newAttributes)}`,
+      newAttributes
+    )
+    .then((res) => getOneArticle(res.insertId));
+};
 
 const getArticles = async () => {
   return db.query('SELECT * FROM article');
@@ -93,5 +90,6 @@ const getArticles = async () => {
 module.exports = {
   getArticles,
   getOneArticle,
-  // createUser, updateUser, removeUser
+  createArticle,
+  // updateUser, removeUser
 };
