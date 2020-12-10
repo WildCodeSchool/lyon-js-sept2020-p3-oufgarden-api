@@ -3,7 +3,7 @@ const {
   getOneArticle,
   createArticle,
   updateArticle,
-  // removeUser,
+  removeArticle,
 } = require('../models/articles.js');
 
 module.exports.handleGetArticles = async (req, res) => {
@@ -39,7 +39,7 @@ module.exports.handleUpdateArticle = async (req, res) => {
   return res.status(200).send(data);
 };
 
-//   module.exports.handleDeleteUser = async (req, res) => {
-//     await removeUser(req.params.id);
-//     res.sendStatus(204);
-//   };
+module.exports.handleDeleteArticle = async (req, res) => {
+  await removeArticle(req.params.id);
+  res.sendStatus(204);
+};

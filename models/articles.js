@@ -68,19 +68,19 @@ const updateArticle = async (id, newAttributes) => {
     .then(() => getOneArticle(id));
 };
 
-// const removeUser = async (id, failIfNotFound = true) => {
-//   const res = await db.query('DELETE FROM user WHERE id = ?', [id]);
-//   if (res.affectedRows !== 0) {
-//     return true;
-//   }
-//   if (failIfNotFound) throw new RecordNotFoundError('contacts', id);
-//   return false;
-// };
+const removeArticle = async (id, failIfNotFound = true) => {
+  const res = await db.query('DELETE FROM article WHERE id = ?', [id]);
+  if (res.affectedRows !== 0) {
+    return true;
+  }
+  if (failIfNotFound) throw new RecordNotFoundError('article', id);
+  return false;
+};
 
 module.exports = {
   getArticles,
   getOneArticle,
   createArticle,
   updateArticle,
-  // removeUser
+  removeArticle,
 };
