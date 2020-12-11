@@ -24,8 +24,8 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
   const forUpdate = !!udpatedRessourceId;
   // Creation du schema pour la validation via Joi
   const schema = Joi.object().keys({
-    firstname: Joi.string().min(0).max(30),
-    lastname: Joi.string().min(0).max(30),
+    firstname: Joi.string().min(0).max(150),
+    lastname: Joi.string().min(0).max(150),
     email: forUpdate ? Joi.string().email() : Joi.string().email().required(),
     password: Joi.string()
       .pattern(new RegExp('^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$'))

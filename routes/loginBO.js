@@ -1,7 +1,7 @@
 const adminLogin = require('express').Router();
 const asyncHandler = require('express-async-handler');
 
-const { handleLogin } = require('../controllers/login.js');
+const { handleLogin } = require('../controllers/loginBO.js');
 
 adminLogin.post('/', asyncHandler(handleLogin));
 
