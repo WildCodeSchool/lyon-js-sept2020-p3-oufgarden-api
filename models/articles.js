@@ -1,15 +1,8 @@
 const Joi = require('joi');
 const db = require('../db');
+
 const { RecordNotFoundError, ValidationError } = require('../error-types');
 const definedAttributesToSqlSet = require('../helpers/definedAttributesToSQLSet.js');
-
-// const emailAlreadyExists = async (email) => {
-//   const rows = await db.query('SELECT * FROM user WHERE email = ?', [email]);
-//   if (rows.length) {
-//     return true;
-//   }
-//   return false;
-// };
 
 const getOneArticle = async (id, failIfNotFound = true) => {
   const rows = await db.query('SELECT * FROM article WHERE id = ?', [id]);
@@ -41,6 +34,31 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
     abortEarly: false,
   });
   if (error) throw new ValidationError(error.details);
+};
+
+const validateTags = async (tagsArray) => {
+  // here insert validation for number
+  const schema = Joi.array().items(Joi.number().integer());
+  const rawData = await db.query('SELECT id FROM tag');
+  const validIds = rawData.map((obj) => obj.id);
+  tagsArray.forEach((idToValidate) => {
+    if (validIds.includes(idToValidate) === false) {
+      throw new RecordNotFoundError('tag', idToValidate);
+    }
+  });
+};
+
+const linkArticleToTags = async (articleId, tagsArray) => {
+  let valuePairsString = '';
+  tagsArray.forEach((tag) => {
+    valuePairsString += `(${+articleId}, ${+tag}),`; // + to convert it to number or make sure it's a number
+  });
+  valuePairsString = valuePairsString.slice(0, -1); // removing the last comma
+  console.log(valuePairsString);
+  return db.query(`INSERT INTO tagToArticle (article_id, tag_id) VALUES ? ;`, [
+    valuePairsString,
+  ]);
+  // then(res=> ?)
 };
 
 const createArticle = async (newAttributes) => {
@@ -81,6 +99,7 @@ module.exports = {
   getArticles,
   getOneArticle,
   createArticle,
+  linkArticleToTags,
   updateArticle,
   removeArticle,
 };
