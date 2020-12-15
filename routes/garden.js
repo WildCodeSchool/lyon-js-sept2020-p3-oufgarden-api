@@ -1,17 +1,17 @@
-const tagRouter = require('express').Router();
+const gardenRouter = require('express').Router();
 const asyncHandler = require('express-async-handler');
 const {
-  handleGetTags,
-  handleGetOneTag,
-  handleCreateTag,
-  handleUpdateTag,
-  handleDeleteTag,
+  handleGetGarden,
+  handleGetOneGarden,
+  handleCreateGarden,
+  handleUpdateGarden,
+  handleDeleteGarden,
 } = require('../controllers/tags');
 
-tagRouter.get('/', asyncHandler(handleGetTags));
-tagRouter.get('/:id', asyncHandler(handleGetOneTag));
-tagRouter.post('/', asyncHandler(handleCreateTag));
-tagRouter.put('/:id', asyncHandler(handleUpdateTag));
-tagRouter.delete('/:id', asyncHandler(handleDeleteTag));
+gardenRouter.get('/', asyncHandler(handleGetGarden));
+gardenRouter.get('/:id', asyncHandler(handleGetOneGarden));
+gardenRouter.post('/', asyncHandler(handleCreateGarden));
+gardenRouter.put('/:id', asyncHandler(handleUpdateGarden));
+gardenRouter.delete('/:id', asyncHandler(handleDeleteGarden));
 
-module.exports = { tagRouter };
+module.exports = { gardenRouter };
