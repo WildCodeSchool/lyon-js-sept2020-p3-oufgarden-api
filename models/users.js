@@ -1,8 +1,10 @@
 const Joi = require('joi');
+const argon2 = require('argon2');
 const db = require('../db');
 const { RecordNotFoundError, ValidationError } = require('../error-types');
 const definedAttributesToSqlSet = require('../helpers/definedAttributesToSQLSet.js');
 
+// On check ici si l'email existe déjà
 const emailAlreadyExists = async (email) => {
   const rows = await db.query('SELECT * FROM user WHERE email = ?', [email]);
   if (rows.length) {
@@ -10,6 +12,10 @@ const emailAlreadyExists = async (email) => {
   }
   return false;
 };
+// Hash du password avec argon 2
+const hashPassword = async (user) => argon2.hash(user.password);
+
+// Methode pour récuperer un user avec son id
 const getOneUser = async (id, failIfNotFound = true) => {
   const rows = await db.query('SELECT * FROM user WHERE id = ?', [id]);
   if (rows.length) {
@@ -19,9 +25,11 @@ const getOneUser = async (id, failIfNotFound = true) => {
   return null;
 };
 
+// Validation avec Joi, voir pour implementation confirmation de mdp ??
 const validate = async (attributes, options = { udpatedRessourceId: null }) => {
   const { udpatedRessourceId } = options;
   const forUpdate = !!udpatedRessourceId;
+  // Il faudra implémenter ici la confirm de password
   // Creation du schema pour la validation via Joi
   const schema = Joi.object().keys({
     firstname: Joi.string().min(0).max(150),
@@ -56,8 +64,13 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
     }
   }
 };
+
+// Methode pour créer un user Et pour hashser son password
 const createUser = async (newAttributes) => {
   await validate(newAttributes);
+
+  const password = await hashPassword(newAttributes);
+  console.log(password);
   return db
     .query(
       `INSERT INTO user SET ${definedAttributesToSqlSet(newAttributes)}`,
@@ -66,10 +79,11 @@ const createUser = async (newAttributes) => {
     .then((res) => getOneUser(res.insertId));
 };
 
+// Methode pour récuperer toute la liste d'user
 const getUsers = async () => {
   return db.query('SELECT * FROM user');
 };
-
+// Methode pour modifier un user
 const updateUser = async (id, newAttributes) => {
   await validate(newAttributes, { udpatedRessourceId: id });
   const namedAttributes = definedAttributesToSqlSet(newAttributes);
@@ -80,6 +94,7 @@ const updateUser = async (id, newAttributes) => {
     })
     .then(() => getOneUser(id));
 };
+// Methode pour supprimer un user
 const removeUser = async (id, failIfNotFound = true) => {
   const res = await db.query('DELETE FROM user WHERE id = ?', [id]);
   if (res.affectedRows !== 0) {
