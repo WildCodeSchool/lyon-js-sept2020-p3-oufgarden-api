@@ -2,6 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const swaggerUi = require('swagger-ui-express');
 const YAML = require('yamljs');
+const session = require('express-session');
+
+const sessionStore = require('./sessionStore');
 const { inTestEnv, inProdEnv, SERVER_PORT } = require('./env');
 const handleValidationEror = require('./middlewares/handleValidationError');
 
@@ -17,6 +20,15 @@ if (!inProdEnv && !inTestEnv) {
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(
+  session({
+    key: 'session_cookie_name',
+    secret: 'session_cookie_secret',
+    store: sessionStore,
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 
 // application routes
 require('./routes')(app);

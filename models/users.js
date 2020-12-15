@@ -68,13 +68,14 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
 // Methode pour créer un user Et pour hashser son password
 const createUser = async (newAttributes) => {
   await validate(newAttributes);
+  const { email } = newAttributes;
   const password = await hashPassword(newAttributes);
   const newObj = { ...newAttributes, password };
   const res = await db.query(
     `INSERT INTO user SET ${definedAttributesToSqlSet(newObj)}`,
     newObj
   );
-  return getOneUser(res.insertId);
+  return { email, id: res.insertId };
 };
 
 // Méthode pour vérifier le match des password avec argon
