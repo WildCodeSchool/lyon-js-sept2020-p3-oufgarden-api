@@ -77,6 +77,11 @@ const createUser = async (newAttributes) => {
   return getOneUser(res.insertId);
 };
 
+// Méthode pour vérifier le match des password avec argon
+/* const verifyPassword = async (user, plainPassword) => {
+  return argon2.verify(user.password, plainPassword);
+}; */
+
 // Methode pour récuperer toute la liste d'user
 const getUsers = async () => {
   return db.query('SELECT * FROM user');
