@@ -27,6 +27,7 @@ app.use(
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
+    cookie: { sameSite: true, secure: inProdEnv },
   })
 );
 
