@@ -39,6 +39,11 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
 const validateTags = async (tagsArray) => {
   // here insert validation for number
   const schema = Joi.array().items(Joi.number().integer());
+  const { error } = schema.validate(tagsArray, {
+    abortEarly: false,
+  });
+  if (error) throw new ValidationError(error.details);
+
   const rawData = await db.query('SELECT id FROM tag');
   const validIds = rawData.map((obj) => obj.id);
   tagsArray.forEach((idToValidate) => {
@@ -49,15 +54,16 @@ const validateTags = async (tagsArray) => {
 };
 
 const linkArticleToTags = async (articleId, tagsArray) => {
+  await validateTags(tagsArray);
   let valuePairsString = '';
   tagsArray.forEach((tag) => {
     valuePairsString += `(${+articleId}, ${+tag}),`; // + to convert it to number or make sure it's a number
   });
   valuePairsString = valuePairsString.slice(0, -1); // removing the last comma
   console.log(valuePairsString);
-  return db.query(`INSERT INTO tagToArticle (article_id, tag_id) VALUES ? ;`, [
-    valuePairsString,
-  ]);
+  return db.query(
+    `INSERT INTO tagToArticle (article_id, tag_id) VALUES ${valuePairsString};`
+  );
   // then(res=> ?)
 };
 
