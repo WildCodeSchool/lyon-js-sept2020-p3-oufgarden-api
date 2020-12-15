@@ -47,7 +47,7 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
       const toUpdate = await getOneTag(udpatedRessourceId);
       shouldThrow =
         !(toUpdate.name === attributes.name) &&
-        (await tagAlreadyExists(attributes.email));
+        (await tagAlreadyExists(attributes.name));
     } else {
       shouldThrow = await tagAlreadyExists(attributes.name);
     }

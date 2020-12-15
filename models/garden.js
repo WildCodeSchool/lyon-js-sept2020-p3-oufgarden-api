@@ -3,90 +3,96 @@ const db = require('../db');
 const { RecordNotFoundError, ValidationError } = require('../error-types');
 const definedAttributesToSqlSet = require('../helpers/definedAttributesToSQLSet.js');
 
-const emailAlreadyExists = async (email) => {
-  const rows = await db.query('SELECT * FROM user WHERE email = ?', [email]);
+// this function checks if a garden with the same name already exists
+const gardenAlreadyExists = async (name) => {
+  const rows = await db.query('SELECT * FROM garden WHERE name = ?', [name]);
   if (rows.length) {
     return true;
   }
   return false;
 };
-const getOneUser = async (id, failIfNotFound = true) => {
-  const rows = await db.query('SELECT * FROM user WHERE id = ?', [id]);
+
+const getGarden = async () => {
+  return db.query('SELECT * FROM garden');
+};
+
+const getOneGarden = async (id, failIfNotFound = true) => {
+  const rows = await db.query('SELECT * FROM garden WHERE id = ?', [id]);
   if (rows.length) {
     return rows[0];
   }
-  if (failIfNotFound) throw new RecordNotFoundError('contacts', id);
+  if (failIfNotFound) throw new RecordNotFoundError('garden', id);
   return null;
 };
 
 const validate = async (attributes, options = { udpatedRessourceId: null }) => {
   const { udpatedRessourceId } = options;
   const forUpdate = !!udpatedRessourceId;
-  // Creation du schema pour la validation via Joi
+  // creating schema for validation by Joi
   const schema = Joi.object().keys({
-    firstname: Joi.string().min(0).max(150),
-    lastname: Joi.string().min(0).max(150),
-    email: forUpdate ? Joi.string().email() : Joi.string().email().required(),
-    password: Joi.string()
-      .pattern(new RegExp('^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$'))
-      .required()
-      .label("Password doesn't match requirement"),
-    //  Carreful ! ESlint n'aime pas les '\' Attention au Regex //
-    is_admin: Joi.number().integer().min(0).max(1).required(),
+    name: forUpdate
+      ? Joi.string().min(0).max(150)
+      : Joi.string().min(0).max(150).required(),
   });
 
   const { error } = schema.validate(attributes, {
     abortEarly: false,
   });
   if (error) throw new ValidationError(error.details);
-  if (attributes.email) {
+
+  // checking the garden does not already exist
+  if (attributes.name) {
     let shouldThrow = false;
     if (forUpdate) {
-      const toUpdate = await getOneUser(udpatedRessourceId);
+      const toUpdate = await getOneGarden(udpatedRessourceId);
       shouldThrow =
-        !(toUpdate.email === attributes.email) &&
-        (await emailAlreadyExists(attributes.email));
+        !(toUpdate.name === attributes.name) &&
+        (await gardenAlreadyExists(attributes.name));
     } else {
-      shouldThrow = await emailAlreadyExists(attributes.email);
+      shouldThrow = await gardenAlreadyExists(attributes.name);
     }
     if (shouldThrow) {
       throw new ValidationError([
-        { message: 'email_taken', path: ['email'], type: 'unique' },
+        { message: 'garden_already_exists', path: ['garden'], type: 'unique' },
       ]);
     }
   }
 };
-const createUser = async (newAttributes) => {
+
+const createGarden= async (newAttributes) => {
   await validate(newAttributes);
   return db
     .query(
-      `INSERT INTO user SET ${definedAttributesToSqlSet(newAttributes)}`,
+      `INSERT INTO garden SET ${definedAttributesToSqlSet(newAttributes)}`,
       newAttributes
     )
-    .then((res) => getOneUser(res.insertId));
+    .then((res) => getOneGarden(res.insertId));
 };
 
-const getUsers = async () => {
-  return db.query('SELECT * FROM user');
-};
-
-const updateUser = async (id, newAttributes) => {
+const updateGarden = async (id, newAttributes) => {
   await validate(newAttributes, { udpatedRessourceId: id });
   const namedAttributes = definedAttributesToSqlSet(newAttributes);
   return db
-    .query(`UPDATE user SET ${namedAttributes} WHERE id = :id`, {
+    .query(`UPDATE garden SET ${namedAttributes} WHERE id = :id`, {
       ...newAttributes,
       id,
     })
-    .then(() => getOneUser(id));
+    .then(() => getOneGarden(id));
 };
-const removeUser = async (id, failIfNotFound = true) => {
-  const res = await db.query('DELETE FROM user WHERE id = ?', [id]);
+
+const removeGarden = async (id, failIfNotFound = true) => {
+  const res = await db.query('DELETE FROM garden WHERE id = ?', [id]);
   if (res.affectedRows !== 0) {
     return true;
   }
-  if (failIfNotFound) throw new RecordNotFoundError('contacts', id);
+  if (failIfNotFound) throw new RecordNotFoundError('garden', id);
   return false;
 };
 
-module.exports = { getUsers, getOneUser, createUser, updateUser, removeUser };
+module.exports = {
+  getGarden,
+  getOneGarden,
+  createGarden,
+  updateGarden,
+  removeGarden,
+};
