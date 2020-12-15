@@ -68,15 +68,13 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
 // Methode pour créer un user Et pour hashser son password
 const createUser = async (newAttributes) => {
   await validate(newAttributes);
-
   const password = await hashPassword(newAttributes);
-  console.log(password);
-  return db
-    .query(
-      `INSERT INTO user SET ${definedAttributesToSqlSet(newAttributes)}`,
-      newAttributes
-    )
-    .then((res) => getOneUser(res.insertId));
+  const newObj = { ...newAttributes, password };
+  const res = await db.query(
+    `INSERT INTO user SET ${definedAttributesToSqlSet(newObj)}`,
+    newObj
+  );
+  return getOneUser(res.insertId);
 };
 
 // Methode pour récuperer toute la liste d'user
