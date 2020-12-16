@@ -6,7 +6,7 @@ const {
   handleCreateGarden,
   handleUpdateGarden,
   handleDeleteGarden,
-} = require('../controllers/tags');
+} = require('../controllers/garden');
 
 gardenRouter.get('/', asyncHandler(handleGetGarden));
 gardenRouter.get('/:id', asyncHandler(handleGetOneGarden));
