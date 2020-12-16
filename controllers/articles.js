@@ -18,13 +18,13 @@ module.exports.handleGetOneArticle = async (req, res) => {
 
 module.exports.handleCreateArticle = async (req, res) => {
   // tagsArray is an array with the IDs of all the tags related to this article
-  const { title, content, url, created_at, updated_at, tagsArray } = req.body;
+  const { title, content, url, tagsArray } = req.body;
   const data = await createArticle({
     title,
     content,
     url,
-    created_at,
-    updated_at,
+    // created_at,
+    // updated_at,
   });
   const createdArticleId = data.id;
   await linkArticleToTags(createdArticleId, tagsArray);

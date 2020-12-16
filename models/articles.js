@@ -1,5 +1,6 @@
 const Joi = require('joi');
 const db = require('../db');
+require('dotenv').config();
 
 const { RecordNotFoundError, ValidationError } = require('../error-types');
 const definedAttributesToSqlSet = require('../helpers/definedAttributesToSQLSet.js');
@@ -38,8 +39,8 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
     url: forUpdate
       ? Joi.string().min(0).max(150)
       : Joi.string().min(0).max(150).required(),
-    created_at: forUpdate ? Joi.any() : Joi.date().required(),
-    updated_at: forUpdate ? Joi.date().required() : Joi.any(),
+    // created_at: forUpdate ? Joi.any() : Joi.date().required(),
+    // updated_at: forUpdate ? Joi.date().required() : Joi.any(),
   });
 
   const { error } = schema.validate(attributes, {
@@ -105,10 +106,17 @@ const linkArticleToTags = async (articleId, tagsArray) => {
 
 const createArticle = async (newAttributes) => {
   await validate(newAttributes);
+  const currentDate = new Date();
+  const date = `${currentDate.getFullYear()}-${currentDate.getMonth()}-${currentDate.getDate()} ${currentDate.getHours()}:${
+    currentDate.getMinutes() < 10 ? '0' : ''
+  }${currentDate.getMinutes()}:${currentDate.getSeconds()}`;
+
   return db
     .query(
-      `INSERT INTO article SET ${definedAttributesToSqlSet(newAttributes)}`,
-      newAttributes
+      `INSERT INTO article SET ${definedAttributesToSqlSet(
+        newAttributes
+      )}, created_at=:date`,
+      { ...newAttributes, date }
     )
     .then((res) => getOneArticle(res.insertId));
 };
@@ -116,11 +124,17 @@ const createArticle = async (newAttributes) => {
 const updateArticle = async (id, newAttributes) => {
   await validate(newAttributes, { udpatedRessourceId: id });
   const namedAttributes = definedAttributesToSqlSet(newAttributes);
+  const date = new Date().toISOString().replace('T', ' ').replace('Z', '');
+
   return db
-    .query(`UPDATE article SET ${namedAttributes} WHERE id = :id`, {
-      ...newAttributes,
-      id,
-    })
+    .query(
+      `UPDATE article SET ${namedAttributes}, updated_at=:date WHERE id = :id`,
+      {
+        ...newAttributes,
+        date,
+        id,
+      }
+    )
     .then(() => getOneArticle(id));
 };
 
