@@ -2,6 +2,7 @@ const {
   getArticles,
   getOneArticle,
   createArticle,
+  linkArticleToTags,
   updateArticle,
   removeArticle,
 } = require('../models/articles.js');
@@ -16,7 +17,8 @@ module.exports.handleGetOneArticle = async (req, res) => {
 };
 
 module.exports.handleCreateArticle = async (req, res) => {
-  const { title, content, url, created_at, updated_at } = req.body;
+  // tagsArray is an array with the IDs of all the tags related to this article
+  const { title, content, url, created_at, updated_at, tagsArray } = req.body;
   const data = await createArticle({
     title,
     content,
@@ -24,6 +26,9 @@ module.exports.handleCreateArticle = async (req, res) => {
     created_at,
     updated_at,
   });
+  const createdArticleId = data.id;
+  await linkArticleToTags(createdArticleId, tagsArray);
+
   return res.status(201).send(data);
 };
 
