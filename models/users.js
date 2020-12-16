@@ -12,6 +12,16 @@ const emailAlreadyExists = async (email) => {
   }
   return false;
 };
+
+// Trouver un utilisateur par l'email
+const findByEmail = async (email, failIfNotFound = true) => {
+  const rows = await db.query(`SELECT * FROM user WHERE email = ?`, [email]);
+  if (rows.length) {
+    return rows[0];
+  }
+  if (failIfNotFound) throw new RecordNotFoundError();
+  return null;
+};
 // Hash du password avec argon 2
 const hashPassword = async (user) => argon2.hash(user.password);
 
@@ -79,9 +89,9 @@ const createUser = async (newAttributes) => {
 };
 
 // Méthode pour vérifier le match des password avec argon
-/* const verifyPassword = async (user, plainPassword) => {
+const verifyPassword = async (user, plainPassword) => {
   return argon2.verify(user.password, plainPassword);
-}; */
+};
 
 // Methode pour récuperer toute la liste d'user
 const getUsers = async () => {
@@ -108,4 +118,12 @@ const removeUser = async (id, failIfNotFound = true) => {
   return false;
 };
 
-module.exports = { getUsers, getOneUser, createUser, updateUser, removeUser };
+module.exports = {
+  getUsers,
+  getOneUser,
+  createUser,
+  updateUser,
+  removeUser,
+  verifyPassword,
+  findByEmail,
+};
