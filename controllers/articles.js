@@ -1,3 +1,4 @@
+const { link } = require('joi');
 const {
   getArticles,
   getOneArticle,
@@ -28,6 +29,7 @@ module.exports.handleCreateArticle = async (req, res) => {
   });
   const createdArticleId = data.id;
   await linkArticleToTags(createdArticleId, tagsArray);
+
   return res.status(201).send(data);
 };
 
