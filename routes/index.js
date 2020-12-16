@@ -13,4 +13,5 @@ module.exports = (app) => {
   app.use('/tagToArticle', tagToArticleRouter);
   app.use('/login', adminLogin);
   app.use('/tags', tagRouter);
+  app.use('/login', adminLogin);
 };
