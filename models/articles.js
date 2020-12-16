@@ -124,7 +124,10 @@ const createArticle = async (newAttributes) => {
 const updateArticle = async (id, newAttributes) => {
   await validate(newAttributes, { udpatedRessourceId: id });
   const namedAttributes = definedAttributesToSqlSet(newAttributes);
-  const date = new Date().toISOString().replace('T', ' ').replace('Z', '');
+  const currentDate = new Date();
+  const date = `${currentDate.getFullYear()}-${currentDate.getMonth()}-${currentDate.getDate()} ${currentDate.getHours()}:${
+    currentDate.getMinutes() < 10 ? '0' : ''
+  }${currentDate.getMinutes()}:${currentDate.getSeconds()}`;
 
   return db
     .query(
