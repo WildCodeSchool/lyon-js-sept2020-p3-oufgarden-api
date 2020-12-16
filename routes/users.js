@@ -13,12 +13,7 @@ const requireRequestBody = require('../middlewares/requireRequestBody.js');
 
 userRouter.get('/', asyncHandler(handleGetUsers));
 userRouter.get('/:id', asyncHandler(handleGetOneUser));
-userRouter.post(
-  '/',
-  protectByApiKey,
-  requireRequestBody,
-  asyncHandler(handleCreateUser)
-);
+userRouter.post('/', requireRequestBody, asyncHandler(handleCreateUser));
 userRouter.put(
   '/:id',
   requireRequestBody,

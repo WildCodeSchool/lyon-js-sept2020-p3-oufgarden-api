@@ -22,6 +22,9 @@ const findByEmail = async (email, failIfNotFound = true) => {
   if (failIfNotFound) throw new RecordNotFoundError();
   return null;
 };
+
+// Trouver l'admin
+
 // Hash du password avec argon 2
 const hashPassword = async (user) => argon2.hash(user.password);
 
