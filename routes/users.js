@@ -8,14 +8,26 @@ const {
   handleDeleteUser,
   handleLogin,
 } = require('../controllers/users');
+const protectByApiKey = require('../middlewares/protectByEnvAPIKey');
+const requireRequestBody = require('../middlewares/requireRequestBody.js');
 
 userRouter.get('/', asyncHandler(handleGetUsers));
 userRouter.get('/:id', asyncHandler(handleGetOneUser));
-userRouter.post('/', asyncHandler(handleCreateUser));
-userRouter.put('/:id', asyncHandler(handleUpdateUser));
+userRouter.post(
+  '/',
+  protectByApiKey,
+  requireRequestBody,
+  asyncHandler(handleCreateUser)
+);
+userRouter.put(
+  '/:id',
+  requireRequestBody,
+  protectByApiKey,
+  asyncHandler(handleUpdateUser)
+);
 userRouter.delete('/:id', asyncHandler(handleDeleteUser));
 // test du login
 
-userRouter.post('/', asyncHandler(handleLogin));
+userRouter.post('/', protectByApiKey, asyncHandler(handleLogin));
 
 module.exports = { userRouter };

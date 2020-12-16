@@ -13,6 +13,11 @@ const inProdEnv = getEnv('NODE_ENV') === 'production';
 const inDevEnv = getEnv('NODE_ENV') === 'dev';
 const inTestEnv = getEnv('NODE_ENV') === 'test';
 
+const API_KEY = getEnv(`API_KEY`);
+const SESSION_COOKIE_NAME = getEnv(`SESSION_COOKIE_NAME`);
+const SESSION_COOKIE_SECRET = getEnv(`SESSION_COOKIE_SECRET`);
+const CORS_ALLOWED_ORINGINS = getEnv(`CORS_ALLOWED_ORINGINS`);
+
 const SERVER_PORT = getEnv(`SERVER_PORT${inTestEnv ? '_TEST' : ''}`);
 
 const DB_HOST = getEnv(`DB_HOST${inTestEnv ? '_TEST' : ''}`);
@@ -32,4 +37,8 @@ module.exports = {
   DB_USER,
   DB_NAME,
   DB_PASS,
+  SESSION_COOKIE_SECRET,
+  CORS_ALLOWED_ORINGINS,
+  SESSION_COOKIE_NAME,
+  API_KEY,
 };
