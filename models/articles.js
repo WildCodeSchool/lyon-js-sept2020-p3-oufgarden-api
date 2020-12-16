@@ -73,31 +73,33 @@ const validateTags = async (tagsArray) => {
 };
 
 const linkArticleToTags = async (articleId, tagsArray) => {
-  const tagValidation = await validateTags(tagsArray);
-  let valuePairsString = '';
-  tagsArray.forEach((tag) => {
-    valuePairsString += `(${+articleId}, ${+tag}),`; // + to convert it to number or make sure it's a number
-  });
-  valuePairsString = valuePairsString.slice(0, -1); // removing the last comma
-
-  const result = await db
-    .query(
-      `INSERT INTO tagToArticle (article_id, tag_id) VALUES ${valuePairsString};`
-    )
-    .catch(() => {
-      return false;
+  if (tagsArray.length > 0) {
+    const tagValidation = await validateTags(tagsArray);
+    let valuePairsString = '';
+    tagsArray.forEach((tag) => {
+      valuePairsString += `(${+articleId}, ${+tag}),`; // + to convert it to number or make sure it's a number
     });
+    valuePairsString = valuePairsString.slice(0, -1); // removing the last comma
 
-  if (!tagValidation || result === false) {
-    removeArticle(articleId);
-    throw new ValidationError([
-      {
-        message:
-          'there was a problem to link the article to its tags, the article was removed',
-        path: ['tagToArticle'],
-        type: 'insertionError',
-      },
-    ]);
+    const result = await db
+      .query(
+        `INSERT INTO tagToArticle (article_id, tag_id) VALUES ${valuePairsString};`
+      )
+      .catch(() => {
+        return false;
+      });
+
+    if (!tagValidation || result === false) {
+      removeArticle(articleId);
+      throw new ValidationError([
+        {
+          message:
+            'there was a problem to link the article to its tags, the article was removed',
+          path: ['tagToArticle'],
+          type: 'insertionError',
+        },
+      ]);
+    }
   }
 };
 
