@@ -8,14 +8,26 @@ const {
   handleDeleteUser,
   handleLogin,
 } = require('../controllers/users');
+const requireRequestBody = require('../middlewares/requireRequestBody.js');
+const requireIsAdmin = require('../middlewares/requireAdmin');
 
-userRouter.get('/', asyncHandler(handleGetUsers));
-userRouter.get('/:id', asyncHandler(handleGetOneUser));
-userRouter.post('/', asyncHandler(handleCreateUser));
-userRouter.put('/:id', asyncHandler(handleUpdateUser));
-userRouter.delete('/:id', asyncHandler(handleDeleteUser));
+userRouter.get('/', requireIsAdmin, asyncHandler(handleGetUsers));
+userRouter.get('/:id', requireIsAdmin, asyncHandler(handleGetOneUser));
+userRouter.post(
+  '/',
+  requireIsAdmin,
+  requireRequestBody,
+  asyncHandler(handleCreateUser)
+);
+userRouter.put(
+  '/:id',
+  requireIsAdmin,
+  requireRequestBody,
+  asyncHandler(handleUpdateUser)
+);
+userRouter.delete('/:id', requireIsAdmin, asyncHandler(handleDeleteUser));
 // test du login
 
-userRouter.post('/', asyncHandler(handleLogin));
+userRouter.post('/', requireIsAdmin, asyncHandler(handleLogin));
 
 module.exports = { userRouter };
