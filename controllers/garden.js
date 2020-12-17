@@ -16,9 +16,13 @@ module.exports.handleGetOneGarden = async (req, res) => {
 };
 
 module.exports.handleCreateGarden = async (req, res) => {
-  const { name } = req.body;
+  const { name, description, exposition, address, zone_number } = req.body;
   const data = await createGarden({
     name,
+    description,
+    exposition,
+    address,
+    zone_number,
   });
   return res.status(201).send(data);
 };

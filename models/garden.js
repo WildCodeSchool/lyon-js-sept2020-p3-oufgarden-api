@@ -59,7 +59,8 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
   }
 };
 
-const createGarden= async (newAttributes) => {
+const createGarden = async (newAttributes) => {
+  console.log(newAttributes);
   await validate(newAttributes);
   return db
     .query(
