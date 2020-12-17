@@ -19,7 +19,6 @@ module.exports.handleLogin = async (req, res) => {
       // session cookie will be valid for a week
       req.session.cookie.maxAge = 7 * 24 * 60 * 60 * 1000;
     }
-    console.log(req.body);
     req.session.userId = user.id;
     req.session.save(() => {
       res.status(200).send('logged');

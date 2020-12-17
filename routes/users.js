@@ -8,21 +8,26 @@ const {
   handleDeleteUser,
   handleLogin,
 } = require('../controllers/users');
-const protectByApiKey = require('../middlewares/protectByEnvAPIKey');
 const requireRequestBody = require('../middlewares/requireRequestBody.js');
+const requireIsAdmin = require('../middlewares/requireAdmin');
 
-userRouter.get('/', asyncHandler(handleGetUsers));
-userRouter.get('/:id', asyncHandler(handleGetOneUser));
-userRouter.post('/', requireRequestBody, asyncHandler(handleCreateUser));
+userRouter.get('/', requireIsAdmin, asyncHandler(handleGetUsers));
+userRouter.get('/:id', requireIsAdmin, asyncHandler(handleGetOneUser));
+userRouter.post(
+  '/',
+  requireIsAdmin,
+  requireRequestBody,
+  asyncHandler(handleCreateUser)
+);
 userRouter.put(
   '/:id',
+  requireIsAdmin,
   requireRequestBody,
-  protectByApiKey,
   asyncHandler(handleUpdateUser)
 );
-userRouter.delete('/:id', asyncHandler(handleDeleteUser));
+userRouter.delete('/:id', requireIsAdmin, asyncHandler(handleDeleteUser));
 // test du login
 
-userRouter.post('/', protectByApiKey, asyncHandler(handleLogin));
+userRouter.post('/', requireIsAdmin, asyncHandler(handleLogin));
 
 module.exports = { userRouter };
