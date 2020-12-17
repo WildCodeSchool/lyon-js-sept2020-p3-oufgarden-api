@@ -24,13 +24,14 @@ const findByEmail = async (email, failIfNotFound = true) => {
 };
 
 // Methode qui permet de retrouver l'admin
-const findAdmin = async (id) => {
+const findAdmin = async (id, failIfNotFound = true) => {
   const rows = await db.query(
     'SELECT * FROM user WHERE id = ? AND is_Admin = 1',
     [id]
   );
   if (rows.length) return rows[0];
-  return false;
+  if (failIfNotFound) throw new RecordNotFoundError();
+  return null;
 };
 // Hash du password avec argon 2
 const hashPassword = async (user) => argon2.hash(user.password);

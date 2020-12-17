@@ -4,6 +4,9 @@ const { SESSION_COOKIE_NAME } = require('../env');
 
 module.exports.handleLogin = async (req, res) => {
   const user = await findByEmail(req.body.email, false);
+  if (!user) {
+    return res.sendStatus(401);
+  }
 
   // Creation d'un objet pour faire passer l'email de l'input
   // et le password crtypé à la fonction isAdmin
@@ -11,6 +14,7 @@ module.exports.handleLogin = async (req, res) => {
     email: req.body.email,
     password: user.password,
   };
+
   const checkedPassword = await verifyPassword(user, req.body.password);
   const data = await isAdmin(attributesForIsAdmin);
 
@@ -23,9 +27,9 @@ module.exports.handleLogin = async (req, res) => {
     req.session.save(() => {
       res.status(200).send('logged');
     });
-  } else {
-    res.status(401).send('Invalid Credentials');
+    return null;
   }
+  return res.status(401).send('Invalid Credentials');
 };
 module.exports.handleLogout = async (req, res) => {
   req.session.destroy((err) => {
