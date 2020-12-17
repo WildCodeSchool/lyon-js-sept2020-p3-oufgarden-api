@@ -1,5 +1,6 @@
 const tagRouter = require('express').Router();
 const asyncHandler = require('express-async-handler');
+const requireIsAdmin = require('../middlewares/requireAdmin');
 const {
   handleGetTags,
   handleGetOneTag,
@@ -10,8 +11,8 @@ const {
 
 tagRouter.get('/', asyncHandler(handleGetTags));
 tagRouter.get('/:id', asyncHandler(handleGetOneTag));
-tagRouter.post('/', asyncHandler(handleCreateTag));
-tagRouter.put('/:id', asyncHandler(handleUpdateTag));
-tagRouter.delete('/:id', asyncHandler(handleDeleteTag));
+tagRouter.post('/', requireIsAdmin, asyncHandler(handleCreateTag));
+tagRouter.put('/:id', requireIsAdmin, asyncHandler(handleUpdateTag));
+tagRouter.delete('/:id', requireIsAdmin, asyncHandler(handleDeleteTag));
 
 module.exports = { tagRouter };
