@@ -33,6 +33,16 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
     name: forUpdate
       ? Joi.string().min(0).max(150)
       : Joi.string().min(0).max(150).required(),
+    pic_profil: Joi.string().min(0).max(150),
+    description: forUpdate
+      ? Joi.string().min(0).max(150)
+      : Joi.string().min(0).max(150).required(),
+    exposition: Joi.string().min(0).max(150),
+    address: forUpdate
+      ? Joi.string().min(0).max(150)
+      : Joi.string().min(0).max(150).required(),
+    pic_plan: Joi.string().min(0).max(150),
+    zone_number: Joi.number().integer().min(0).max(15).required(),
   });
 
   const { error } = schema.validate(attributes, {
