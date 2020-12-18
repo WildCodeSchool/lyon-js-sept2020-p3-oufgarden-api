@@ -4,7 +4,7 @@ const {
   createGarden,
   updateGarden,
   removeGarden,
-} = require('../models/garden.js');
+} = require('../models/garden');
 
 module.exports.handleGetGarden = async (req, res) => {
   const rawData = await getGarden();
