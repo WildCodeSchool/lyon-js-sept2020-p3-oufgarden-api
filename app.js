@@ -12,6 +12,7 @@ const {
   SESSION_COOKIE_SECRET,
   CORS_ALLOWED_ORINGINS,
   SESSION_COOKIE_NAME,
+  SESSION_COOKIE_DOMAIN,
 } = require('./env');
 const sessionStore = require('./sessionStore');
 
@@ -50,7 +51,11 @@ app.use(
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
-    cookie: { sameSite: true },
+    cookie: {
+      sameSite: true,
+      secure: inProdEnv,
+      domain: SESSION_COOKIE_DOMAIN,
+    },
   })
 );
 
