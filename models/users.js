@@ -42,7 +42,7 @@ const getOneUser = async (id, failIfNotFound = true) => {
   if (rows.length) {
     return rows[0];
   }
-  if (failIfNotFound) throw new RecordNotFoundError('contacts', id);
+  if (failIfNotFound) throw new RecordNotFoundError('users', id);
   return null;
 };
 
@@ -110,7 +110,10 @@ const getUsers = async () => {
 };
 // Methode pour modifier un user
 const updateUser = async (id, newAttributes) => {
-  await validate(newAttributes, { udpatedRessourceId: id });
+  /*   await validate(newAttributes, { udpatedRessourceId: id });
+  
+   */
+  console.log(newAttributes);
   const namedAttributes = definedAttributesToSqlSet(newAttributes);
   return db
     .query(`UPDATE user SET ${namedAttributes} WHERE id = :id`, {
@@ -125,7 +128,7 @@ const removeUser = async (id, failIfNotFound = true) => {
   if (res.affectedRows !== 0) {
     return true;
   }
-  if (failIfNotFound) throw new RecordNotFoundError('contacts', id);
+  if (failIfNotFound) throw new RecordNotFoundError('users', id);
   return false;
 };
 
