@@ -53,15 +53,25 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
   // Il faudra implémenter ici la confirm de password
   // Creation du schema pour la validation via Joi
   const schema = Joi.object().keys({
-    firstname: Joi.string().min(0).max(150),
-    lastname: Joi.string().min(0).max(150),
+    firstname: forUpdate
+      ? Joi.string().min(0).max(150)
+      : Joi.string().min(0).max(150).required(),
+    lastname: forUpdate
+      ? Joi.string().min(0).max(150)
+      : Joi.string().min(0).max(150).required(),
     email: forUpdate ? Joi.string().email() : Joi.string().email().required(),
-    password: Joi.string()
-      .pattern(new RegExp('^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$'))
-      .required()
-      .label("Password doesn't match requirement"),
+    password: forUpdate
+      ? Joi.string().pattern(
+          new RegExp('^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$')
+        )
+      : Joi.string()
+          .pattern(new RegExp('^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$'))
+          .required()
+          .label("Password doesn't match requirement"),
     //  Carreful ! ESlint n'aime pas les '\' Attention au Regex //
-    is_admin: Joi.number().integer().min(0).max(1).required(),
+    is_admin: forUpdate
+      ? Joi.number().integer().min(0).max(1)
+      : Joi.number().integer().min(0).max(1).required(),
   });
 
   const { error } = schema.validate(attributes, {
@@ -110,14 +120,19 @@ const getUsers = async () => {
 };
 // Methode pour modifier un user
 const updateUser = async (id, newAttributes) => {
-  /*   await validate(newAttributes, { udpatedRessourceId: id });
-  
-   */
-  console.log(newAttributes);
-  const namedAttributes = definedAttributesToSqlSet(newAttributes);
+  await validate(newAttributes, { udpatedRessourceId: id });
+
+  let newObj = newAttributes;
+
+  if (newAttributes.password) {
+    const password = await hashPassword(newAttributes);
+    newObj = { ...newAttributes, password };
+  }
+
+  const namedAttributes = definedAttributesToSqlSet(newObj);
   return db
     .query(`UPDATE user SET ${namedAttributes} WHERE id = :id`, {
-      ...newAttributes,
+      ...newObj,
       id,
     })
     .then(() => getOneUser(id));

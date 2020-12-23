@@ -34,7 +34,7 @@ module.exports.handleUpdateUser = async (req, res) => {
     lastname,
     email,
     password,
-    is_admin,
+    is_admin: is_admin ? 1 : 0,
   });
   return res.status(200).send(data);
 };
