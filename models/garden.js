@@ -33,16 +33,19 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
     name: forUpdate
       ? Joi.string().min(0).max(150)
       : Joi.string().min(0).max(150).required(),
-    pic_profil: Joi.string().min(0).max(150),
+    picture: Joi.string().min(0).max(150),
     description: forUpdate
       ? Joi.string().min(0).max(150)
       : Joi.string().min(0).max(150).required(),
     exposition: Joi.string().min(0).max(150),
-    address: forUpdate
-      ? Joi.string().min(0).max(150)
-      : Joi.string().min(0).max(150).required(),
-    pic_plan: Joi.string().min(0).max(150),
-    zone_number: Joi.number().integer().min(0).max(15).required(),
+    address_id: forUpdate
+      ? Joi.number().integer()
+      : Joi.number().integer().required(),
+    map: Joi.string().min(0).max(150),
+    zone_quantity: forUpdate
+      ? Joi.number().integer().min(0).max(15)
+      : Joi.number().integer().min(0).max(15).required(),
+    zone_details: Joi.array(),
   });
 
   const { error } = schema.validate(attributes, {
@@ -69,15 +72,75 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
   }
 };
 
-const createGarden = async (newAttributes) => {
-  console.log(newAttributes);
-  await validate(newAttributes);
+const getOneAddress = async (id, failIfNotFound = true) => {
+  const rows = await db.query('SELECT * FROM address WHERE id = ?', [id]);
+  if (rows.length) {
+    return rows[0];
+  }
+  if (failIfNotFound) throw new RecordNotFoundError('address', id);
+  return null;
+};
+
+const createAddress = async (address) => {
+  const addressAttributes = {
+    street: address.address_street,
+    city: address.address_city,
+    zip_code: address.address_zipcode,
+  };
   return db
     .query(
-      `INSERT INTO garden SET ${definedAttributesToSqlSet(newAttributes)}`,
-      newAttributes
+      `INSERT INTO garden SET ${definedAttributesToSqlSet(addressAttributes)}`,
+      addressAttributes
     )
+    .then((res) => getOneAddress(res.insertId));
+};
+
+const createGarden = async (newAttributes) => {
+  console.log(newAttributes);
+
+  await validate(newAttributes);
+
+  // eslint-disable-next-line no-unused-vars
+  const [zone_details, ...rest] = newAttributes;
+
+  return db
+    .query(`INSERT INTO garden SET ${definedAttributesToSqlSet(rest)}`, rest)
     .then((res) => getOneGarden(res.insertId));
+};
+
+const createZonesForGardenId = async (gardenId, zone_details) => {
+  // ajouter une validation des données !
+  let valuePairsString = '';
+  zone_details.forEach((zone) => {
+    valuePairsString += `(${+gardenId}, ${zone.zone_name}, ${zone.type}, ${
+      zone.exposition
+    }, ${zone.description}),`; // + to convert it to number or make sure it's a number
+  });
+  valuePairsString = valuePairsString.slice(0, -1); // removing the last comma
+  // attention, la table zone n'a pas encore été mise à jour, il faut créer les colonnes description, type, exposition
+  const result = await db
+    .query(
+      `INSERT INTO zone (garden_id, name, type, exposition, description) VALUES ${valuePairsString};`
+    )
+    // .then((res) => console.log(res.insertId)) // id de la zone, à voir comment ça marche pour plusieurs insertions ?
+    .catch(() => {
+      return false;
+    });
+
+  if (
+    // !dataValidation || - la validation des données est à ajouter
+    result === false
+  ) {
+    removeGarden(gardenId);
+    throw new ValidationError([
+      {
+        message:
+          'there was a problem to create the zones for this garden, the garden was removed',
+        path: ['zone'],
+        type: 'insertionError',
+      },
+    ]);
+  }
 };
 
 const updateGarden = async (id, newAttributes) => {
@@ -106,4 +169,7 @@ module.exports = {
   createGarden,
   updateGarden,
   removeGarden,
+  createAddress,
+  getOneAddress,
+  createZonesForGardenId,
 };
