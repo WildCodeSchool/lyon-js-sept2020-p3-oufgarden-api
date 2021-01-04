@@ -12,8 +12,14 @@ class ValidationError extends Error {
     this.errorsByField = errorsByField;
   }
 }
+class UnauthorizedError extends Error {
+  constructor() {
+    super('Authorization is required');
+  }
+}
 
 module.exports = {
   RecordNotFoundError,
   ValidationError,
+  UnauthorizedError,
 };

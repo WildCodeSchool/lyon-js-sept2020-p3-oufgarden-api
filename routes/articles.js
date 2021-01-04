@@ -1,5 +1,6 @@
 const articleRouter = require('express').Router();
 const asyncHandler = require('express-async-handler');
+const requireIsAdmin = require('../middlewares/requireAdmin');
 const {
   handleGetArticles,
   handleGetOneArticle,
@@ -10,8 +11,8 @@ const {
 
 articleRouter.get('/', asyncHandler(handleGetArticles));
 articleRouter.get('/:id', asyncHandler(handleGetOneArticle));
-articleRouter.post('/', asyncHandler(handleCreateArticle));
-articleRouter.put('/:id', asyncHandler(handleUpdateArticle));
-articleRouter.delete('/:id', asyncHandler(handleDeleteArticle));
+articleRouter.post('/', requireIsAdmin, asyncHandler(handleCreateArticle));
+articleRouter.put('/:id', requireIsAdmin, asyncHandler(handleUpdateArticle));
+articleRouter.delete('/:id', requireIsAdmin, asyncHandler(handleDeleteArticle));
 
 module.exports = { articleRouter };
