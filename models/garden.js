@@ -16,6 +16,15 @@ const getGarden = async () => {
   return db.query('SELECT * FROM garden');
 };
 
+const removeGarden = async (id, failIfNotFound = true) => {
+  const res = await db.query('DELETE FROM garden WHERE id = ?', [id]);
+  if (res.affectedRows !== 0) {
+    return true;
+  }
+  if (failIfNotFound) throw new RecordNotFoundError('garden', id);
+  return false;
+};
+
 const getOneGarden = async (id, failIfNotFound = true) => {
   const rows = await db.query('SELECT * FROM garden WHERE id = ?', [id]);
   if (rows.length) {
@@ -87,21 +96,23 @@ const createAddress = async (address) => {
     city: address.address_city,
     zip_code: address.address_zipcode,
   };
+  // rajouter validation des données addresse
   return db
     .query(
-      `INSERT INTO garden SET ${definedAttributesToSqlSet(addressAttributes)}`,
+      `INSERT INTO address SET ${definedAttributesToSqlSet(addressAttributes)}`,
       addressAttributes
     )
     .then((res) => getOneAddress(res.insertId));
 };
 
 const createGarden = async (newAttributes) => {
-  console.log(newAttributes);
+  // console.log(newAttributes);
 
   await validate(newAttributes);
 
   // eslint-disable-next-line no-unused-vars
-  const [zone_details, ...rest] = newAttributes;
+  const { zone_details, ...rest } = newAttributes;
+  console.log(rest);
 
   return db
     .query(`INSERT INTO garden SET ${definedAttributesToSqlSet(rest)}`, rest)
@@ -120,18 +131,22 @@ const createZonesForGardenId = async (gardenId, zone_details) => {
   // ajouter une validation des données !
   let valuePairsString = '';
   zone_details.forEach((zone) => {
-    valuePairsString += `(${+gardenId}, ${zone.zone_name}, ${zone.type}, ${
+    valuePairsString += `(${+gardenId}, "${zone.zone_name}", "${zone.type}", "${
       zone.exposition
-    }, ${zone.description}),`; // + to convert it to number or make sure it's a number
+    }", "${zone.description}"),`; // + to convert it to number or make sure it's a number
   });
   valuePairsString = valuePairsString.slice(0, -1); // removing the last comma
-  // attention, la table zone n'a pas encore été mise à jour, il faut créer les colonnes description, type, exposition
+
   const result = await db
     .query(
       `INSERT INTO zone (garden_id, name, type, exposition, description) VALUES ${valuePairsString};`
     )
-    // .then((res) => console.log(res.insertId)) // id de la zone, à voir comment ça marche pour plusieurs insertions ?
-    .catch(() => {
+    .then((res) => ({
+      affectedRows: res.affectedRows,
+      firstInsertId: res.insertId,
+    })) // id de la zone, à voir comment ça marche pour plusieurs insertions ?
+    .catch((err) => {
+      console.log(err);
       return false;
     });
 
@@ -148,7 +163,46 @@ const createZonesForGardenId = async (gardenId, zone_details) => {
         type: 'insertionError',
       },
     ]);
+  } else {
+    return result;
   }
+};
+
+const linkZoneToPlantFamily = async (zoneId, plantFamilyArray) => {
+  if (plantFamilyArray.length > 0) {
+    // const tagValidation = await validateTags(plantFamilyArray);
+    let valuePairsString = '';
+    plantFamilyArray.forEach((plantFamilyId) => {
+      valuePairsString += `(${+zoneId}, ${+plantFamilyId}),`; // + to convert it to number or make sure it's a number
+    });
+    valuePairsString = valuePairsString.slice(0, -1); // removing the last comma
+
+    const result = await db
+      .query(
+        `INSERT INTO zoneToPlantFamily (zone_id, plantFamily_id) VALUES ${valuePairsString};`
+      )
+      .then(() => true)
+      .catch((err) => {
+        console.log(err);
+        return false;
+      });
+
+    // if (
+    //   // !tagValidation ||
+    //   result === false) {
+    //   removeZone(zoneId);
+    //   throw new ValidationError([
+    //     {
+    //       message:
+    //         'there was a problem to link the article to its tags, the article was removed',
+    //       path: ['tagToArticle'],
+    //       type: 'insertionError',
+    //     },
+    //   ]);
+    // }
+    return result;
+  }
+  return null;
 };
 
 const updateGarden = async (id, newAttributes) => {
@@ -171,4 +225,5 @@ module.exports = {
   createAddress,
   getOneAddress,
   createZonesForGardenId,
+  linkZoneToPlantFamily,
 };
