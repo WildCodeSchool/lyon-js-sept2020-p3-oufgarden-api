@@ -19,7 +19,6 @@ module.exports.handleGetOneGarden = async (req, res) => {
 };
 
 module.exports.handleCreateGarden = async (req, res) => {
-  console.log(req.body);
   // exemple de ce qui est envoyé côté back office
   // {
   //   address: {
@@ -59,7 +58,6 @@ module.exports.handleCreateGarden = async (req, res) => {
 
   const dataAddress = await createAddress(address);
   const createdAddressId = dataAddress.id;
-  // console.log(createdAddressId);
 
   const dataGarden = await createGarden({
     address_id: createdAddressId,
@@ -103,14 +101,6 @@ module.exports.handleCreateGarden = async (req, res) => {
     };
   });
 
-  /* il faut encore créer une fonction qui remplit la table de jointure entre les zones et les catégories de plantes, et l'appeler pour chaque zone : 
-  pour cela il faudrait que la fonction juste au dessus renvoie un tableau des zones créées avec notamment leur id, et renvoie zone_details
-  le tableau de résultats devra avoir la forme [{zoneId:, plantFamilyArray:}]
-  ensuite on pourrait faire un forEach sur ce tableau de résultat :
-  tableauDeResultats.forEach(zone => {
-    await linkZoneToPlantFamily(zone.zoneId, zone.plantFamilyArray)
-  })
-  */
   // [{zoneId: 15, plantFamilyArray: [2,4]}, {zoneId: 16, plantFamilyArray: [5, 6]}]
   const insertionStatus = []; // tableau de type [true, false, true, true]
   zoneToPlantFamilyArray.forEach(async (elem) => {
