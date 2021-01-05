@@ -1,4 +1,6 @@
 const Joi = require('joi');
+const dayjs = require('dayjs');
+
 const db = require('../db');
 require('dotenv').config();
 
@@ -106,10 +108,7 @@ const linkArticleToTags = async (articleId, tagsArray) => {
 
 const createArticle = async (newAttributes) => {
   await validate(newAttributes);
-  const currentDate = new Date();
-  const date = `${currentDate.getFullYear()}-${currentDate.getMonth()}-${currentDate.getDate()} ${currentDate.getHours()}:${
-    currentDate.getMinutes() < 10 ? '0' : ''
-  }${currentDate.getMinutes()}:${currentDate.getSeconds()}`;
+  const date = dayjs().format('YYYY-MM-DD HH:mm:ss');
 
   return db
     .query(
@@ -124,10 +123,7 @@ const createArticle = async (newAttributes) => {
 const updateArticle = async (id, newAttributes) => {
   await validate(newAttributes, { udpatedRessourceId: id });
   const namedAttributes = definedAttributesToSqlSet(newAttributes);
-  const currentDate = new Date();
-  const date = `${currentDate.getFullYear()}-${currentDate.getMonth()}-${currentDate.getDate()} ${currentDate.getHours()}:${
-    currentDate.getMinutes() < 10 ? '0' : ''
-  }${currentDate.getMinutes()}:${currentDate.getSeconds()}`;
+  const date = dayjs.utc().tz('Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
 
   return db
     .query(
