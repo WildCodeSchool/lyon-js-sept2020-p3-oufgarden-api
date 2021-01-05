@@ -58,6 +58,7 @@ module.exports.handleCreateGarden = async (req, res) => {
 
   const dataAddress = await createAddress(address);
   const createdAddressId = dataAddress.id;
+  // we don't *absolutely* need to remove the address if creating the garden fails, there will simply be a useless address in the table - it does not have foreign keys pointing to anything
 
   const dataGarden = await createGarden({
     address_id: createdAddressId,
@@ -71,49 +72,39 @@ module.exports.handleCreateGarden = async (req, res) => {
   });
   const createdGardenId = dataGarden.id;
 
-  const dataZones = await createZonesForGardenId(createdGardenId, zone_details);
-  const { affectedRows, firstInsertId } = dataZones;
-  // par exemple, affectedRows = 2, firstInsertId = 7, du coup on veut [7,8]
-  const zoneIdList = [];
-  for (let i = 0; i < affectedRows; i += 1) {
-    zoneIdList.push(firstInsertId + i);
-  }
-  // zone_details: [
-  //    {
-  //      zone_name: 'Zone 1',
-  //     type: 'Serre',
-  //   exposition: 'Sud',
-  //    plantFamilyArray: [Array],
-  //      description: 'Serre zone 1'
-  //     },
-  // {
-  //      zone_name: 'Zone 2',
-  //         type: 'Compost zone 2',
-  //          exposition: 'Sud ouest',
-  //          plantFamilyArray: [Array],
-  //        description: 'Description zone 2'
-  //        }
-  //    ]
-  const zoneToPlantFamilyArray = zoneIdList.map((zone, index) => {
-    return {
-      zoneId: zone,
-      plantFamilyArray: [...zone_details[index].plantFamilyArray],
-    };
-  });
-
-  // [{zoneId: 15, plantFamilyArray: [2,4]}, {zoneId: 16, plantFamilyArray: [5, 6]}]
-  const insertionStatus = []; // tableau de type [true, false, true, true]
-  zoneToPlantFamilyArray.forEach(async (elem) => {
-    const result = await linkZoneToPlantFamily(
-      elem.zoneId,
-      elem.plantFamilyArray
+  if (zone_details.length > 0) {
+    const dataZones = await createZonesForGardenId(
+      createdGardenId,
+      zone_details
     );
-    insertionStatus.push(result);
-  });
-  if (insertionStatus.includes(false)) {
-    return res
-      .status(409)
-      .send('Problème dans la table de jointure zone-plantFamily');
+    const { affectedRows, firstInsertId } = dataZones;
+
+    const zoneIdList = [];
+    for (let i = 0; i < affectedRows; i += 1) {
+      zoneIdList.push(firstInsertId + i);
+    }
+    const zoneToPlantFamilyArray = zoneIdList.map((zone, index) => {
+      return {
+        zoneId: zone,
+        plantFamilyArray: [...zone_details[index].plantFamilyArray],
+      };
+    });
+
+    // [{zoneId: 15, plantFamilyArray: [2,4]}, {zoneId: 16, plantFamilyArray: [5, 6]}]
+
+    const insertionStatus = []; // table looking like [true, false, true, true], if the plantFamilyArray is empty, it should just be [null, null, null]
+    zoneToPlantFamilyArray.forEach(async (elem) => {
+      const result = await linkZoneToPlantFamily(
+        elem.zoneId,
+        elem.plantFamilyArray
+      );
+      insertionStatus.push(result);
+    });
+    if (insertionStatus.includes(false)) {
+      return res
+        .status(409)
+        .send('Problème dans la table de jointure zone-plantFamily');
+    }
   }
 
   return res.status(201).send('Jardin créé avec succès');

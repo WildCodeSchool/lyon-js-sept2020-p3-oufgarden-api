@@ -144,11 +144,33 @@ const createGarden = async (newAttributes) => {
 
   return db
     .query(`INSERT INTO garden SET ${definedAttributesToSqlSet(rest)}`, rest)
-    .then((res) => getOneGarden(res.insertId));
+    .then((res) => getOneGarden(res.insertId))
+    .catch(() => false);
+};
+
+const validateZoneDetailsArray = async (
+  attributes,
+  options = { udpatedRessourceId: null }
+) => {
+  const { udpatedRessourceId } = options;
+  const forUpdate = !!udpatedRessourceId;
+  // creating schema for validation by Joi
+  const schema = Joi.array().items(Joi.object());
+
+  const { error } = schema.validate(attributes, {
+    abortEarly: false,
+  });
+  if (error) {
+    return false;
+  }
+  return true;
+  //throw new ValidationError(error.details);
 };
 
 const createZonesForGardenId = async (gardenId, zone_details) => {
   // ajouter une validation des données !
+  const zoneDataValidation = await validateZoneDetailsArray(zone_details);
+
   let valuePairsString = '';
   zone_details.forEach((zone) => {
     valuePairsString += `(${+gardenId}, "${zone.zone_name}", "${zone.type}", "${
@@ -164,16 +186,13 @@ const createZonesForGardenId = async (gardenId, zone_details) => {
     .then((res) => ({
       affectedRows: res.affectedRows,
       firstInsertId: res.insertId,
-    })) // id de la zone, à voir comment ça marche pour plusieurs insertions ?
+    }))
     .catch((err) => {
       console.log(err);
       return false;
     });
 
-  if (
-    // !dataValidation || - la validation des données est à ajouter
-    result === false
-  ) {
+  if (!zoneDataValidation || result === false) {
     removeGarden(gardenId);
     throw new ValidationError([
       {
