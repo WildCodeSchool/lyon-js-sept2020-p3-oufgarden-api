@@ -107,6 +107,14 @@ const createGarden = async (newAttributes) => {
     .query(`INSERT INTO garden SET ${definedAttributesToSqlSet(rest)}`, rest)
     .then((res) => getOneGarden(res.insertId));
 };
+const removeGarden = async (id, failIfNotFound = true) => {
+  const res = await db.query('DELETE FROM garden WHERE id = ?', [id]);
+  if (res.affectedRows !== 0) {
+    return true;
+  }
+  if (failIfNotFound) throw new RecordNotFoundError('garden', id);
+  return false;
+};
 
 const createZonesForGardenId = async (gardenId, zone_details) => {
   // ajouter une validation des données !
@@ -152,15 +160,6 @@ const updateGarden = async (id, newAttributes) => {
       id,
     })
     .then(() => getOneGarden(id));
-};
-
-const removeGarden = async (id, failIfNotFound = true) => {
-  const res = await db.query('DELETE FROM garden WHERE id = ?', [id]);
-  if (res.affectedRows !== 0) {
-    return true;
-  }
-  if (failIfNotFound) throw new RecordNotFoundError('garden', id);
-  return false;
 };
 
 module.exports = {
