@@ -2,7 +2,7 @@
 const { userRouter } = require('./users');
 const { articleRouter } = require('./articles');
 const { tagToArticleRouter } = require('./tagToArticle');
-const { adminLogin } = require('./loginBO');
+const { adminLogin } = require('./login');
 const { tagRouter } = require('./tags');
 const { gardenRouter } = require('./garden');
 const { plantFamilyRouter } = require('./plantFamily.js');

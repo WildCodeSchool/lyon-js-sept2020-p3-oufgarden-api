@@ -146,6 +146,7 @@ const createZonesForGardenId = async (gardenId, zone_details) => {
     // !dataValidation || - la validation des données est à ajouter
     result === false
   ) {
+    // eslint-disable-next-line no-use-before-define
     removeGarden(gardenId);
     throw new ValidationError([
       {
