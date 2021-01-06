@@ -164,7 +164,7 @@ const validateZoneDetailsArray = async (
     return false;
   }
   return true;
-  //throw new ValidationError(error.details);
+  // throw new ValidationError(error.details);
 };
 
 const createZonesForGardenId = async (gardenId, zone_details) => {
