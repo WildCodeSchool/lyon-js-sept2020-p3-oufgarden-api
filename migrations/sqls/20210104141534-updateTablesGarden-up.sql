@@ -1,4 +1,3 @@
-/* Replace with your SQL commands */
 ALTER TABLE plot RENAME TO zone;
 ALTER TABLE plotToActionToUser RENAME TO zoneToActionToUser ;
 
@@ -24,10 +23,3 @@ ALTER TABLE garden CHANGE zone_number zone_quantity int;
 
 ALTER TABLE garden
 ADD FOREIGN KEY (address_id) REFERENCES address(id); 
-
-
-
-
-
-
-
