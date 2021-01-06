@@ -2,9 +2,9 @@ const adminLogin = require('express').Router();
 const asyncHandler = require('express-async-handler');
 const requireRequestBody = require('../middlewares/requireRequestBody');
 
-const { handleLogin } = require('../controllers/loginBO.js');
+const { handleLoginAdmin, handleLogout } = require('../controllers/login.js');
 
-adminLogin.post('/', requireRequestBody, asyncHandler(handleLogin));
-/* adminLogin.get('/', asyncHandler(handleLogout)); */
+adminLogin.post('/', requireRequestBody, asyncHandler(handleLoginAdmin));
+adminLogin.get('/', asyncHandler(handleLogout));
 
 module.exports = { adminLogin };
