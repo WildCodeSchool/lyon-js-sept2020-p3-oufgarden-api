@@ -16,7 +16,36 @@ module.exports.handleGetOneUser = async (req, res) => {
 };
 
 module.exports.handleCreateUser = async (req, res) => {
-  const { firstname, lastname, email, password, is_admin } = req.body;
+  // {
+  //   "gender": "monsieur",
+  //   "lastname": "Blanc",
+  //   "firstname": "Jules",
+  //   "birthdate": "1999-12-12",
+  //   "membership_start": "2021-01-01",
+  //   "email": "manu-macron@gmail.com",
+  //   "emailConfirmation": "manu-macron@gmail.com",
+  //   "phone": "0789876655",
+  //   "password": "9uI5pbY7",
+  //   "is_admin": false,
+  //   "gardenArray": [
+  //     27,
+  //     28
+  //   ]
+  // }
+  const {
+    gender,
+    birthdate,
+    firstname,
+    lastname,
+    email,
+    phone,
+    password,
+    membership_start,
+    is_admin,
+    gardenArray,
+  } = req.body;
+  // here, still have to handle data validation
+
   const data = await createUser({
     firstname,
     lastname,
