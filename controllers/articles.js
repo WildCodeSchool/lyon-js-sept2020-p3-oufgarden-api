@@ -36,6 +36,7 @@ module.exports.handleCreateArticle = async (req, res) => {
 
 module.exports.handleUpdateArticle = async (req, res) => {
   const { title, content, url, created_at, updated_at } = req.body;
+  console.log(req.body);
   const data = await updateArticle(req.params.id, {
     title,
     content,

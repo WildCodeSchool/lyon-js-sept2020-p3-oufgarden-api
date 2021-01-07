@@ -8,7 +8,7 @@ const { RecordNotFoundError, ValidationError } = require('../error-types');
 const definedAttributesToSqlSet = require('../helpers/definedAttributesToSQLSet.js');
 
 const getArticles = async () => {
-  return db.query('SELECT * FROM article');
+  return db.query('SELECT * FROM article ORDER BY created_at DESC');
 };
 
 const getOneArticle = async (id, failIfNotFound = true) => {
