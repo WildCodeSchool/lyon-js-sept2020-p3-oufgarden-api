@@ -8,7 +8,7 @@ const { RecordNotFoundError, ValidationError } = require('../error-types');
 const definedAttributesToSqlSet = require('../helpers/definedAttributesToSQLSet.js');
 
 const getArticles = async () => {
-  return db.query('SELECT * FROM article');
+  return db.query('SELECT * FROM article ORDER BY created_at DESC');
 };
 
 const getOneArticle = async (id, failIfNotFound = true) => {
@@ -58,10 +58,7 @@ const validateTags = async (tagsArray) => {
   const { error } = schema.validate(tagsArray, {
     abortEarly: false,
   });
-  if (error) {
-    validation = false;
-  }
-  // throw new ValidationError(error.details);
+  if (error) throw new ValidationError(error.details);
 
   const rawData = await db.query('SELECT id FROM tag');
   const validIds = rawData.map((obj) => obj.id);
@@ -106,6 +103,59 @@ const linkArticleToTags = async (articleId, tagsArray) => {
   }
 };
 
+const validateGarden = async (gardenArray) => {
+  let validation = true;
+  const schema = Joi.array().items(Joi.number().integer());
+  const { error } = schema.validate(gardenArray, {
+    abortEarly: false,
+  });
+
+  if (error) throw new ValidationError(error.details);
+
+  const rawData = await db.query('SELECT id FROM garden');
+  console.log(rawData);
+  const validIds = rawData.map((obj) => obj.id);
+  gardenArray.forEach((idToValidate) => {
+    if (validIds.includes(idToValidate) === false) {
+      validation = false;
+      // throw new RecordNotFoundError('tag', idToValidate);
+    }
+  });
+
+  return validation;
+};
+const linkArticleToGarden = async (articleId, gardenArray) => {
+  console.log(gardenArray);
+  if (gardenArray.length > 0) {
+    const gardenValidation = await validateGarden(gardenArray);
+    let valuePairsString = '';
+    gardenArray.forEach((elem) => {
+      valuePairsString += `(${+articleId}, ${+elem}),`; // + to convert it to number or make sure it's a number
+    });
+    valuePairsString = valuePairsString.slice(0, -1); // removing the last comma
+
+    const result = await db
+      .query(
+        `INSERT INTO articleToGarden (article_id, garden_id) VALUES ${valuePairsString};`
+      )
+      .catch(() => {
+        return false;
+      });
+
+    if (!gardenValidation || result === false) {
+      removeArticle(articleId);
+      throw new ValidationError([
+        {
+          message:
+            'there was a problem to link the article to its tags, the article was removed',
+          path: ['gardenToArticle'],
+          type: 'insertionError',
+        },
+      ]);
+    }
+  }
+};
+
 const createArticle = async (newAttributes) => {
   await validate(newAttributes);
   const date = dayjs().format('YYYY-MM-DD HH:mm:ss');
@@ -142,6 +192,7 @@ module.exports = {
   getOneArticle,
   createArticle,
   linkArticleToTags,
+  linkArticleToGarden,
   updateArticle,
   removeArticle,
 };

@@ -3,6 +3,7 @@ const db = require('../db');
 const { RecordNotFoundError, ValidationError } = require('../error-types');
 const definedAttributesToSqlSet = require('../helpers/definedAttributesToSQLSet.js');
 
+// basic functions for garden table //////////////////////////
 // this function checks if a garden with the same name already exists
 const gardenAlreadyExists = async (name) => {
   const rows = await db.query('SELECT * FROM garden WHERE name = ?', [name]);
@@ -81,6 +82,7 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
   }
 };
 
+// basic functions for address table /////////////////////////////////////////
 const getOneAddress = async (id, failIfNotFound = true) => {
   const rows = await db.query('SELECT * FROM address WHERE id = ?', [id]);
   if (rows.length) {
@@ -90,37 +92,86 @@ const getOneAddress = async (id, failIfNotFound = true) => {
   return null;
 };
 
+const validateAddress = async (
+  attributes,
+  options = { udpatedRessourceId: null }
+) => {
+  const { udpatedRessourceId } = options;
+  const forUpdate = !!udpatedRessourceId;
+  // creating schema for validation by Joi
+  const schema = Joi.object().keys({
+    address_street: forUpdate
+      ? Joi.string().min(0).max(150)
+      : Joi.string().min(0).max(150).required(),
+    address_city: forUpdate
+      ? Joi.string().min(0).max(150)
+      : Joi.string().min(0).max(150).required(),
+    address_zipcode: forUpdate
+      ? Joi.string().regex(/^(?:[0-8]\d|9[0-8])\d{3}$/)
+      : Joi.string()
+          .regex(/^(?:[0-8]\d|9[0-8])\d{3}$/)
+          .required(),
+  });
+
+  const { error } = schema.validate(attributes, {
+    abortEarly: false,
+  });
+  if (error) throw new ValidationError(error.details);
+};
+
 const createAddress = async (address) => {
   const addressAttributes = {
     street: address.address_street,
     city: address.address_city,
     zip_code: address.address_zipcode,
   };
-  // rajouter validation des données addresse
+  await validateAddress(address);
   return db
     .query(
       `INSERT INTO address SET ${definedAttributesToSqlSet(addressAttributes)}`,
       addressAttributes
     )
-    .then((res) => getOneAddress(res.insertId));
+    .then((res) => getOneAddress(res.insertId))
+    .catch(() => false);
 };
 
-const createGarden = async (newAttributes) => {
-  // console.log(newAttributes);
+// create garden, and address, and zones... /////////////////////////
 
+const createGarden = async (newAttributes) => {
   await validate(newAttributes);
 
-  // eslint-disable-next-line no-unused-vars
   const { zone_details, ...rest } = newAttributes;
-  console.log(rest);
 
   return db
     .query(`INSERT INTO garden SET ${definedAttributesToSqlSet(rest)}`, rest)
-    .then((res) => getOneGarden(res.insertId));
+    .then((res) => getOneGarden(res.insertId))
+    .catch(() => false);
+};
+
+const validateZoneDetailsArray = async (
+  attributes,
+  options = { udpatedRessourceId: null }
+) => {
+  const { udpatedRessourceId } = options;
+  // eslint-disable-next-line no-unused-vars
+  const forUpdate = !!udpatedRessourceId;
+  // creating schema for validation by Joi
+  const schema = Joi.array().items(Joi.object());
+
+  const { error } = schema.validate(attributes, {
+    abortEarly: false,
+  });
+  if (error) {
+    return false;
+  }
+  return true;
+  // throw new ValidationError(error.details);
 };
 
 const createZonesForGardenId = async (gardenId, zone_details) => {
   // ajouter une validation des données !
+  const zoneDataValidation = await validateZoneDetailsArray(zone_details);
+
   let valuePairsString = '';
   zone_details.forEach((zone) => {
     valuePairsString += `(${+gardenId}, "${zone.zone_name}", "${zone.type}", "${
@@ -136,17 +187,13 @@ const createZonesForGardenId = async (gardenId, zone_details) => {
     .then((res) => ({
       affectedRows: res.affectedRows,
       firstInsertId: res.insertId,
-    })) // id de la zone, à voir comment ça marche pour plusieurs insertions ?
+    }))
     .catch((err) => {
       console.log(err);
       return false;
     });
 
-  if (
-    // !dataValidation || - la validation des données est à ajouter
-    result === false
-  ) {
-    // eslint-disable-next-line no-use-before-define
+  if (!zoneDataValidation || result === false) {
     removeGarden(gardenId);
     throw new ValidationError([
       {

@@ -3,6 +3,7 @@ const {
   getOneArticle,
   createArticle,
   linkArticleToTags,
+  linkArticleToGarden,
   updateArticle,
   removeArticle,
 } = require('../models/articles.js');
@@ -18,7 +19,7 @@ module.exports.handleGetOneArticle = async (req, res) => {
 
 module.exports.handleCreateArticle = async (req, res) => {
   // tagsArray is an array with the IDs of all the tags related to this article
-  const { title, content, url, tagsArray } = req.body;
+  const { title, content, url, tagsArray, gardenArray } = req.body;
   const data = await createArticle({
     title,
     content,
@@ -28,12 +29,14 @@ module.exports.handleCreateArticle = async (req, res) => {
   });
   const createdArticleId = data.id;
   await linkArticleToTags(createdArticleId, tagsArray);
+  await linkArticleToGarden(createdArticleId, gardenArray);
 
   return res.status(201).send(data);
 };
 
 module.exports.handleUpdateArticle = async (req, res) => {
   const { title, content, url, created_at, updated_at } = req.body;
+  console.log(req.body);
   const data = await updateArticle(req.params.id, {
     title,
     content,
