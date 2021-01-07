@@ -183,6 +183,7 @@ const validateZoneDetailsArray = async (
   options = { udpatedRessourceId: null }
 ) => {
   const { udpatedRessourceId } = options;
+  // eslint-disable-next-line
   const forUpdate = !!udpatedRessourceId;
   // creating schema for validation by Joi
   const schema = Joi.array().items(Joi.object());
