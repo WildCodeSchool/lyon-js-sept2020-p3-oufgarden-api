@@ -2,7 +2,7 @@ const { isAdmin } = require('../models/login.js');
 const { verifyPassword, findByEmail } = require('../models/users');
 const { SESSION_COOKIE_NAME } = require('../env');
 
-module.exports.handleLoginAdmin = async (req, res) => {
+module.exports.handleLogin = async (req, res) => {
   const user = await findByEmail(req.body.email, false);
   if (!user) {
     return res.sendStatus(401);

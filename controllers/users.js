@@ -1,9 +1,11 @@
+const dayjs = require('dayjs');
 const {
   getUsers,
   getOneUser,
   createUser,
   updateUser,
   removeUser,
+  linkUserToGarden,
 } = require('../models/users.js');
 
 module.exports.handleGetUsers = async (req, res) => {
@@ -16,24 +18,8 @@ module.exports.handleGetOneUser = async (req, res) => {
 };
 
 module.exports.handleCreateUser = async (req, res) => {
-  // {
-  //   "gender": "monsieur",
-  //   "lastname": "Blanc",
-  //   "firstname": "Jules",
-  //   "birthdate": "1999-12-12",
-  //   "membership_start": "2021-01-01",
-  //   "email": "manu-macron@gmail.com",
-  //   "emailConfirmation": "manu-macron@gmail.com",
-  //   "phone": "0789876655",
-  //   "password": "9uI5pbY7",
-  //   "is_admin": false,
-  //   "gardenArray": [
-  //     27,
-  //     28
-  //   ]
-  // }
   const {
-    gender,
+    gender_marker,
     birthdate,
     firstname,
     lastname,
@@ -44,16 +30,29 @@ module.exports.handleCreateUser = async (req, res) => {
     is_admin,
     gardenArray,
   } = req.body;
-  // here, still have to handle data validation
 
-  const data = await createUser({
+  const user_creation = dayjs().format('YYYY-MM-DD'); // still have to check the format we will want
+  const userData = await createUser({
+    gender_marker,
+    birthdate,
     firstname,
     lastname,
     email,
+    phone,
     password,
+    membership_start: dayjs(membership_start).format('YYYY-MM-DD'),
+    user_creation,
     is_admin: is_admin ? 1 : 0,
   });
-  return res.status(201).send(data);
+
+  // here, wait to answer and if ok, fill the joining table
+  if (!userData) {
+    // problem creating the user
+    return res.status(424).send('failed to create user');
+  }
+  await linkUserToGarden(userData.id, gardenArray);
+
+  return res.status(201).send('User and joining table successfully created');
 };
 
 module.exports.handleUpdateUser = async (req, res) => {
