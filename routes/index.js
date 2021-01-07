@@ -13,7 +13,6 @@ module.exports = (app) => {
   app.use('/users', userRouter);
   app.use('/articles', articleRouter);
   app.use('/tagToArticle', tagToArticleRouter);
-  app.use('/login', adminLogin);
   app.use('/tags', tagRouter);
   app.use('/garden', gardenRouter);
   app.use('/login', adminLogin);

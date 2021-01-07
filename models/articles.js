@@ -58,10 +58,7 @@ const validateTags = async (tagsArray) => {
   const { error } = schema.validate(tagsArray, {
     abortEarly: false,
   });
-  if (error) {
-    validation = false;
-  }
-  // throw new ValidationError(error.details);
+  if (error) throw new ValidationError(error.details);
 
   const rawData = await db.query('SELECT id FROM tag');
   const validIds = rawData.map((obj) => obj.id);
@@ -112,10 +109,8 @@ const validateGarden = async (gardenArray) => {
   const { error } = schema.validate(gardenArray, {
     abortEarly: false,
   });
-  if (error) {
-    validation = false;
-  }
-  // throw new ValidationError(error.details);
+
+  if (error) throw new ValidationError(error.details);
 
   const rawData = await db.query('SELECT id FROM garden');
   console.log(rawData);
