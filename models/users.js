@@ -176,6 +176,7 @@ const updateUser = async (id, newAttributes) => {
   }
 
   const namedAttributes = definedAttributesToSqlSet(newObj);
+  // careful here with the method namedatributes
   return db
     .query(`UPDATE user SET ${namedAttributes} WHERE id = :id`, {
       ...newObj,
