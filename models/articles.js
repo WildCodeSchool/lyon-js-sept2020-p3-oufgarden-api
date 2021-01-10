@@ -12,7 +12,12 @@ const getArticles = async () => {
 };
 
 const getOneArticle = async (id, failIfNotFound = true) => {
-  const rows = await db.query('SELECT * FROM article WHERE id = ?', [id]);
+  const rows = await db.query(
+    /* 'SELECT * from tagToArticle AS TTA  JOIN article AS A ON A.id=TTA.article_id JOIN tag AS T ON T.id=TTA.tag_id WHERE A.id = ?',
+    [id] */
+    'select * from article where id = ?',
+    [id]
+  );
   if (rows.length) {
     return rows[0];
   }
@@ -32,17 +37,18 @@ const removeArticle = async (id, failIfNotFound = true) => {
 const validate = async (attributes, options = { udpatedRessourceId: null }) => {
   const { udpatedRessourceId } = options;
   const forUpdate = !!udpatedRessourceId;
-  // Creation du schema pour la validation via Joi
+
   const schema = Joi.object().keys({
     title: forUpdate
-      ? Joi.string().min(0).max(150)
+      ? Joi.string().allow('').allow(null)
       : Joi.string().min(0).max(150).required(),
-    content: forUpdate ? Joi.string() : Joi.string().required(),
+    content: forUpdate
+      ? Joi.string().allow('').allow(null)
+      : Joi.string().required(),
     url: forUpdate
-      ? Joi.string().min(0).max(150)
+      ? Joi.string().allow('').allow(null)
       : Joi.string().min(0).max(150).required(),
-    // created_at: forUpdate ? Joi.any() : Joi.date().required(),
-    // updated_at: forUpdate ? Joi.date().required() : Joi.any(),
+    updated_at: forUpdate ? Joi.date().required() : Joi.any(),
   });
 
   const { error } = schema.validate(attributes, {
@@ -113,7 +119,6 @@ const validateGarden = async (gardenArray) => {
   if (error) throw new ValidationError(error.details);
 
   const rawData = await db.query('SELECT id FROM garden');
-  console.log(rawData);
   const validIds = rawData.map((obj) => obj.id);
   gardenArray.forEach((idToValidate) => {
     if (validIds.includes(idToValidate) === false) {
@@ -125,7 +130,6 @@ const validateGarden = async (gardenArray) => {
   return validation;
 };
 const linkArticleToGarden = async (articleId, gardenArray) => {
-  console.log(gardenArray);
   if (gardenArray.length > 0) {
     const gardenValidation = await validateGarden(gardenArray);
     let valuePairsString = '';
@@ -173,8 +177,8 @@ const createArticle = async (newAttributes) => {
 const updateArticle = async (id, newAttributes) => {
   await validate(newAttributes, { udpatedRessourceId: id });
   const namedAttributes = definedAttributesToSqlSet(newAttributes);
-  const date = dayjs.utc().tz('Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
-
+  const date = dayjs().format('YYYY-MM-DD HH:mm:ss');
+  console.log(date);
   return db
     .query(
       `UPDATE article SET ${namedAttributes}, updated_at=:date WHERE id = :id`,

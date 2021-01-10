@@ -30,20 +30,21 @@ module.exports.handleCreateArticle = async (req, res) => {
   const createdArticleId = data.id;
   await linkArticleToTags(createdArticleId, tagsArray);
   await linkArticleToGarden(createdArticleId, gardenArray);
-
   return res.status(201).send(data);
 };
 
 module.exports.handleUpdateArticle = async (req, res) => {
-  const { title, content, url, created_at, updated_at } = req.body;
-  console.log(req.body);
+  const { title, content, url, updated_at, tagsArray, gardenArray } = req.body;
   const data = await updateArticle(req.params.id, {
     title,
     content,
     url,
-    created_at,
     updated_at,
   });
+
+  const createdArticleId = data.id;
+  await linkArticleToTags(createdArticleId, tagsArray);
+  await linkArticleToGarden(createdArticleId, gardenArray);
   return res.status(200).send(data);
 };
 
