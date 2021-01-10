@@ -78,6 +78,7 @@ const validateTags = async (tagsArray) => {
   return validation;
 };
 
+// eslint-disable-next-line consistent-return
 const linkArticleToTags = async (articleId, tagsArray) => {
   if (tagsArray.length > 0) {
     const tagValidation = await validateTags(tagsArray);
@@ -106,6 +107,10 @@ const linkArticleToTags = async (articleId, tagsArray) => {
         },
       ]);
     }
+  } else {
+    return db.query('DELETE from tagToArticle WHERE article_id = ?', [
+      articleId,
+    ]);
   }
 };
 
@@ -178,7 +183,7 @@ const updateArticle = async (id, newAttributes) => {
   await validate(newAttributes, { udpatedRessourceId: id });
   const namedAttributes = definedAttributesToSqlSet(newAttributes);
   const date = dayjs().format('YYYY-MM-DD HH:mm:ss');
-  console.log(date);
+
   return db
     .query(
       `UPDATE article SET ${namedAttributes}, updated_at=:date WHERE id = :id`,
