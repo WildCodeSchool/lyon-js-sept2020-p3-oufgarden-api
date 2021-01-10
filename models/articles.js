@@ -81,6 +81,9 @@ const validateTags = async (tagsArray) => {
 // eslint-disable-next-line consistent-return
 const linkArticleToTags = async (articleId, tagsArray) => {
   if (tagsArray.length > 0) {
+    await db.query('DELETE from tagToArticle WHERE article_id = ?', [
+      articleId,
+    ]);
     const tagValidation = await validateTags(tagsArray);
     let valuePairsString = '';
     tagsArray.forEach((tag) => {
