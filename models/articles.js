@@ -14,13 +14,23 @@ const getArticles = async () => {
 const getOneArticle = async (id, failIfNotFound = true) => {
   const rows = await db.query('select * from article where id = ?', [id]);
   const tagsRows = await db.query(
-    'SELECT * FROM tagToArticle AS TTA JOIN article AS A ON TTA.article_id=A.id JOIN tag AS T ON TTA.tag_id=T.id WHERE A.id=?',
+    'SELECT * FROM tagToArticle AS TTA JOIN article AS A ON TTA.article_id=A.id JOIN tag AS T ON TTA.tag_id=T.id JOIN articleToGarden AS ATG ON ATG.article_id=A.id WHERE A.id= ?',
     [id]
   );
-  if (tagsRows.length) {
-    return tagsRows[0];
+  const gardenRows = await db.query(
+    'SELECT G.name FROM articleToGarden as ATG JOIN garden AS G ON ATG.garden_id=G.id JOIN article AS A ON ATG.article_id=A.id WHERE A.id = ?',
+    [id]
+  );
+  console.log(gardenRows, tagsRows);
+  if (tagsRows.length || gardenRows.length) {
+    const tagGardenRows = {
+      tag: tagsRows[0],
+      garden: gardenRows,
+      row: rows[0],
+    };
+    return tagGardenRows;
   }
-  if (tagsRows.length < 1) {
+  if (tagsRows.length < 1 && gardenRows < 1) {
     return rows[0];
   }
   if (failIfNotFound) {
