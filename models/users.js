@@ -59,21 +59,22 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
     birthdate: Joi.date(),
     membership_start: Joi.date(),
     user_creation: forUpdate ? Joi.date() : Joi.date().required(),
-    phone: Joi.string().length(10),
+    phone: Joi.string().length(10).allow('').allow(null),
     gender_marker: forUpdate
       ? Joi.string().allow('madame', 'monsieur', 'inconnu')
       : Joi.string().allow('madame', 'monsieur', 'inconnu').required(),
     firstname: forUpdate
-      ? Joi.string().min(0).max(150)
+      ? Joi.string().min(0).max(150).allow('').allow(null)
       : Joi.string().min(0).max(150).required(),
     lastname: forUpdate
-      ? Joi.string().min(0).max(150)
+      ? Joi.string().min(0).max(150).allow('').allow(null)
       : Joi.string().min(0).max(150).required(),
     email: forUpdate ? Joi.string().email() : Joi.string().email().required(),
     password: forUpdate
-      ? Joi.string().pattern(
-          new RegExp('^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$')
-        )
+      ? Joi.string()
+          .pattern(new RegExp('^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$'))
+          .allow('')
+          .allow(null)
       : Joi.string()
           .pattern(new RegExp('^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$'))
           .required()
@@ -126,7 +127,11 @@ const createUser = async (newAttributes) => {
   return { email, id: res.insertId };
 };
 
-const linkUserToGarden = async (userId, gardenArray) => {
+const linkUserToGarden = async (userId, gardenArray, forUpdate = false) => {
+  if (forUpdate) {
+    await db.query('DELETE FROM userToGarden WHERE user_id = ?', [userId]);
+  }
+
   if (gardenArray.length > 0) {
     // const gardenValidation = await validateTags(gardenArray);
     let valuePairsString = '';
@@ -176,7 +181,7 @@ const updateUser = async (id, newAttributes) => {
   }
 
   const namedAttributes = definedAttributesToSqlSet(newObj);
-  // careful here with the method namedatributes
+
   return db
     .query(`UPDATE user SET ${namedAttributes} WHERE id = :id`, {
       ...newObj,

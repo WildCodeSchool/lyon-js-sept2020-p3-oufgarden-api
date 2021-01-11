@@ -56,15 +56,38 @@ module.exports.handleCreateUser = async (req, res) => {
 };
 
 module.exports.handleUpdateUser = async (req, res) => {
-  const { firstname, lastname, email, password, is_admin } = req.body;
-  const data = await updateUser(req.params.id, {
+  const {
+    gender_marker,
+    birthdate,
     firstname,
     lastname,
     email,
+    phone,
     password,
+    membership_start,
+    is_admin,
+    gardenArray,
+  } = req.body;
+
+  const userData = await updateUser(req.params.id, {
+    gender_marker,
+    birthdate,
+    firstname,
+    lastname,
+    email,
+    phone,
+    password,
+    membership_start,
     is_admin: is_admin ? 1 : 0,
   });
-  return res.status(200).send(data);
+  // here, wait to answer and if ok, fill the joining table
+  if (!userData) {
+    // problem creating the user
+    return res.status(424).send('failed to create user');
+  }
+  await linkUserToGarden(userData.id, gardenArray, true);
+
+  return res.status(201).send('User and joining table successfully created');
 };
 
 module.exports.handleDeleteUser = async (req, res) => {
