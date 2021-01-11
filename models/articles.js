@@ -12,26 +12,33 @@ const getArticles = async () => {
 };
 
 const getOneArticle = async (id, failIfNotFound = true) => {
-  const rows = await db.query(
-    /* 'SELECT * from tagToArticle AS TTA  JOIN article AS A ON A.id=TTA.article_id JOIN tag AS T ON T.id=TTA.tag_id WHERE A.id = ?',
-    [id] */
-    'select * from article where id = ?',
+  const rows = await db.query('select * from article where id = ?', [id]);
+  const tagsRows = await db.query(
+    'SELECT * FROM tagToArticle AS TTA JOIN article AS A ON TTA.article_id=A.id JOIN tag AS T ON TTA.tag_id=T.id WHERE A.id=?',
     [id]
   );
-  if (rows.length) {
+  if (tagsRows.length) {
+    return tagsRows[0];
+  }
+  if (tagsRows.length < 1) {
     return rows[0];
   }
-  if (failIfNotFound) throw new RecordNotFoundError('articles', id);
+  if (failIfNotFound) {
+    throw new RecordNotFoundError('articles', id);
+  }
   return null;
 };
 
 const removeArticle = async (id, failIfNotFound = true) => {
-  const res = await db.query('DELETE FROM article WHERE id = ?', [id]);
-  if (res.affectedRows !== 0) {
-    return true;
+  if (id) {
+    const res = await db.query('DELETE FROM article WHERE id = ?', [id]);
+    if (res.affectedRows !== 0) {
+      return true;
+    }
+    if (failIfNotFound) throw new RecordNotFoundError('article', id);
+    return false;
   }
-  if (failIfNotFound) throw new RecordNotFoundError('article', id);
-  return false;
+  return null;
 };
 
 const validate = async (attributes, options = { udpatedRessourceId: null }) => {
@@ -60,7 +67,9 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
 // this whole function returns either true or false depending on whether the data is ok or not
 const validateTags = async (tagsArray) => {
   let validation = true;
-  const schema = Joi.array().items(Joi.number().integer());
+  const schema = Joi.array().items(
+    Joi.number().integer().allow('').allow(null)
+  );
   const { error } = schema.validate(tagsArray, {
     abortEarly: false,
   });
@@ -80,10 +89,8 @@ const validateTags = async (tagsArray) => {
 
 // eslint-disable-next-line consistent-return
 const linkArticleToTags = async (articleId, tagsArray) => {
+  await db.query('DELETE from tagToArticle WHERE article_id = ?', [articleId]);
   if (tagsArray.length > 0) {
-    await db.query('DELETE from tagToArticle WHERE article_id = ?', [
-      articleId,
-    ]);
     const tagValidation = await validateTags(tagsArray);
     let valuePairsString = '';
     tagsArray.forEach((tag) => {
@@ -95,10 +102,9 @@ const linkArticleToTags = async (articleId, tagsArray) => {
       .query(
         `INSERT INTO tagToArticle (article_id, tag_id) VALUES ${valuePairsString};`
       )
-      .catch(() => {
-        return false;
+      .catch((err) => {
+        console.log(err);
       });
-
     if (!tagValidation || result === false) {
       removeArticle(articleId);
       throw new ValidationError([
