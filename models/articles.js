@@ -80,7 +80,6 @@ const validateTags = async (tagsArray) => {
   tagsArray.forEach((idToValidate) => {
     if (validIds.includes(idToValidate) === false) {
       validation = false;
-      // throw new RecordNotFoundError('tag', idToValidate);
     }
   });
 
@@ -144,6 +143,9 @@ const validateGarden = async (gardenArray) => {
   return validation;
 };
 const linkArticleToGarden = async (articleId, gardenArray) => {
+  await db.query('DELETE from articleToGarden WHERE article_id = ?', [
+    articleId,
+  ]);
   if (gardenArray.length > 0) {
     const gardenValidation = await validateGarden(gardenArray);
     let valuePairsString = '';
@@ -156,8 +158,8 @@ const linkArticleToGarden = async (articleId, gardenArray) => {
       .query(
         `INSERT INTO articleToGarden (article_id, garden_id) VALUES ${valuePairsString};`
       )
-      .catch(() => {
-        return false;
+      .catch((err) => {
+        console.log(err);
       });
 
     if (!gardenValidation || result === false) {

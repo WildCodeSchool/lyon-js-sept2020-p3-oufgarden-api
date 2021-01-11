@@ -28,15 +28,13 @@ module.exports.handleCreateArticle = async (req, res) => {
     // updated_at,
   });
   const createdArticleId = data.id;
-  console.log(data.id);
   await linkArticleToTags(createdArticleId, tagsArray);
   await linkArticleToGarden(createdArticleId, gardenArray);
   return res.status(201).send(data);
 };
 
 module.exports.handleUpdateArticle = async (req, res) => {
-  const { title, content, url, updated_at, tagsArray } = req.body;
-  console.log(req.body);
+  const { title, content, url, updated_at, tagsArray, gardenArray } = req.body;
   const data = await updateArticle(req.params.id, {
     title,
     content,
@@ -46,7 +44,7 @@ module.exports.handleUpdateArticle = async (req, res) => {
 
   const createdArticleId = req.params.id;
   await linkArticleToTags(createdArticleId, tagsArray);
-  /* await linkArticleToGarden(createdArticleId, gardenArray); */
+  await linkArticleToGarden(createdArticleId, gardenArray);
   return res.status(200).send(data);
 };
 
