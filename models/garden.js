@@ -1,7 +1,70 @@
 const Joi = require('joi');
+
 const db = require('../db');
 const { RecordNotFoundError, ValidationError } = require('../error-types');
 const definedAttributesToSqlSet = require('../helpers/definedAttributesToSQLSet.js');
+
+// basic functions for address table /////////////////////////////////////////
+const getOneAddress = async (id, failIfNotFound = true) => {
+  const rows = await db.query('SELECT * FROM address WHERE id = ?', [id]);
+  if (rows.length) {
+    return rows[0];
+  }
+  if (failIfNotFound) throw new RecordNotFoundError('address', id);
+  return null;
+};
+
+const validateAddress = async (
+  attributes,
+  options = { udpatedRessourceId: null }
+) => {
+  const { udpatedRessourceId } = options;
+  const forUpdate = !!udpatedRessourceId;
+  // creating schema for validation by Joi
+  const schema = Joi.object().keys({
+    address_street: forUpdate
+      ? Joi.string().min(0).max(150)
+      : Joi.string().min(0).max(150).required(),
+    address_city: forUpdate
+      ? Joi.string().min(0).max(150)
+      : Joi.string().min(0).max(150).required(),
+    address_zipcode: forUpdate
+      ? Joi.string().regex(/^(?:[0-8]\d|9[0-8])\d{3}$/)
+      : Joi.string()
+          .regex(/^(?:[0-8]\d|9[0-8])\d{3}$/)
+          .required(),
+  });
+
+  const { error } = schema.validate(attributes, {
+    abortEarly: false,
+  });
+  if (error) throw new ValidationError(error.details);
+};
+
+const createAddress = async (address) => {
+  const addressAttributes = {
+    street: address.address_street,
+    city: address.address_city,
+    zip_code: address.address_zipcode,
+  };
+  await validateAddress(address);
+  return db
+    .query(
+      `INSERT INTO address SET ${definedAttributesToSqlSet(addressAttributes)}`,
+      addressAttributes
+    )
+    .then((res) => getOneAddress(res.insertId))
+    .catch(() => false);
+};
+
+const removeAddress = async (addressId, failIfNotFound = true) => {
+  const res = await db.query('DELETE FROM address WHERE id = ?', [addressId]);
+  if (res.affectedRows !== 0) {
+    return true;
+  }
+  if (failIfNotFound) throw new RecordNotFoundError('address', addressId);
+  return false;
+};
 
 // basic functions for garden table //////////////////////////
 // this function checks if a garden with the same name already exists
@@ -17,12 +80,32 @@ const getGarden = async () => {
   return db.query('SELECT * FROM garden');
 };
 
-const removeGarden = async (id, failIfNotFound = true) => {
-  const res = await db.query('DELETE FROM garden WHERE id = ?', [id]);
-  if (res.affectedRows !== 0) {
-    return true;
+// removing a garden must remove the connected address, zones, etc | everything is automativ thanks to cascade deleting, except the address //////////////////////////////
+const removeGarden = async (removedGardenId, failIfNotFound = true) => {
+  console.log(removedGardenId);
+  const removedAddressId = await db
+    .query('SELECT address_id FROM garden WHERE id = ?', [removedGardenId])
+    .catch(() => false);
+
+  if (
+    !removedAddressId &&
+    !removedAddressId[0].address_id &&
+    typeof +removedAddressId[0].address_id !== 'number'
+  ) {
+    return false;
   }
-  if (failIfNotFound) throw new RecordNotFoundError('garden', id);
+
+  const res = await db.query('DELETE FROM garden WHERE id = ?', [
+    removedGardenId,
+  ]);
+  if (res.affectedRows !== 0) {
+    // then the garden was deleted
+    const wasAddressRemoved = await removeAddress(
+      removedAddressId[0].address_id
+    );
+    return wasAddressRemoved;
+  }
+  if (failIfNotFound) throw new RecordNotFoundError('garden', removedGardenId);
   return false;
 };
 
@@ -82,59 +165,6 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
   }
 };
 
-// basic functions for address table /////////////////////////////////////////
-const getOneAddress = async (id, failIfNotFound = true) => {
-  const rows = await db.query('SELECT * FROM address WHERE id = ?', [id]);
-  if (rows.length) {
-    return rows[0];
-  }
-  if (failIfNotFound) throw new RecordNotFoundError('address', id);
-  return null;
-};
-
-const validateAddress = async (
-  attributes,
-  options = { udpatedRessourceId: null }
-) => {
-  const { udpatedRessourceId } = options;
-  const forUpdate = !!udpatedRessourceId;
-  // creating schema for validation by Joi
-  const schema = Joi.object().keys({
-    address_street: forUpdate
-      ? Joi.string().min(0).max(150)
-      : Joi.string().min(0).max(150).required(),
-    address_city: forUpdate
-      ? Joi.string().min(0).max(150)
-      : Joi.string().min(0).max(150).required(),
-    address_zipcode: forUpdate
-      ? Joi.string().regex(/^(?:[0-8]\d|9[0-8])\d{3}$/)
-      : Joi.string()
-          .regex(/^(?:[0-8]\d|9[0-8])\d{3}$/)
-          .required(),
-  });
-
-  const { error } = schema.validate(attributes, {
-    abortEarly: false,
-  });
-  if (error) throw new ValidationError(error.details);
-};
-
-const createAddress = async (address) => {
-  const addressAttributes = {
-    city: address.address_city,
-    street: address.address_street,
-    zip_code: address.address_zipcode,
-  };
-  await validateAddress(address);
-  return db
-    .query(
-      `INSERT INTO address SET ${definedAttributesToSqlSet(addressAttributes)}`,
-      addressAttributes
-    )
-    .then((res) => getOneAddress(res.insertId))
-    .catch(() => false);
-};
-
 // create garden, and address, and zones... /////////////////////////
 
 const createGarden = async (newAttributes) => {
@@ -154,6 +184,7 @@ const validateZoneDetailsArray = async (
 ) => {
   const { udpatedRessourceId } = options;
   // eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line
   const forUpdate = !!udpatedRessourceId;
   // creating schema for validation by Joi
   const schema = Joi.array().items(Joi.object());
