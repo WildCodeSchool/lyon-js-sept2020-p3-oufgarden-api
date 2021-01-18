@@ -167,7 +167,9 @@ const verifyPassword = async (user, plainPassword) => {
 
 // get all users
 const getUsers = async () => {
-  return db.query('SELECT * FROM user');
+  return db.query(
+    'SELECT user.*, GROUP_CONCAT(userToGarden.garden_id) AS garden_id_concat FROM user INNER JOIN userToGarden ON userToGarden.user_id=user.id GROUP BY user.id ;'
+  );
 };
 
 const updateUser = async (id, newAttributes) => {
