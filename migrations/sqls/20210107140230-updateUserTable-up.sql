@@ -13,6 +13,11 @@ ADD
 ADD
   COLUMN birthdate DATE;
 
+ALTER TABLE
+  user
+ADD
+  COLUMN picture_url VARCHAR(150);
+
 describe user;
 
 
