@@ -23,8 +23,9 @@ const fileFilter = (req, file, cb) => {
   cb(err);
   return null;
 };
-const upload = multer({ storage, fileFilter }).single('gardenPicture');
-/* const handleZoneImageUpload = multer({ storage }).single('zonePiture');
- */ module.exports = upload;
-/* module.exports = handleZoneImageUpload;
- */
+const uploadImg = multer({ storage, fileFilter }).fields([
+  { name: 'gardenPicture' },
+  { name: 'zonePicture' },
+]);
+
+module.exports = uploadImg;

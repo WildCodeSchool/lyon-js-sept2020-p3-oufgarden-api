@@ -19,9 +19,11 @@ module.exports.handleGetOneGarden = async (req, res) => {
 };
 
 module.exports.handleCreateGarden = async (req, res) => {
-  console.log(req.body);
-  const picture = req.file ? req.file.path : null;
-  console.log(picture);
+  console.log(req.files);
+  const picture = req.files.gardenPicture
+    ? req.files.gardenPicture[0].path
+    : null;
+  const map = req.files.zonePicture ? req.files.zonePicture[0].path : null;
 
   // exemple de ce qui est envoyé côté back office
   // {
@@ -58,10 +60,9 @@ module.exports.handleCreateGarden = async (req, res) => {
     exposition,
     zone_quantity,
     zone_details,
-  } = req.body;
+  } = JSON.parse(req.body.newData);
   // Start to manage file upload here
 
-  console.log(req.file);
   const dataAddress = await createAddress(address);
   const createdAddressId = dataAddress.id;
   // we don't *absolutely* need to remove the address if creating the garden fails, there will simply be a useless address in the table - it does not have foreign keys pointing to anything
@@ -74,7 +75,7 @@ module.exports.handleCreateGarden = async (req, res) => {
     zone_quantity: +zone_quantity,
     zone_details,
     picture,
-    map: 'testURL',
+    map,
   });
   const createdGardenId = dataGarden.id;
 

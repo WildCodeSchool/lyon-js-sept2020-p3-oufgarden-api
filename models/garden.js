@@ -50,6 +50,7 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
     address_id: forUpdate
       ? Joi.number().integer()
       : Joi.number().integer().required(),
+    picture: Joi.string().min(0).max(150),
     map: Joi.string().min(0).max(150),
     zone_quantity: forUpdate
       ? Joi.number().integer().min(0).max(15)
@@ -120,8 +121,8 @@ const validateAddress = async (
 
 const createAddress = async (address) => {
   const addressAttributes = {
-    street: address.address_street,
     city: address.address_city,
+    street: address.address_street,
     zip_code: address.address_zipcode,
   };
   await validateAddress(address);
