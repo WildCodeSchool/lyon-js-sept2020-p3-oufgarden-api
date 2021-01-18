@@ -8,10 +8,16 @@ const {
   handleUpdateArticle,
   handleDeleteArticle,
 } = require('../controllers/articles');
+const mainUploadImage = require('../middlewares/handleImageUpload');
 
 articleRouter.get('/', asyncHandler(handleGetArticles));
 articleRouter.get('/:id', asyncHandler(handleGetOneArticle));
-articleRouter.post('/', requireIsAdmin, asyncHandler(handleCreateArticle));
+articleRouter.post(
+  '/',
+  mainUploadImage,
+  requireIsAdmin,
+  asyncHandler(handleCreateArticle)
+);
 articleRouter.put('/:id', requireIsAdmin, asyncHandler(handleUpdateArticle));
 articleRouter.delete('/:id', requireIsAdmin, asyncHandler(handleDeleteArticle));
 
