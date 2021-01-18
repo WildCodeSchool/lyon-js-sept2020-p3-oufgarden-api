@@ -5,7 +5,7 @@ ALTER TABLE
 ADD
   COLUMN phone VARCHAR(10),
 ADD
-  COLUMN gender VARCHAR(150) NOT NULL,
+  COLUMN gender_marker VARCHAR(150) NOT NULL,
 ADD
   COLUMN membership_start DATE,
 ADD
