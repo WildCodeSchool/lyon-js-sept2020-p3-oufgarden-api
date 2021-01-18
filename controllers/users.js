@@ -16,7 +16,10 @@ module.exports.handleGetOneUser = async (req, res) => {
 };
 
 module.exports.handleCreateUser = async (req, res) => {
+  console.log(req);
   const { firstname, lastname, email, password, is_admin } = req.body;
+  console.log(req.body);
+  console.log(req.file);
   const data = await createUser({
     firstname,
     lastname,

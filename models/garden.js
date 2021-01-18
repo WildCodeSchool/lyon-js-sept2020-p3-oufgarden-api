@@ -50,8 +50,8 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
     address_id: forUpdate
       ? Joi.number().integer()
       : Joi.number().integer().required(),
-    picture: Joi.string().min(0).max(150),
-    map: Joi.string().min(0).max(150),
+    picture: Joi.string().min(0).max(150).allow('').allow(null),
+    map: Joi.string().min(0).max(150).allow('').allow(null),
     zone_quantity: forUpdate
       ? Joi.number().integer().min(0).max(15)
       : Joi.number().integer().min(0).max(15).required(),

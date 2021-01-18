@@ -53,6 +53,7 @@ module.exports.handleCreateGarden = async (req, res) => {
   //     },
   //   ],
   // }
+  // JSON.parse is used  here to retrieve nested Object in formdata
   const {
     address,
     name,
