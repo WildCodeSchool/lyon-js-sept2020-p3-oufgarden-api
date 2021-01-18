@@ -3,6 +3,7 @@ const argon2 = require('argon2');
 const db = require('../db');
 const { RecordNotFoundError, ValidationError } = require('../error-types');
 const definedAttributesToSqlSet = require('../helpers/definedAttributesToSQLSet.js');
+const definedAttributesToSQLSetNoNull = require('../helpers/definedAttributesToSQLSetNoNull.js');
 
 // On check ici si l'email existe déjà
 const emailAlreadyExists = async (email) => {
@@ -26,7 +27,7 @@ const findByEmail = async (email, failIfNotFound = true) => {
 // get user by id
 const getOneUser = async (id, failIfNotFound = true) => {
   const rows = await db.query(
-    'SELECT user.*, GROUP_CONCAT(userToGarden.garden_id) as garden_id_concat FROM user INNER JOIN userToGarden ON userToGarden.user_id=user.id WHERE id = ? GROUP BY user.id ;',
+    'SELECT user.*, GROUP_CONCAT(userToGarden.garden_id) as garden_id_concat FROM user LEFT JOIN userToGarden ON userToGarden.user_id=user.id WHERE id = ? GROUP BY user.id ;',
     [id]
   );
   if (rows.length) {
@@ -182,7 +183,7 @@ const updateUser = async (id, newAttributes) => {
     newObj = { ...newAttributes, password };
   }
 
-  const namedAttributes = definedAttributesToSqlSet(newObj);
+  const namedAttributes = definedAttributesToSQLSetNoNull(newObj);
 
   return db
     .query(`UPDATE user SET ${namedAttributes} WHERE id = :id`, {
