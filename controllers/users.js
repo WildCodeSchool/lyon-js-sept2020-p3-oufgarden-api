@@ -1,4 +1,5 @@
 const dayjs = require('dayjs');
+const nodemailer = require('nodemailer');
 const {
   getUsers,
   getOneUser,
@@ -7,7 +8,6 @@ const {
   removeUser,
   linkUserToGarden,
 } = require('../models/users.js');
-const nodemailer = require('nodemailer');
 const creds = require('../mailConfig');
 
 module.exports.handleGetUsers = async (req, res) => {
@@ -55,7 +55,7 @@ module.exports.handleCreateUser = async (req, res) => {
   await linkUserToGarden(userData.id, gardenArray);
 
   // sending an email with user infos
-  var transport = {
+  const transport = {
     host: 'smtp.gmail.com', // e.g. smtp.gmail.com
     auth: {
       user: creds.USER,
@@ -63,7 +63,7 @@ module.exports.handleCreateUser = async (req, res) => {
     },
   };
 
-  let transporter = nodemailer.createTransport(transport);
+  const transporter = nodemailer.createTransport(transport);
 
   transporter.verify((error, success) => {
     if (error) {
@@ -73,7 +73,7 @@ module.exports.handleCreateUser = async (req, res) => {
     }
   });
 
-  let mail = {
+  const mail = {
     from: `"OufGarden" <${creds.USER}>`,
     to: email,
     subject: 'Bienvenue chez OufGarden !',
