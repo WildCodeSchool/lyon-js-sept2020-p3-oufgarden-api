@@ -10,7 +10,7 @@ const {
 } = require('../models/users.js');
 const creds = require('../mailConfig');
 
-module.exports.handleGetUsers = async (req, res) => {
+module.exports.handleGetUsers = async (_req, res) => {
   const rawData = await getUsers();
   return res.status(200).send(rawData);
 };
@@ -69,6 +69,7 @@ module.exports.handleCreateUser = async (req, res) => {
     if (error) {
       console.log(error);
     } else {
+      console.log(success);
       console.log('All works fine, congrats!');
     }
   });
@@ -86,6 +87,7 @@ module.exports.handleCreateUser = async (req, res) => {
       console.log('fail sending user creation email');
     } else {
       console.log('success sending user creation email');
+      console.log(data);
     }
   });
 
