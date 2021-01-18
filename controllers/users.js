@@ -7,6 +7,8 @@ const {
   removeUser,
   linkUserToGarden,
 } = require('../models/users.js');
+const nodemailer = require('nodemailer');
+const creds = require('../mailConfig');
 
 module.exports.handleGetUsers = async (req, res) => {
   const rawData = await getUsers();
@@ -51,6 +53,41 @@ module.exports.handleCreateUser = async (req, res) => {
     return res.status(424).send('failed to create user');
   }
   await linkUserToGarden(userData.id, gardenArray);
+
+  // sending an email with user infos
+  var transport = {
+    host: 'smtp.gmail.com', // e.g. smtp.gmail.com
+    auth: {
+      user: creds.USER,
+      pass: creds.PASS,
+    },
+  };
+
+  let transporter = nodemailer.createTransport(transport);
+
+  transporter.verify((error, success) => {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log('All works fine, congrats!');
+    }
+  });
+
+  let mail = {
+    from: `"OufGarden" <${creds.USER}>`,
+    to: email,
+    subject: 'Bienvenue chez OufGarden !',
+
+    html: `<p>Votre compte adhérent chez OufGarden a bien été créé ! <br/> Vous pouvez y accéder en utilisant votre adresse mail, ainsi que le mot de passe : ${password}</>`,
+  };
+
+  transporter.sendMail(mail, (err, data) => {
+    if (err) {
+      console.log('fail sending user creation email');
+    } else {
+      console.log('success sending user creation email');
+    }
+  });
 
   return res.status(201).send('User and joining table successfully created');
 };
