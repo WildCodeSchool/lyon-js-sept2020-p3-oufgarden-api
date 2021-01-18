@@ -58,6 +58,7 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
   const schema = Joi.object().keys({
     birthdate: Joi.date(),
     membership_start: Joi.date(),
+    picture_url: Joi.string().min(0).max(150).allow('').allow(null),
     user_creation: forUpdate ? Joi.date() : Joi.date().required(),
     phone: Joi.string().length(10).allow('').allow(null),
     gender_marker: forUpdate
@@ -102,15 +103,14 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
       shouldThrow = await emailAlreadyExists(attributes.email);
     }
     if (shouldThrow) {
-      throw new ValidationError([
-        { message: 'email_taken', path: ['email'], type: 'unique' },
-      ]);
+      throw new ValidationError(error.details);
     }
   }
 };
 
 // creating a user and hashing their password
 const createUser = async (newAttributes) => {
+  console.log(newAttributes);
   await validate(newAttributes);
   const { email } = newAttributes;
   const password = await hashPassword(newAttributes);

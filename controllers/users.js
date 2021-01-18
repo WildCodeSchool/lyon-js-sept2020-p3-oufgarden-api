@@ -18,6 +18,9 @@ module.exports.handleGetOneUser = async (req, res) => {
 };
 
 module.exports.handleCreateUser = async (req, res) => {
+  console.log(req.body);
+  console.log(req.file);
+  const picture_url = req.file ? req.file.path : null;
   const {
     gender_marker,
     birthdate,
@@ -29,7 +32,7 @@ module.exports.handleCreateUser = async (req, res) => {
     membership_start,
     is_admin,
     gardenArray,
-  } = req.body;
+  } = JSON.parse(req.body.data);
 
   const user_creation = dayjs().format('YYYY-MM-DD'); // still have to check the format we will want
   const userData = await createUser({
@@ -42,6 +45,7 @@ module.exports.handleCreateUser = async (req, res) => {
     password,
     membership_start: dayjs(membership_start).format('YYYY-MM-DD'),
     user_creation,
+    picture_url,
     is_admin: is_admin ? 1 : 0,
   });
 
