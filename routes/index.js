@@ -6,6 +6,7 @@ const { adminLogin } = require('./login');
 const { tagRouter } = require('./tags');
 const { gardenRouter } = require('./garden');
 const { plantFamilyRouter } = require('./plantFamily.js');
+const { frontLogin } = require('./login');
 
 // eslint-disable-next-line
 module.exports = (app) => {
@@ -13,9 +14,9 @@ module.exports = (app) => {
   app.use('/users', userRouter);
   app.use('/articles', articleRouter);
   app.use('/tagToArticle', tagToArticleRouter);
-  app.use('/login', adminLogin);
   app.use('/tags', tagRouter);
   app.use('/garden', gardenRouter);
   app.use('/login', adminLogin);
   app.use('/plantFamily', plantFamilyRouter);
+  app.use('/app/login', frontLogin);
 };
