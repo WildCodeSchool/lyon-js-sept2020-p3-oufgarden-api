@@ -3,6 +3,7 @@ const argon2 = require('argon2');
 const db = require('../db');
 const { RecordNotFoundError, ValidationError } = require('../error-types');
 const definedAttributesToSqlSet = require('../helpers/definedAttributesToSQLSet.js');
+const definedAttributesToSQLSetNoNull = require('../helpers/definedAttributesToSQLSetNoNull.js');
 
 // On check ici si l'email existe déjà
 const emailAlreadyExists = async (email) => {
@@ -95,6 +96,7 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
   if (attributes.email) {
     let shouldThrow = false;
     if (forUpdate) {
+      console.log(udpatedRessourceId);
       const toUpdate = await getOneUser(udpatedRessourceId);
       shouldThrow =
         !(toUpdate.email === attributes.email) &&
@@ -181,7 +183,7 @@ const updateUser = async (id, newAttributes) => {
     newObj = { ...newAttributes, password };
   }
 
-  const namedAttributes = definedAttributesToSqlSet(newObj);
+  const namedAttributes = definedAttributesToSQLSetNoNull(newObj);
 
   return db
     .query(`UPDATE user SET ${namedAttributes} WHERE id = :id`, {
