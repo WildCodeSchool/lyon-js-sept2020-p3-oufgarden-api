@@ -18,7 +18,12 @@ module.exports.handleGetOneArticle = async (req, res) => {
 };
 
 module.exports.handleCreateArticle = async (req, res) => {
-  const url = req.file ? req.file.path : null;
+  let url;
+  if (!req.file) {
+    url = null;
+  } else {
+    url = req.file.path;
+  }
   // tagsArray is an array with the IDs of all the tags related to this article
   const { title, content, tagsArray, gardenArray } = JSON.parse(req.body.data);
   const data = await createArticle({
@@ -35,8 +40,13 @@ module.exports.handleCreateArticle = async (req, res) => {
 };
 
 module.exports.handleUpdateArticle = async (req, res) => {
-  const url = req.file ? req.file.path : null;
-  const { title, content, updated_at, tagsArray, gardenArray } = req.body;
+  let url;
+  if (req.file) {
+    url = req.file.path;
+  }
+  const { title, content, updated_at, tagsArray, gardenArray } = JSON.parse(
+    req.body.data
+  );
   const data = await updateArticle(req.params.id, {
     title,
     content,

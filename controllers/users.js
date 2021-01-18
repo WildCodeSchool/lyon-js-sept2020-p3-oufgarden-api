@@ -58,6 +58,10 @@ module.exports.handleCreateUser = async (req, res) => {
 };
 
 module.exports.handleUpdateUser = async (req, res) => {
+  let picture_url;
+  if (req.file) {
+    picture_url = req.file.path;
+  }
   const {
     gender_marker,
     birthdate,
@@ -69,7 +73,7 @@ module.exports.handleUpdateUser = async (req, res) => {
     membership_start,
     is_admin,
     gardenArray,
-  } = req.body;
+  } = JSON.parse(req.body.data);
 
   const userData = await updateUser(req.params.id, {
     gender_marker,
@@ -79,6 +83,7 @@ module.exports.handleUpdateUser = async (req, res) => {
     email,
     phone,
     password,
+    picture_url,
     membership_start,
     is_admin: is_admin ? 1 : 0,
   });

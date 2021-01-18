@@ -19,11 +19,18 @@ module.exports.handleGetOneGarden = async (req, res) => {
 };
 
 module.exports.handleCreateGarden = async (req, res) => {
-  console.log(req.files);
-  const picture = req.files.gardenPicture
-    ? req.files.gardenPicture[0].path
-    : null;
-  const map = req.files.zonePicture ? req.files.zonePicture[0].path : null;
+  let picture;
+  let map;
+  if (!req.files.path) {
+    picture = null;
+  } else {
+    picture = req.files.gardenPicture[0].path;
+  }
+  if (!req.files.path) {
+    picture = null;
+  } else {
+    map = req.files.zonePicture[0].path;
+  }
 
   // exemple de ce qui est envoyé côté back office
   // {

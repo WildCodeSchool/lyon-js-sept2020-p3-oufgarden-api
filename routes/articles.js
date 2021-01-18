@@ -18,7 +18,12 @@ articleRouter.post(
   requireIsAdmin,
   asyncHandler(handleCreateArticle)
 );
-articleRouter.put('/:id', requireIsAdmin, asyncHandler(handleUpdateArticle));
+articleRouter.put(
+  '/:id',
+  mainUploadImage,
+  requireIsAdmin,
+  asyncHandler(handleUpdateArticle)
+);
 articleRouter.delete('/:id', requireIsAdmin, asyncHandler(handleDeleteArticle));
 
 module.exports = { articleRouter };
