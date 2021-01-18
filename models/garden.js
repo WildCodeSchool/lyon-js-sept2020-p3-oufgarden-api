@@ -43,7 +43,6 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
     name: forUpdate
       ? Joi.string().min(0).max(150)
       : Joi.string().min(0).max(150).required(),
-    picture: Joi.string().min(0).max(150),
     description: forUpdate
       ? Joi.string().min(0).max(150)
       : Joi.string().min(0).max(150).required(),

@@ -7,10 +7,11 @@ const {
   handleUpdateGarden,
   handleDeleteGarden,
 } = require('../controllers/garden');
+const upload = require('../middlewares/handleImageUpload');
 
 gardenRouter.get('/', asyncHandler(handleGetGarden));
 gardenRouter.get('/:id', asyncHandler(handleGetOneGarden));
-gardenRouter.post('/', asyncHandler(handleCreateGarden));
+gardenRouter.post('/', upload, asyncHandler(handleCreateGarden));
 gardenRouter.put('/:id', asyncHandler(handleUpdateGarden));
 gardenRouter.delete('/:id', asyncHandler(handleDeleteGarden));
 
