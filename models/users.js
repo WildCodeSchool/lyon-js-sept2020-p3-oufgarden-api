@@ -26,7 +26,7 @@ const findByEmail = async (email, failIfNotFound = true) => {
 // get user by id
 const getOneUser = async (id, failIfNotFound = true) => {
   const rows = await db.query(
-    'SELECT user.*, GROUP_CONCAT(userToGarden.garden_id) as garden_id_concat FROM user INNER JOIN userToGarden ON userToGarden.user_id=user.id WHERE id = ? GROUP BY user.id ;',
+    'SELECT user.*, GROUP_CONCAT(userToGarden.garden_id) as garden_id_concat FROM user LEFT JOIN userToGarden ON userToGarden.user_id=user.id WHERE id = ? GROUP BY user.id ;',
     [id]
   );
   if (rows.length) {
@@ -94,6 +94,7 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
   if (attributes.email) {
     let shouldThrow = false;
     if (forUpdate) {
+      console.log(udpatedRessourceId);
       const toUpdate = await getOneUser(udpatedRessourceId);
       shouldThrow =
         !(toUpdate.email === attributes.email) &&
