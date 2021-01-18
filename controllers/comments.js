@@ -2,14 +2,13 @@ const {
   getComments,
   getOneComment,
   createComment,
-  /* linkArticleToTags,
-  linkArticleToGarden, */
-  //   updateComment,
-  //   removeComment,
+  updateComment,
+  removeComment,
 } = require('../models/comments.js');
 
 module.exports.handleGetComments = async (req, res) => {
-  const rawData = await getComments();
+  const { article_id } = req.query;
+  const rawData = await getComments(article_id);
   return res.status(200).send(rawData);
 };
 
@@ -30,22 +29,15 @@ module.exports.handleCreateComment = async (req, res) => {
   return res.status(201).send(data);
 };
 
-// module.exports.handleUpdateArticle = async (req, res) => {
-//   const { title, content, url, updated_at, tagsArray, gardenArray } = req.body;
-//   const data = await updateArticle(req.params.id, {
-//     title,
-//     content,
-//     url,
-//     updated_at,
-//   });
+module.exports.handleUpdateComment = async (req, res) => {
+  const { message } = req.body; // only the message can be updated in a comment
+  const data = await updateComment(req.params.id, {
+    message,
+  });
+  return res.status(200).send(data);
+};
 
-//   const createdArticleId = req.params.id;
-//   await linkArticleToTags(createdArticleId, tagsArray);
-//   await linkArticleToGarden(createdArticleId, gardenArray);
-//   return res.status(200).send(data);
-// };
-
-// module.exports.handleDeleteArticle = async (req, res) => {
-//   await removeArticle(req.params.id);
-//   res.sendStatus(204);
-// };
+module.exports.handleDeleteComment = async (req, res) => {
+  await removeComment(req.params.id);
+  res.sendStatus(204);
+};

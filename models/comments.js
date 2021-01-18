@@ -7,8 +7,22 @@ require('dotenv').config();
 const { RecordNotFoundError, ValidationError } = require('../error-types');
 const definedAttributesToSqlSet = require('../helpers/definedAttributesToSQLSet.js');
 
-const getComments = async () => {
-  return db.query('SELECT * FROM comment ORDER BY date DESC');
+const getComments = async (article_id) => {
+  // it is possible to filter comments by article id
+  // 'get/comments?article_id=12'
+  const filterArray = [];
+  let query = 'SELECT * FROM comment';
+  if (article_id) {
+    query += ` WHERE article_id= ?`;
+    filterArray.push(article_id);
+  }
+
+  query += ' ORDER BY date DESC;';
+
+  console.log(query);
+  console.log(filterArray);
+
+  return db.query(query, filterArray);
 };
 
 const getOneComment = async (id, failIfNotFound = true) => {
@@ -60,12 +74,36 @@ const createComment = async (newAttributes) => {
     .then((res) => getOneComment(res.insertId));
 };
 
+const updateComment = async (id, newAttributes) => {
+  await validate(newAttributes, { udpatedRessourceId: id });
+  const { message } = newAttributes;
+  const date = dayjs().format('YYYY-MM-DD HH:mm:ss');
+
+  return db
+    .query(`UPDATE comment SET message=:message, date=:date WHERE id = :id`, {
+      message,
+      date,
+      id,
+    })
+    .then(() => getOneComment(id));
+};
+
+const removeComment = async (id, failIfNotFound = true) => {
+  if (id) {
+    const res = await db.query('DELETE FROM comment WHERE id = ?', [id]);
+    if (res.affectedRows !== 0) {
+      return true;
+    }
+    if (failIfNotFound) throw new RecordNotFoundError('comment', id);
+    return false;
+  }
+  return null;
+};
+
 module.exports = {
   getComments,
   getOneComment,
   createComment,
-  // linkArticleToTags,
-  // linkArticleToGarden,
-  // updateArticle,
-  // removeArticle,
+  updateComment,
+  removeComment,
 };
