@@ -110,7 +110,6 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
 
 // creating a user and hashing their password
 const createUser = async (newAttributes) => {
-  console.log(newAttributes);
   await validate(newAttributes);
   const { email } = newAttributes;
   const password = await hashPassword(newAttributes);

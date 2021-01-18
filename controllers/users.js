@@ -18,8 +18,6 @@ module.exports.handleGetOneUser = async (req, res) => {
 };
 
 module.exports.handleCreateUser = async (req, res) => {
-  console.log(req.body);
-  console.log(req.file);
   const picture_url = req.file ? req.file.path : null;
   const {
     gender_marker,
