@@ -10,15 +10,14 @@ const {
 } = require('../controllers/users');
 const requireRequestBody = require('../middlewares/requireRequestBody.js');
 const requireIsAdmin = require('../middlewares/requireAdmin');
-const mainUploadImage = require('../middlewares/handleImageUpload');
-
+/* const mainUploadImage = require('../middlewares/handleImageUpload');
+ */
 userRouter.get('/', requireIsAdmin, asyncHandler(handleGetUsers));
 userRouter.get('/:id', requireIsAdmin, asyncHandler(handleGetOneUser));
 userRouter.post(
   '/',
   requireIsAdmin,
   requireRequestBody,
-  mainUploadImage,
   asyncHandler(handleCreateUser)
 );
 userRouter.put('/:id', requireIsAdmin, asyncHandler(handleUpdateUser));
