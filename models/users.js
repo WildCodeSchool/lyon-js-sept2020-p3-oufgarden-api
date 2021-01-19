@@ -132,7 +132,7 @@ const linkUserToGarden = async (userId, gardenArray, forUpdate = false) => {
   if (forUpdate) {
     await db.query('DELETE FROM userToGarden WHERE user_id = ?', [userId]);
   }
-
+  // to fix map problem on member creation put a if with !gardenArray
   if (gardenArray.length > 0) {
     // const gardenValidation = await validateTags(gardenArray);
     let valuePairsString = '';
