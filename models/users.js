@@ -133,21 +133,24 @@ const linkUserToGarden = async (userId, gardenArray, forUpdate = false) => {
     await db.query('DELETE FROM userToGarden WHERE user_id = ?', [userId]);
   }
   // to fix map problem on member creation put a if with !gardenArray
-  if (gardenArray.length > 0) {
-    // const gardenValidation = await validateTags(gardenArray);
-    let valuePairsString = '';
-    gardenArray.forEach((garden) => {
-      valuePairsString += `(${+userId}, ${+garden}),`; // + to convert it to number or make sure it's a number
-    });
-    valuePairsString = valuePairsString.slice(0, -1); // removing the last comma
-
-    const result = await db
-      .query(
-        `INSERT INTO userToGarden (user_id, garden_id) VALUES ${valuePairsString};`
-      )
-      .catch(() => {
-        return false;
+  let valuePairsString = '';
+  let result;
+  if (gardenArray !== undefined) {
+    if (gardenArray.length > 0) {
+      // const gardenValidation = await validateTags(gardenArray);
+      valuePairsString = '';
+      gardenArray.forEach((garden) => {
+        valuePairsString += `(${+userId}, ${+garden}),`; // + to convert it to number or make sure it's a number
       });
+      valuePairsString = valuePairsString.slice(0, -1); // removing the last comma
+      result = await db
+        .query(
+          `INSERT INTO userToGarden (user_id, garden_id) VALUES ${valuePairsString};`
+        )
+        .catch(() => {
+          return false;
+        });
+    }
 
     if (/* !gardenValidation || */ result === false) {
       throw new ValidationError([
