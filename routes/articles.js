@@ -8,11 +8,16 @@ const {
   handleUpdateArticle,
   handleDeleteArticle,
   handleGetFavorites,
+  handleCreateFavorite,
+  handleDeleteFavorite,
 } = require('../controllers/articles');
 const mainUploadImage = require('../middlewares/handleImageUpload');
 
-articleRouter.get('/', asyncHandler(handleGetArticles));
 articleRouter.get('/favorites', asyncHandler(handleGetFavorites));
+articleRouter.post('/favorites', asyncHandler(handleCreateFavorite));
+articleRouter.delete('/favorites', asyncHandler(handleDeleteFavorite));
+
+articleRouter.get('/', asyncHandler(handleGetArticles));
 articleRouter.get('/:id', asyncHandler(handleGetOneArticle));
 articleRouter.post(
   '/',

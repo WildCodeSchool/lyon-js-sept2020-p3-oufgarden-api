@@ -7,6 +7,8 @@ const {
   updateArticle,
   removeArticle,
   getFavorites,
+  createFavorite,
+  removeFavorite,
 } = require('../models/articles.js');
 
 module.exports.handleGetArticles = async (req, res) => {
@@ -46,6 +48,15 @@ module.exports.handleCreateArticle = async (req, res) => {
   return res.status(201).send(data);
 };
 
+module.exports.handleCreateFavorite = async (req, res) => {
+  const { user_id, article_id } = req.body;
+  const data = await createFavorite({
+    user_id,
+    article_id,
+  });
+  return res.status(201).send(data);
+};
+
 module.exports.handleUpdateArticle = async (req, res) => {
   let url;
   if (req.file) {
@@ -69,5 +80,19 @@ module.exports.handleUpdateArticle = async (req, res) => {
 
 module.exports.handleDeleteArticle = async (req, res) => {
   await removeArticle(req.params.id);
+  res.sendStatus(204);
+};
+
+module.exports.handleDeleteFavorite = async (req, res) => {
+  const { user_id, article_id } = req.body;
+  const removed = await removeFavorite({ user_id, article_id });
+  if (!removed) {
+    res
+      .status(422)
+      .send(
+        'error deleting favorite, check that you send a correct user AND article id'
+      );
+  }
+
   res.sendStatus(204);
 };

@@ -109,6 +109,37 @@ const validateTags = async (tagsArray) => {
   return validation;
 };
 
+const validateFavorite = async (attributes) => {
+  let validation = true;
+  const { user_id, article_id } = attributes;
+
+  const schema = Joi.object().keys({
+    user_id: Joi.number().integer().required(),
+    article_id: Joi.number().integer().required(),
+  });
+  const { error } = schema.validate(attributes, {
+    abortEarly: false,
+  });
+  if (error) throw new ValidationError(error.details);
+
+  const rawDataUser = await db.query('SELECT id FROM user');
+  const validIdsUser = rawDataUser.map((obj) => obj.id);
+
+  const rawDataArticle = await db.query('SELECT id FROM article');
+  const validIdsArticle = rawDataArticle.map((obj) => obj.id);
+
+  console.log(rawDataUser, rawDataArticle);
+
+  if (validIdsUser.includes(user_id) === false) {
+    validation = false;
+  }
+  if (validIdsArticle.includes(article_id) === false) {
+    validation = false;
+  }
+
+  return validation;
+};
+
 // eslint-disable-next-line consistent-return
 const linkArticleToTags = async (articleId, tagsArray) => {
   await db.query('DELETE from tagToArticle WHERE article_id = ?', [articleId]);
@@ -213,6 +244,28 @@ const createArticle = async (newAttributes) => {
     .then((res) => getOneArticle(res.insertId));
 };
 
+const createFavorite = async (newAttributes) => {
+  const validation = await validateFavorite(newAttributes);
+  console.log(newAttributes);
+  const { user_id } = newAttributes;
+  if (validation === false) {
+    throw new ValidationError([
+      {
+        message:
+          'there is no such article, or no such user (an id does not exist)',
+        path: ['favorite'],
+        type: 'insertionError',
+      },
+    ]);
+  }
+  return db
+    .query(
+      `INSERT INTO favorite SET ${definedAttributesToSqlSet(newAttributes)}`,
+      { ...newAttributes }
+    )
+    .then(() => getFavorites(user_id));
+};
+
 const updateArticle = async (id, newAttributes) => {
   await validate(newAttributes, { udpatedRessourceId: id });
   const namedAttributes = definedAttributesToSqlSet(newAttributes);
@@ -230,6 +283,24 @@ const updateArticle = async (id, newAttributes) => {
     .then(() => getOneArticle(id));
 };
 
+const removeFavorite = async (
+  { user_id, article_id },
+  failIfNotFound = true
+) => {
+  if (user_id && article_id) {
+    const res = await db.query(
+      'DELETE FROM favorite WHERE user_id=? AND article_id=?',
+      [user_id, article_id]
+    );
+    if (res.affectedRows !== 0) {
+      return true;
+    }
+    if (failIfNotFound) throw new RecordNotFoundError('favorite', user_id);
+    return false;
+  }
+  return null;
+};
+
 module.exports = {
   getArticles,
   getOneArticle,
@@ -239,4 +310,6 @@ module.exports = {
   updateArticle,
   removeArticle,
   getFavorites,
+  createFavorite,
+  removeFavorite,
 };
