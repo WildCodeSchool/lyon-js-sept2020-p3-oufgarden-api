@@ -64,7 +64,7 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
       : Joi.string().required(),
     url: forUpdate
       ? Joi.string().allow('').allow(null)
-      : Joi.string().min(0).max(150).required(),
+      : Joi.string().min(0).max(150).allow(' ').allow(null),
     updated_at: forUpdate ? Joi.date().required() : Joi.any(),
   });
 

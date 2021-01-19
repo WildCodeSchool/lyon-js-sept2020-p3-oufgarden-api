@@ -126,7 +126,6 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
     name: forUpdate
       ? Joi.string().min(0).max(150)
       : Joi.string().min(0).max(150).required(),
-    picture: Joi.string().min(0).max(150),
     description: forUpdate
       ? Joi.string().min(0).max(150)
       : Joi.string().min(0).max(150).required(),
@@ -134,7 +133,8 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
     address_id: forUpdate
       ? Joi.number().integer()
       : Joi.number().integer().required(),
-    map: Joi.string().min(0).max(150),
+    picture: Joi.string().min(0).max(150).allow('').allow(null),
+    map: Joi.string().min(0).max(150).allow('').allow(null),
     zone_quantity: forUpdate
       ? Joi.number().integer().min(0).max(15)
       : Joi.number().integer().min(0).max(15).required(),
@@ -184,6 +184,7 @@ const validateZoneDetailsArray = async (
 ) => {
   const { udpatedRessourceId } = options;
   // eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line
   const forUpdate = !!udpatedRessourceId;
   // creating schema for validation by Joi
   const schema = Joi.array().items(Joi.object());

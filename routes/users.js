@@ -10,16 +10,23 @@ const {
 } = require('../controllers/users');
 const requireRequestBody = require('../middlewares/requireRequestBody.js');
 const requireIsAdmin = require('../middlewares/requireAdmin');
+const mainUploadImage = require('../middlewares/handleImageUpload');
 
 userRouter.get('/', requireIsAdmin, asyncHandler(handleGetUsers));
 userRouter.get('/:id', requireIsAdmin, asyncHandler(handleGetOneUser));
 userRouter.post(
   '/',
+  mainUploadImage,
   requireIsAdmin,
   requireRequestBody,
   asyncHandler(handleCreateUser)
 );
-userRouter.put('/:id', requireIsAdmin, asyncHandler(handleUpdateUser));
+userRouter.put(
+  '/:id',
+  mainUploadImage,
+  requireIsAdmin,
+  asyncHandler(handleUpdateUser)
+);
 userRouter.delete('/:id', requireIsAdmin, asyncHandler(handleDeleteUser));
 // test du login
 

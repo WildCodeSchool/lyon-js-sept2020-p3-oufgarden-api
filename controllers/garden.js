@@ -19,6 +19,19 @@ module.exports.handleGetOneGarden = async (req, res) => {
 };
 
 module.exports.handleCreateGarden = async (req, res) => {
+  let picture;
+  let map;
+  if (!req.files.path) {
+    picture = null;
+  } else {
+    picture = req.files.gardenPicture[0].path;
+  }
+  if (!req.files.path) {
+    picture = null;
+  } else {
+    map = req.files.zonePicture[0].path;
+  }
+
   // exemple de ce qui est envoyé côté back office
   // {
   //   address: {
@@ -47,6 +60,7 @@ module.exports.handleCreateGarden = async (req, res) => {
   //     },
   //   ],
   // }
+  // JSON.parse is used  here to retrieve nested Object in formdata
   const {
     address,
     name,
@@ -54,7 +68,8 @@ module.exports.handleCreateGarden = async (req, res) => {
     exposition,
     zone_quantity,
     zone_details,
-  } = req.body;
+  } = JSON.parse(req.body.newData);
+  // Start to manage file upload here
 
   const dataAddress = await createAddress(address);
   const createdAddressId = dataAddress.id;
@@ -67,8 +82,8 @@ module.exports.handleCreateGarden = async (req, res) => {
     exposition,
     zone_quantity: +zone_quantity,
     zone_details,
-    picture: 'testURL',
-    map: 'testURL',
+    picture,
+    map,
   });
   const createdGardenId = dataGarden.id;
 
