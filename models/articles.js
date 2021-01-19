@@ -11,6 +11,19 @@ const getArticles = async () => {
   return db.query('SELECT * FROM article ORDER BY created_at DESC');
 };
 
+const getFavorites = async (user_id) => {
+  if (user_id) {
+    return db.query(
+      'SELECT fav.*, article.title AS article_title, user.firstname AS user_firstname, user.lastname AS user_lastname FROM favorite AS fav INNER JOIN article ON fav.article_id = article.id INNER JOIN user ON fav.user_id = user.id WHERE fav.user_id=? ORDER BY article_id ASC',
+      [user_id]
+    );
+  }
+
+  return db.query(
+    'SELECT fav.*, article.title AS article_title, user.firstname AS user_firstname, user.lastname AS user_lastname FROM favorite AS fav INNER JOIN article ON fav.article_id = article.id INNER JOIN user ON fav.user_id = user.id ORDER BY article_id ASC'
+  );
+};
+
 const getOneArticle = async (id, failIfNotFound = true) => {
   const rows = await db.query('select * from article where id = ?', [id]);
   const tagsRows = await db.query(
@@ -225,4 +238,5 @@ module.exports = {
   linkArticleToGarden,
   updateArticle,
   removeArticle,
+  getFavorites,
 };

@@ -6,10 +6,17 @@ const {
   linkArticleToGarden,
   updateArticle,
   removeArticle,
+  getFavorites,
 } = require('../models/articles.js');
 
 module.exports.handleGetArticles = async (req, res) => {
   const rawData = await getArticles();
+  return res.status(200).send(rawData);
+};
+
+module.exports.handleGetFavorites = async (req, res) => {
+  const { user_id } = req.query;
+  const rawData = await getFavorites(user_id);
   return res.status(200).send(rawData);
 };
 
