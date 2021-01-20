@@ -76,7 +76,13 @@ const gardenAlreadyExists = async (name) => {
   return false;
 };
 
-const getGarden = async () => {
+const getGarden = async (userId) => {
+  if (userId) {
+    return db.query(
+      'SELECT garden.* FROM garden INNER JOIN userToGarden AS UTG ON garden.id = UTG.garden_id WHERE UTG.user_id= ?',
+      [userId]
+    );
+  }
   return db.query('SELECT * FROM garden');
 };
 

@@ -10,7 +10,11 @@ const {
 } = require('../models/garden');
 
 module.exports.handleGetGarden = async (req, res) => {
-  const rawData = await getGarden();
+  if (req.currentUser.is_admin === 1) {
+    const rawData = await getGarden();
+    return res.status(200).send(rawData);
+  }
+  const rawData = await getGarden(+req.currentUser.id);
   return res.status(200).send(rawData);
 };
 
@@ -32,35 +36,6 @@ module.exports.handleCreateGarden = async (req, res) => {
     map = req.files.zonePicture[0].path;
   }
 
-  // exemple de ce qui est envoyé côté back office
-  // {
-  //   address: {
-  //     address_city: ,
-  //     address_street: ,
-  //     address_zipcode: ,
-  //   },
-  //   name: ,
-  //   description: ,
-  //   exposition: ,
-  //   zone_quantity: ,
-  //   zone_details: [
-  //     {
-  //       zone_name: '',
-  //       type: '',
-  //       exposition: '',
-  //       plantFamilyArray: [],
-  //       description: '',
-  //     },
-  //     {
-  //       zone_name: '',
-  //       type: '',
-  //       exposition: '',
-  //       plantFamilyArray: [],
-  //       description: '',
-  //     },
-  //   ],
-  // }
-  // JSON.parse is used  here to retrieve nested Object in formdata
   const {
     address,
     name,
@@ -104,8 +79,6 @@ module.exports.handleCreateGarden = async (req, res) => {
         plantFamilyArray: [...zone_details[index].plantFamilyArray],
       };
     });
-
-    // [{zoneId: 15, plantFamilyArray: [2,4]}, {zoneId: 16, plantFamilyArray: [5, 6]}]
 
     const insertionStatus = []; // table looking like [true, false, true, true], if the plantFamilyArray is empty, it should just be [null, null, null]
     zoneToPlantFamilyArray.forEach(async (elem) => {
