@@ -1,5 +1,7 @@
 // const Joi = require('joi');
 const db = require('../db');
+const definedAttributesToSqlSet = require('../helpers/definedAttributesToSQLSet.js');
+
 /* const { RecordNotFoundError, ValidationError } = require('../error-types'); */
 // const definedAttributesToSqlSet = require('../helpers/definedAttributesToSQLSet.js');
 
@@ -37,6 +39,18 @@ const getReservations = async () => {
   return newData;
 };
 
+const createReservation = async (newAttributes) => {
+  /*  await validate(newAttributes); */
+  return db
+    .query(
+      `INSERT INTO reservation SET ${definedAttributesToSqlSet(newAttributes)}`,
+      newAttributes
+    )
+    .then(
+      /* ((res) => getOneTag(res.insertId)); */ (res) => res.sendStatus(200)
+    );
+};
+
 // const validate = async (attributes, options = { udpatedRessourceId: null }) => {
 //   const { udpatedRessourceId } = options;
 //   const forUpdate = !!udpatedRessourceId;
@@ -71,16 +85,6 @@ const getReservations = async () => {
 //   }
 // };
 
-// const createTag = async (newAttributes) => {
-//   await validate(newAttributes);
-//   return db
-//     .query(
-//       `INSERT INTO tag SET ${definedAttributesToSqlSet(newAttributes)}`,
-//       newAttributes
-//     )
-//     .then((res) => getOneTag(res.insertId));
-// };
-
 // const updateTag = async (id, newAttributes) => {
 //   await validate(newAttributes, { udpatedRessourceId: id });
 //   const namedAttributes = definedAttributesToSqlSet(newAttributes);
@@ -103,6 +107,7 @@ const getReservations = async () => {
 
 module.exports = {
   getReservations,
+  createReservation,
   //   getOneTag,
   //   createTag,
   //   updateTag,

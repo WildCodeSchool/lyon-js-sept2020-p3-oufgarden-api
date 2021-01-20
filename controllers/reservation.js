@@ -1,5 +1,6 @@
 const {
   getReservations,
+  /*  createReservation, */
   // getOneTag,
   // createTag,
   // updateTag,
@@ -11,16 +12,19 @@ module.exports.handleGetReservations = async (req, res) => {
   return res.status(200).send(rawData);
 };
 
+module.exports.handleCreateReservation = async (req, res) => {
+  console.log(req.body);
+  console.log(req.currentUser);
+  const data = { user_id: req.currentUser.id };
+  /* const { name } = req.body; */
+  /* const data = await createReservation({
+    name,
+  }); */
+  return res.status(201).send(data);
+};
+
 //   module.exports.handleGetOneTag = async (req, res) => {
 //     res.send(await getOneTag(req.params.id));
-//   };
-
-//   module.exports.handleCreateTag = async (req, res) => {
-//     const { name } = req.body;
-//     const data = await createTag({
-//       name,
-//     });
-//     return res.status(201).send(data);
 //   };
 
 //   module.exports.handleUpdateTag = async (req, res) => {
