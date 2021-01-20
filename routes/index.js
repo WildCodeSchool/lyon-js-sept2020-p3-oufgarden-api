@@ -9,18 +9,19 @@ const { plantFamilyRouter } = require('./plantFamily.js');
 const { frontLogin } = require('./login');
 const { timeSlotRouter } = require('./timeSlots');
 const { reservationRouter } = require('./reservation');
+const requireCurrentUser = require('../middlewares/requireCurrentUser');
 
 // eslint-disable-next-line
 module.exports = (app) => {
   // app.use('/things', thingsRoutes);
-  app.use('/users', userRouter);
-  app.use('/articles', articleRouter);
-  app.use('/tagToArticle', tagToArticleRouter);
-  app.use('/tags', tagRouter);
-  app.use('/garden', gardenRouter);
+  app.use('/users', requireCurrentUser, userRouter);
+  app.use('/articles', requireCurrentUser, articleRouter);
+  app.use('/tagToArticle', requireCurrentUser, tagToArticleRouter);
+  app.use('/tags', requireCurrentUser, tagRouter);
+  app.use('/garden', requireCurrentUser, gardenRouter);
   app.use('/login', adminLogin);
-  app.use('/plantFamily', plantFamilyRouter);
+  app.use('/plantFamily', requireCurrentUser, plantFamilyRouter);
   app.use('/app/login', frontLogin);
-  app.use('/timeSlots', timeSlotRouter);
-  app.use('/reservation', reservationRouter);
+  app.use('/timeSlots', requireCurrentUser, timeSlotRouter);
+  app.use('/reservation', requireCurrentUser, reservationRouter);
 };
