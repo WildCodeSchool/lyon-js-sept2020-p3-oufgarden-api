@@ -1,6 +1,6 @@
 // const Joi = require('joi');
 const db = require('../db');
-const { RecordNotFoundError, ValidationError } = require('../error-types');
+// const { RecordNotFoundError, ValidationError } = require('../error-types');
 // const definedAttributesToSqlSet = require('../helpers/definedAttributesToSQLSet.js');
 
 // this function checks is a tag with the same name already exists
@@ -23,7 +23,7 @@ const getReservations = async () => {
 
   const newData = reservationData.map((reservation) => {
     let newReservation = { ...reservation };
-    for (let i = 0; i < currentReservations.length; i++) {
+    for (let i = 0; i < currentReservations.length; i += 1) {
       if (currentReservations[i].garden_id === reservation.garden_id) {
         newReservation = {
           ...newReservation,

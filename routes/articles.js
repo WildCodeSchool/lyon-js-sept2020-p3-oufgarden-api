@@ -1,6 +1,8 @@
 const articleRouter = require('express').Router();
 const asyncHandler = require('express-async-handler');
 const requireIsAdmin = require('../middlewares/requireAdmin');
+// const requireCurrentUser = require('../middlewares/requireCurrentUser');
+const extractCurrentUser = require('../middlewares/extractCurrentUser');
 const {
   handleGetArticles,
   handleGetOneArticle,
@@ -10,7 +12,7 @@ const {
 } = require('../controllers/articles');
 const mainUploadImage = require('../middlewares/handleImageUpload');
 
-articleRouter.get('/', asyncHandler(handleGetArticles));
+articleRouter.get('/', extractCurrentUser, asyncHandler(handleGetArticles));
 articleRouter.get('/:id', asyncHandler(handleGetOneArticle));
 articleRouter.post(
   '/',
