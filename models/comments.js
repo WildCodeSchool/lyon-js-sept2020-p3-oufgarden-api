@@ -51,7 +51,7 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
     user_id: forUpdate
       ? Joi.number().integer()
       : Joi.number().integer().required(),
-    parent_comment_id: Joi.number().integer(),
+    parent_comment_id: Joi.number().integer().allow(null),
   });
 
   const { error } = schema.validate(attributes, {
