@@ -1,5 +1,6 @@
 const {
   getReservations,
+  createReservation,
   /*  createReservation, */
   // getOneTag,
   // createTag,
@@ -15,11 +16,16 @@ module.exports.handleGetReservations = async (req, res) => {
 module.exports.handleCreateReservation = async (req, res) => {
   console.log(req.body);
   console.log(req.currentUser);
-  const data = { user_id: req.currentUser.id };
-  /* const { name } = req.body; */
-  /* const data = await createReservation({
-    name,
-  }); */
+  const { garden_id, time_slot_id, reservation_date } = req.body;
+  const { id } = req.currentUser;
+
+  const data = await createReservation({
+    user_id: id,
+    garden_id,
+    time_slot_id,
+    date: reservation_date,
+  });
+
   return res.status(201).send(data);
 };
 
