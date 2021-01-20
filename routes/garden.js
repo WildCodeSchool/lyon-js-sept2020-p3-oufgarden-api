@@ -4,6 +4,7 @@ const extractCurrentUser = require('../middlewares/extractCurrentUser');
 const {
   handleGetGarden,
   handleGetZonesForOneGarden,
+  handleGetActionFeedForOneZone,
   handleGetOneGarden,
   handleCreateGarden,
   handleUpdateGarden,
@@ -17,7 +18,7 @@ gardenRouter.get('/:id', asyncHandler(handleGetOneGarden));
 gardenRouter.get('/:id/zones', asyncHandler(handleGetZonesForOneGarden));
 gardenRouter.get(
   '/:gardenId/zones/:zoneId/actionFeed',
-  asyncHandler(handleGetOneGarden)
+  asyncHandler(handleGetActionFeedForOneZone)
 );
 
 gardenRouter.post('/', uploadImg, asyncHandler(handleCreateGarden));

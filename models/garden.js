@@ -1,3 +1,4 @@
+const dayjs = require('dayjs');
 const Joi = require('joi');
 
 const db = require('../db');
@@ -88,6 +89,11 @@ const getGarden = async (userId) => {
 
 const getZonesForOneGarden = async (gardenId) => {
   return db.query('SELECT * from zone WHERE garden_id=?', [gardenId]);
+};
+
+const getActionFeedForOneZone = async (gardenId, zoneId) => {
+  const limitDate = dayjs().format('YYYY-MM-DD HH:mm:ss');
+  return db.query('SELECT * from zoneToActionToUser WHERE zoneId=', [zoneId]);
 };
 
 // removing a garden must remove the connected address, zones, etc | everything is automatic thanks to cascade deleting, except the address //

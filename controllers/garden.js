@@ -2,6 +2,7 @@ const {
   getGarden,
   getOneGarden,
   getZonesForOneGarden,
+  getActionFeedForOneZone,
   createGarden,
   updateGarden,
   removeGarden,
@@ -21,6 +22,14 @@ module.exports.handleGetGarden = async (req, res) => {
 
 module.exports.handleGetZonesForOneGarden = async (req, res) => {
   const rawData = await getZonesForOneGarden(req.params.id);
+  return res.status(200).send(rawData);
+};
+
+module.exports.handleGetActionFeedForOneZone = async (req, res) => {
+  const rawData = await getActionFeedForOneZone(
+    req.params.gardenId,
+    req.params.zoneId
+  );
   return res.status(200).send(rawData);
 };
 
