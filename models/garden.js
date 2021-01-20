@@ -1,7 +1,8 @@
 const dayjs = require('dayjs');
 const Joi = require('joi');
-var utc = require('dayjs/plugin/utc'); // dependent on utc plugin
-var timezone = require('dayjs/plugin/timezone');
+const utc = require('dayjs/plugin/utc'); // dependent on utc plugin
+const timezone = require('dayjs/plugin/timezone');
+
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -96,8 +97,6 @@ const getZonesForOneGarden = async (gardenId) => {
 };
 
 const getActionFeedForOneZone = async (zoneId) => {
-  // const now = dayjs();
-  // console.log(now.$d);
   const limitDate = dayjs().tz('Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
   console.log(limitDate);
   const newLimitDate = dayjs(limitDate)
@@ -107,6 +106,49 @@ const getActionFeedForOneZone = async (zoneId) => {
     'SELECT * from zoneToActionToUser WHERE zone_id=? AND date > ?',
     [zoneId, newLimitDate]
   );
+};
+
+const validateActionFeed = async (
+  attributes,
+  options = { udpatedRessourceId: null }
+) => {
+  const { udpatedRessourceId } = options;
+  const forUpdate = !!udpatedRessourceId;
+  // creating schema for validation by Joi
+  const schema = Joi.object().keys({
+    action_id: forUpdate
+      ? Joi.number().integer()
+      : Joi.number().integer().required(),
+    user_id: forUpdate
+      ? Joi.number().integer()
+      : Joi.number().integer().required(),
+    zone_id: forUpdate
+      ? Joi.number().integer()
+      : Joi.number().integer().required(),
+    date: forUpdate ? Joi.date() : Joi.date().required(),
+    description: Joi.string().allow('').allow(null),
+  });
+
+  const { error } = schema.validate(attributes, {
+    abortEarly: false,
+  });
+  if (error) throw new ValidationError(error.details);
+};
+
+const postActionFeedForOneZone = async (newAttributes) => {
+  console.log(newAttributes);
+  await validateActionFeed(newAttributes);
+  const { zone_id } = newAttributes;
+
+  return db
+    .query(
+      `INSERT INTO zoneToActionToUser SET ${definedAttributesToSqlSet(
+        newAttributes
+      )}`,
+      newAttributes
+    )
+    .then(() => getActionFeedForOneZone(zone_id))
+    .catch(() => false);
 };
 
 // removing a garden must remove the connected address, zones, etc | everything is automatic thanks to cascade deleting, except the address //
@@ -229,7 +271,6 @@ const validateZoneDetailsArray = async (
 };
 
 const createZonesForGardenId = async (gardenId, zone_details) => {
-  // ajouter une validation des données !
   const zoneDataValidation = await validateZoneDetailsArray(zone_details);
 
   let valuePairsString = '';
@@ -328,4 +369,5 @@ module.exports = {
   linkZoneToPlantFamily,
   getZonesForOneGarden,
   getActionFeedForOneZone,
+  postActionFeedForOneZone,
 };

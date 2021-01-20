@@ -3,6 +3,7 @@ const {
   getOneGarden,
   getZonesForOneGarden,
   getActionFeedForOneZone,
+  postActionFeedForOneZone,
   createGarden,
   updateGarden,
   removeGarden,
@@ -32,6 +33,19 @@ module.exports.handleGetActionFeedForOneZone = async (req, res) => {
 
 module.exports.handleGetOneGarden = async (req, res) => {
   res.send(await getOneGarden(req.params.id));
+};
+
+module.exports.handlePostActionFeedForOneZone = async (req, res) => {
+  const { date, description, action_id } = req.body;
+  const actionData = {
+    date,
+    description,
+    action_id,
+    user_id: req.currentUser.id,
+    zone_id: req.params.zoneId,
+  };
+  const rawData = await postActionFeedForOneZone(actionData);
+  return res.status(200).send(rawData);
 };
 
 module.exports.handleCreateGarden = async (req, res) => {
