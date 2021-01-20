@@ -26,10 +26,7 @@ module.exports.handleGetZonesForOneGarden = async (req, res) => {
 };
 
 module.exports.handleGetActionFeedForOneZone = async (req, res) => {
-  const rawData = await getActionFeedForOneZone(
-    req.params.gardenId,
-    req.params.zoneId
-  );
+  const rawData = await getActionFeedForOneZone(req.params.zoneId);
   return res.status(200).send(rawData);
 };
 

@@ -1,5 +1,9 @@
 const dayjs = require('dayjs');
 const Joi = require('joi');
+var utc = require('dayjs/plugin/utc'); // dependent on utc plugin
+var timezone = require('dayjs/plugin/timezone');
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const db = require('../db');
 const { RecordNotFoundError, ValidationError } = require('../error-types');
@@ -91,9 +95,18 @@ const getZonesForOneGarden = async (gardenId) => {
   return db.query('SELECT * from zone WHERE garden_id=?', [gardenId]);
 };
 
-const getActionFeedForOneZone = async (gardenId, zoneId) => {
-  const limitDate = dayjs().format('YYYY-MM-DD HH:mm:ss');
-  return db.query('SELECT * from zoneToActionToUser WHERE zoneId=', [zoneId]);
+const getActionFeedForOneZone = async (zoneId) => {
+  // const now = dayjs();
+  // console.log(now.$d);
+  const limitDate = dayjs().tz('Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
+  console.log(limitDate);
+  const newLimitDate = dayjs(limitDate)
+    .subtract(7, 'days')
+    .format('YYYY-MM-DD HH:mm:ss');
+  return db.query(
+    'SELECT * from zoneToActionToUser WHERE zone_id=? AND date > ?',
+    [zoneId, newLimitDate]
+  );
 };
 
 // removing a garden must remove the connected address, zones, etc | everything is automatic thanks to cascade deleting, except the address //
@@ -314,4 +327,5 @@ module.exports = {
   createZonesForGardenId,
   linkZoneToPlantFamily,
   getZonesForOneGarden,
+  getActionFeedForOneZone,
 };
