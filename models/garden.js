@@ -86,7 +86,11 @@ const getGarden = async (userId) => {
   return db.query('SELECT * FROM garden');
 };
 
-// removing a garden must remove the connected address, zones, etc | everything is automativ thanks to cascade deleting, except the address //////////////////////////////
+const getZonesForOneGarden = async (gardenId) => {
+  return db.query('SELECT * from zone WHERE garden_id=?', [gardenId]);
+};
+
+// removing a garden must remove the connected address, zones, etc | everything is automatic thanks to cascade deleting, except the address //
 const removeGarden = async (removedGardenId, failIfNotFound = true) => {
   console.log(removedGardenId);
   const removedAddressId = await db
@@ -303,4 +307,5 @@ module.exports = {
   getOneAddress,
   createZonesForGardenId,
   linkZoneToPlantFamily,
+  getZonesForOneGarden,
 };
