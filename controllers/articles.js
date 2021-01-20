@@ -14,10 +14,6 @@ module.exports.handleGetArticles = async (req, res) => {
     const rawData = await getArticles();
     return res.status(200).send(rawData);
   }
-  // extraire garden id + methode getFeed(gardenArray);
-  // const gardenIdArray = req.currentUser.garden_id_concat
-  //   .split(',')
-  //   .map((number) => +number);
   const rawData = await getFeed(req.currentUser.garden_id_concat);
   return res.status(200).send(rawData);
 };
