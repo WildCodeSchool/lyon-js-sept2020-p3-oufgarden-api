@@ -25,12 +25,12 @@ module.exports.handleGetOneGarden = async (req, res) => {
 module.exports.handleCreateGarden = async (req, res) => {
   let picture;
   let map;
-  if (!req.files.path) {
+  if (!req.files.gardenPicture) {
     picture = null;
   } else {
     picture = req.files.gardenPicture[0].path;
   }
-  if (!req.files.path) {
+  if (!req.files.zonePicture) {
     picture = null;
   } else {
     map = req.files.zonePicture[0].path;
