@@ -23,7 +23,7 @@ module.exports = (app) => {
   app.use('/login', adminLogin);
   app.use('/plantFamily', requireCurrentUser, plantFamilyRouter);
   app.use('/app/login', frontLogin);
-  app.use('/comments', commentRouter);
+  app.use('/comments', requireCurrentUser, commentRouter);
   app.use('/timeSlots', requireCurrentUser, timeSlotRouter);
   app.use('/reservation', requireCurrentUser, reservationRouter);
 };

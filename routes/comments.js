@@ -1,5 +1,6 @@
 const commentRouter = require('express').Router();
 const asyncHandler = require('express-async-handler');
+const extractCurrentUser = require('../middlewares/extractCurrentUser');
 
 const {
   handleGetComments,
@@ -9,11 +10,23 @@ const {
   handleDeleteComment,
 } = require('../controllers/comments');
 
-commentRouter.get('/', asyncHandler(handleGetComments));
-commentRouter.get('/:id', asyncHandler(handleGetOneComment));
-commentRouter.post('/', asyncHandler(handleCreateComment));
-commentRouter.put('/:id', asyncHandler(handleUpdateComment));
-commentRouter.delete('/:id', asyncHandler(handleDeleteComment));
+commentRouter.get('/', extractCurrentUser, asyncHandler(handleGetComments));
+commentRouter.get(
+  '/:id',
+  extractCurrentUser,
+  asyncHandler(handleGetOneComment)
+);
+commentRouter.post('/', extractCurrentUser, asyncHandler(handleCreateComment));
+commentRouter.put(
+  '/:id',
+  extractCurrentUser,
+  asyncHandler(handleUpdateComment)
+);
+commentRouter.delete(
+  '/:id',
+  extractCurrentUser,
+  asyncHandler(handleDeleteComment)
+);
 // you will need to be admin to delete a comment
 
 module.exports = { commentRouter };

@@ -17,8 +17,8 @@ module.exports.handleGetOneComment = async (req, res) => {
 };
 
 module.exports.handleCreateComment = async (req, res) => {
-  // tagsArray is an array with the IDs of all the tags related to this article
-  const { message, article_id, user_id, parent_comment_id } = req.body;
+  const { message, article_id, parent_comment_id } = req.body;
+  const user_id = req.currentUser.id;
   const data = await createComment({
     message,
     article_id,
@@ -31,6 +31,7 @@ module.exports.handleCreateComment = async (req, res) => {
 
 module.exports.handleUpdateComment = async (req, res) => {
   const { message } = req.body; // only the message can be updated in a comment
+  // still have to make sure we will use a different route and thus will have access to a req.params.id
   const data = await updateComment(req.params.id, {
     message,
   });
