@@ -14,8 +14,6 @@ module.exports.handleGetReservations = async (req, res) => {
 };
 
 module.exports.handleCreateReservation = async (req, res) => {
-  console.log(req.body);
-  console.log(req.currentUser);
   const { garden_id, time_slot_id, reservation_date } = req.body;
   const { id } = req.currentUser;
 

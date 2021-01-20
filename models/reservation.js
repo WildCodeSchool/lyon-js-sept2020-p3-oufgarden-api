@@ -41,14 +41,19 @@ const getReservations = async () => {
 
 const createReservation = async (newAttributes) => {
   /*  await validate(newAttributes); */
-  return db
+  const res = await db
     .query(
       `INSERT INTO reservation SET ${definedAttributesToSqlSet(newAttributes)}`,
       newAttributes
     )
-    .then(
-      /* ((res) => getOneTag(res.insertId)); */ (res) => res.sendStatus(200)
-    );
+    .catch((err) => {
+      console.log(err);
+      return false;
+    });
+  if (!res) {
+    return false;
+  }
+  return { id: res.insertId };
 };
 
 // const validate = async (attributes, options = { udpatedRessourceId: null }) => {
