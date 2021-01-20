@@ -1,3 +1,4 @@
+// const { removeArticle } = require('../models/articles.js');
 const {
   getComments,
   getOneComment,
@@ -18,12 +19,13 @@ module.exports.handleGetOneComment = async (req, res) => {
 
 module.exports.handleCreateComment = async (req, res) => {
   // tagsArray is an array with the IDs of all the tags related to this article
-  const { message, article_id, user_id, parent_comment_id } = req.body;
+  const { message, article_id } = req.body;
+  console.log(req.currentUser);
   const data = await createComment({
     message,
     article_id,
-    user_id,
-    parent_comment_id,
+    user_id: req.currentUser.id,
+    parent_comment_id: null,
   });
 
   return res.status(201).send(data);
