@@ -1,6 +1,8 @@
 const articleRouter = require('express').Router();
 const asyncHandler = require('express-async-handler');
 const requireIsAdmin = require('../middlewares/requireAdmin');
+// const requireCurrentUser = require('../middlewares/requireCurrentUser');
+const extractCurrentUser = require('../middlewares/extractCurrentUser');
 const {
   handleGetArticles,
   handleGetOneArticle,
@@ -13,12 +15,28 @@ const {
 } = require('../controllers/articles');
 const mainUploadImage = require('../middlewares/handleImageUpload');
 
-articleRouter.get('/favorites', asyncHandler(handleGetFavorites));
-articleRouter.post('/favorites', asyncHandler(handleCreateFavorite));
-articleRouter.delete('/favorites', asyncHandler(handleDeleteFavorite));
+articleRouter.get(
+  '/favorites',
+  extractCurrentUser,
+  asyncHandler(handleGetFavorites)
+);
+articleRouter.post(
+  '/favorites',
+  extractCurrentUser,
+  asyncHandler(handleCreateFavorite)
+);
+articleRouter.delete(
+  '/favorites',
+  extractCurrentUser,
+  asyncHandler(handleDeleteFavorite)
+);
 
-articleRouter.get('/', asyncHandler(handleGetArticles));
-articleRouter.get('/:id', asyncHandler(handleGetOneArticle));
+articleRouter.get('/', extractCurrentUser, asyncHandler(handleGetArticles));
+articleRouter.get(
+  '/:id',
+  extractCurrentUser,
+  asyncHandler(handleGetOneArticle)
+);
 articleRouter.post(
   '/',
   mainUploadImage,

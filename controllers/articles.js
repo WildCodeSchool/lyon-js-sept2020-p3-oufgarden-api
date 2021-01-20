@@ -7,18 +7,28 @@ const {
   updateArticle,
   removeArticle,
   getFavorites,
+  getAllFavorites,
   createFavorite,
   removeFavorite,
+  getFeed,
 } = require('../models/articles.js');
 
 module.exports.handleGetArticles = async (req, res) => {
-  const rawData = await getArticles();
+  if (req.currentUser.is_admin === 1) {
+    const rawData = await getArticles();
+    return res.status(200).send(rawData);
+  }
+  const rawData = await getFeed(req.currentUser.garden_id_concat);
   return res.status(200).send(rawData);
 };
 
 module.exports.handleGetFavorites = async (req, res) => {
-  const { user_id } = req.query;
-  const rawData = await getFavorites(user_id);
+  // const { user_id } = req.query; user_id sould not come frome the req.query and should be of the current user
+  if (req.currentUser.is_admin === 1) {
+    const rawData = await getAllFavorites();
+    return res.status(200).send(rawData);
+  }
+  const rawData = await getFavorites(req.currentUser.id);
   return res.status(200).send(rawData);
 };
 

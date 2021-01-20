@@ -1,12 +1,12 @@
 const router = require('express').Router();
-const asyncHandler = require('express-async-handler');
-const currentUserController = require('../controllers/currentUser');
-const requireCurrentUser = require('../middlewares/requireCurrentUser');
+// const asyncHandler = require('express-async-handler');
+// const currentUserController = require('../controllers/currentUser');
+const extractCurrentUser = require('../middlewares/extractCurrentUser');
 
 router.get(
   '/',
-  requireCurrentUser,
-  asyncHandler(currentUserController.handleGetProfile)
+  extractCurrentUser
+  // asyncHandler(currentUserController.handleGetProfile)
 );
 
 module.exports = router;

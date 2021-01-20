@@ -11,16 +11,23 @@ const getArticles = async () => {
   return db.query('SELECT * FROM article ORDER BY created_at DESC');
 };
 
-const getFavorites = async (user_id) => {
-  if (user_id) {
-    return db.query(
-      'SELECT fav.*, article.title AS article_title, user.firstname AS user_firstname, user.lastname AS user_lastname FROM favorite AS fav INNER JOIN article ON fav.article_id = article.id INNER JOIN user ON fav.user_id = user.id WHERE fav.user_id=? ORDER BY article_id ASC',
-      [user_id]
-    );
-  }
-
+const getAllFavorites = async () => {
   return db.query(
     'SELECT fav.*, article.title AS article_title, user.firstname AS user_firstname, user.lastname AS user_lastname FROM favorite AS fav INNER JOIN article ON fav.article_id = article.id INNER JOIN user ON fav.user_id = user.id ORDER BY article_id ASC'
+  );
+};
+
+const getFavorites = async (user_id) => {
+  return db.query(
+    'SELECT fav.*, article.title AS article_title, user.firstname AS user_firstname, user.lastname AS user_lastname FROM favorite AS fav INNER JOIN article ON fav.article_id = article.id INNER JOIN user ON fav.user_id = user.id WHERE fav.user_id=? ORDER BY article_id ASC',
+    [user_id]
+  );
+};
+
+const getFeed = async (gardenIdConcat) => {
+  return db.query(
+    'SELECT A.* FROM article AS A INNER JOIN articleToGarden AS ATG ON A.id = ATG.article_id WHERE ATG.garden_id IN (?) ORDER BY created_at DESC',
+    [gardenIdConcat]
   );
 };
 
@@ -303,6 +310,7 @@ const removeFavorite = async (
 
 module.exports = {
   getArticles,
+  getAllFavorites,
   getOneArticle,
   createArticle,
   linkArticleToTags,
@@ -312,4 +320,5 @@ module.exports = {
   getFavorites,
   createFavorite,
   removeFavorite,
+  getFeed,
 };
