@@ -56,6 +56,14 @@ const createReservation = async (newAttributes) => {
   return { id: res.insertId };
 };
 
+const getGardenReservation = async (id) => {
+  console.log(db.query('SELECT * FROM reservation WHERE garden_id = ?', [id]));
+  return db.query(
+    'SELECT R.*, U.firstname, U.lastname FROM reservation as R  JOIN user AS U ON R.user_id = U.id WHERE garden_id = ?',
+    [id]
+  );
+};
+
 // const validate = async (attributes, options = { udpatedRessourceId: null }) => {
 //   const { udpatedRessourceId } = options;
 //   const forUpdate = !!udpatedRessourceId;
@@ -113,6 +121,7 @@ const createReservation = async (newAttributes) => {
 module.exports = {
   getReservations,
   createReservation,
+  getGardenReservation,
   //   getOneTag,
   //   createTag,
   //   updateTag,
