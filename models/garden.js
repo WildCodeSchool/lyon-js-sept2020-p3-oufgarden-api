@@ -93,7 +93,10 @@ const getGarden = async (userId) => {
 };
 
 const getZonesForOneGarden = async (gardenId) => {
-  return db.query('SELECT * from zone WHERE garden_id=?', [gardenId]);
+  return db.query(
+    'SELECT zone.*, GROUP_CONCAT(ZTPF.plantFamily_id) AS plantFamily_concat_string FROM zone LEFT JOIN zoneToPlantFamily AS ZTPF ON ZTPF.zone_id = zone.id WHERE garden_id=? GROUP BY zone.id',
+    [gardenId]
+  );
 };
 
 const getActionFeedForOneZone = async (zoneId) => {
@@ -181,7 +184,10 @@ const removeGarden = async (removedGardenId, failIfNotFound = true) => {
 };
 
 const getOneGarden = async (id, failIfNotFound = true) => {
-  const rows = await db.query('SELECT * FROM garden WHERE id = ?', [id]);
+  const rows = await db.query(
+    'SELECT garden.*, address.* FROM garden LEFT JOIN address ON address.id = garden.address_id WHERE garden.id = ?',
+    [id]
+  );
   if (rows.length) {
     return rows[0];
   }
@@ -201,6 +207,9 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
       ? Joi.string().min(0).max(150)
       : Joi.string().min(0).max(150).required(),
     exposition: Joi.string().min(0).max(150),
+    max_users: forUpdate
+      ? Joi.number().integer().min(0).max(15)
+      : Joi.number().integer().min(0).max(15).required(),
     address_id: forUpdate
       ? Joi.number().integer()
       : Joi.number().integer().required(),

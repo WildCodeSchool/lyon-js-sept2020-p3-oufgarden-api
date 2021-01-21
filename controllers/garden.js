@@ -37,6 +37,7 @@ module.exports.handleGetOneGarden = async (req, res) => {
 
 module.exports.handlePostActionFeedForOneZone = async (req, res) => {
   const { date, description, action_id } = req.body;
+  // we can get the zone_id from the body as well
   const actionData = {
     date,
     description,
@@ -51,12 +52,12 @@ module.exports.handlePostActionFeedForOneZone = async (req, res) => {
 module.exports.handleCreateGarden = async (req, res) => {
   let picture;
   let map;
-  if (!req.files.path) {
+  if (!req.files.gardenPicture) {
     picture = null;
   } else {
     picture = req.files.gardenPicture[0].path;
   }
-  if (!req.files.path) {
+  if (!req.files.zonePicture) {
     picture = null;
   } else {
     map = req.files.zonePicture[0].path;
@@ -69,8 +70,8 @@ module.exports.handleCreateGarden = async (req, res) => {
     exposition,
     zone_quantity,
     zone_details,
+    max_users,
   } = JSON.parse(req.body.newData);
-  // Start to manage file upload here
 
   const dataAddress = await createAddress(address);
   const createdAddressId = dataAddress.id;
@@ -81,6 +82,7 @@ module.exports.handleCreateGarden = async (req, res) => {
     name,
     description,
     exposition,
+    max_users: +max_users,
     zone_quantity: +zone_quantity,
     zone_details,
     picture,
@@ -125,6 +127,7 @@ module.exports.handleCreateGarden = async (req, res) => {
 };
 
 module.exports.handleUpdateGarden = async (req, res) => {
+  // change method here!
   const { name } = req.body;
   const data = await updateGarden(req.params.id, {
     name,
