@@ -57,9 +57,8 @@ const createReservation = async (newAttributes) => {
 };
 
 const getGardenReservation = async (id) => {
-  console.log(db.query('SELECT * FROM reservation WHERE garden_id = ?', [id]));
   return db.query(
-    'SELECT R.*, U.firstname, U.lastname FROM reservation as R  JOIN user AS U ON R.user_id = U.id WHERE garden_id = ?',
+    'SELECT R.*, U.firstname, U.lastname, TS.start_time, TS.end_time FROM reservation as R  JOIN user AS U ON R.user_id = U.id JOIN time_slot as TS ON R.time_slot_id=TS.id WHERE garden_id = ?',
     [id]
   );
 };
