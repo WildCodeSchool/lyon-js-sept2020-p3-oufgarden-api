@@ -3,6 +3,7 @@ const argon2 = require('argon2');
 const db = require('../db');
 const { RecordNotFoundError, ValidationError } = require('../error-types');
 const definedAttributesToSqlSet = require('../helpers/definedAttributesToSQLSet.js');
+const definedAttributesToSQLSetNoNull = require('../helpers/definedAttributesToSQLSetNoNull.js');
 
 // On check ici si l'email existe déjà
 const emailAlreadyExists = async (email) => {
@@ -26,7 +27,7 @@ const findByEmail = async (email, failIfNotFound = true) => {
 // get user by id
 const getOneUser = async (id, failIfNotFound = true) => {
   const rows = await db.query(
-    'SELECT user.*, GROUP_CONCAT(userToGarden.garden_id) as garden_id_concat FROM user INNER JOIN userToGarden ON userToGarden.user_id=user.id WHERE id = ? GROUP BY user.id ;',
+    'SELECT user.*, GROUP_CONCAT(userToGarden.garden_id) as garden_id_concat FROM user LEFT JOIN userToGarden ON userToGarden.user_id=user.id WHERE id = ? GROUP BY user.id ;',
     [id]
   );
   if (rows.length) {
@@ -58,6 +59,7 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
   const schema = Joi.object().keys({
     birthdate: Joi.date(),
     membership_start: Joi.date(),
+    picture_url: Joi.string().min(0).max(150).allow('').allow(null),
     user_creation: forUpdate ? Joi.date() : Joi.date().required(),
     phone: Joi.string().length(10).allow('').allow(null),
     gender_marker: forUpdate
@@ -94,6 +96,7 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
   if (attributes.email) {
     let shouldThrow = false;
     if (forUpdate) {
+      console.log(udpatedRessourceId);
       const toUpdate = await getOneUser(udpatedRessourceId);
       shouldThrow =
         !(toUpdate.email === attributes.email) &&
@@ -102,9 +105,7 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
       shouldThrow = await emailAlreadyExists(attributes.email);
     }
     if (shouldThrow) {
-      throw new ValidationError([
-        { message: 'email_taken', path: ['email'], type: 'unique' },
-      ]);
+      throw new ValidationError(error.details);
     }
   }
 };
@@ -131,22 +132,25 @@ const linkUserToGarden = async (userId, gardenArray, forUpdate = false) => {
   if (forUpdate) {
     await db.query('DELETE FROM userToGarden WHERE user_id = ?', [userId]);
   }
-
-  if (gardenArray.length > 0) {
-    // const gardenValidation = await validateTags(gardenArray);
-    let valuePairsString = '';
-    gardenArray.forEach((garden) => {
-      valuePairsString += `(${+userId}, ${+garden}),`; // + to convert it to number or make sure it's a number
-    });
-    valuePairsString = valuePairsString.slice(0, -1); // removing the last comma
-
-    const result = await db
-      .query(
-        `INSERT INTO userToGarden (user_id, garden_id) VALUES ${valuePairsString};`
-      )
-      .catch(() => {
-        return false;
+  // to fix map problem on member creation put a if with !gardenArray
+  let valuePairsString = '';
+  let result;
+  if (gardenArray !== undefined) {
+    if (gardenArray.length > 0) {
+      // const gardenValidation = await validateTags(gardenArray);
+      valuePairsString = '';
+      gardenArray.forEach((garden) => {
+        valuePairsString += `(${+userId}, ${+garden}),`; // + to convert it to number or make sure it's a number
       });
+      valuePairsString = valuePairsString.slice(0, -1); // removing the last comma
+      result = await db
+        .query(
+          `INSERT INTO userToGarden (user_id, garden_id) VALUES ${valuePairsString};`
+        )
+        .catch(() => {
+          return false;
+        });
+    }
 
     if (/* !gardenValidation || */ result === false) {
       throw new ValidationError([
@@ -168,7 +172,7 @@ const verifyPassword = async (user, plainPassword) => {
 // get all users
 const getUsers = async () => {
   return db.query(
-    'SELECT user.*, GROUP_CONCAT(userToGarden.garden_id) AS garden_id_concat FROM user INNER JOIN userToGarden ON userToGarden.user_id=user.id GROUP BY user.id ;'
+    'SELECT user.*, GROUP_CONCAT(userToGarden.garden_id) AS garden_id_concat FROM user LEFT JOIN userToGarden ON userToGarden.user_id=user.id GROUP BY user.id ;'
   );
 };
 
@@ -182,7 +186,7 @@ const updateUser = async (id, newAttributes) => {
     newObj = { ...newAttributes, password };
   }
 
-  const namedAttributes = definedAttributesToSqlSet(newObj);
+  const namedAttributes = definedAttributesToSQLSetNoNull(newObj);
 
   return db
     .query(`UPDATE user SET ${namedAttributes} WHERE id = :id`, {

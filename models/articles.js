@@ -11,6 +11,13 @@ const getArticles = async () => {
   return db.query('SELECT * FROM article ORDER BY created_at DESC');
 };
 
+const getFeed = async (gardenIdConcat) => {
+  return db.query(
+    'SELECT A.* FROM article AS A INNER JOIN articleToGarden AS ATG ON A.id = ATG.article_id WHERE ATG.garden_id IN (?) ORDER BY created_at DESC',
+    [gardenIdConcat]
+  );
+};
+
 const getOneArticle = async (id, failIfNotFound = true) => {
   const rows = await db.query('select * from article where id = ?', [id]);
   const tagsRows = await db.query(
@@ -64,7 +71,7 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
       : Joi.string().required(),
     url: forUpdate
       ? Joi.string().allow('').allow(null)
-      : Joi.string().min(0).max(150).required(),
+      : Joi.string().min(0).max(150).allow(' ').allow(null),
     updated_at: forUpdate ? Joi.date().required() : Joi.any(),
   });
 
@@ -225,4 +232,5 @@ module.exports = {
   linkArticleToGarden,
   updateArticle,
   removeArticle,
+  getFeed,
 };

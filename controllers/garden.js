@@ -10,7 +10,11 @@ const {
 } = require('../models/garden');
 
 module.exports.handleGetGarden = async (req, res) => {
-  const rawData = await getGarden();
+  if (req.currentUser.is_admin === 1) {
+    const rawData = await getGarden();
+    return res.status(200).send(rawData);
+  }
+  const rawData = await getGarden(+req.currentUser.id);
   return res.status(200).send(rawData);
 };
 
@@ -19,34 +23,19 @@ module.exports.handleGetOneGarden = async (req, res) => {
 };
 
 module.exports.handleCreateGarden = async (req, res) => {
-  // exemple de ce qui est envoyé côté back office
-  // {
-  //   address: {
-  //     address_city: ,
-  //     address_street: ,
-  //     address_zipcode: ,
-  //   },
-  //   name: ,
-  //   description: ,
-  //   exposition: ,
-  //   zone_quantity: ,
-  //   zone_details: [
-  //     {
-  //       zone_name: '',
-  //       type: '',
-  //       exposition: '',
-  //       plantFamilyArray: [],
-  //       description: '',
-  //     },
-  //     {
-  //       zone_name: '',
-  //       type: '',
-  //       exposition: '',
-  //       plantFamilyArray: [],
-  //       description: '',
-  //     },
-  //   ],
-  // }
+  let picture;
+  let map;
+  if (!req.files.gardenPicture) {
+    picture = null;
+  } else {
+    picture = req.files.gardenPicture[0].path;
+  }
+  if (!req.files.zonePicture) {
+    picture = null;
+  } else {
+    map = req.files.zonePicture[0].path;
+  }
+
   const {
     address,
     name,
@@ -54,7 +43,8 @@ module.exports.handleCreateGarden = async (req, res) => {
     exposition,
     zone_quantity,
     zone_details,
-  } = req.body;
+  } = JSON.parse(req.body.newData);
+  // Start to manage file upload here
 
   const dataAddress = await createAddress(address);
   const createdAddressId = dataAddress.id;
@@ -67,8 +57,8 @@ module.exports.handleCreateGarden = async (req, res) => {
     exposition,
     zone_quantity: +zone_quantity,
     zone_details,
-    picture: 'testURL',
-    map: 'testURL',
+    picture,
+    map,
   });
   const createdGardenId = dataGarden.id;
 
@@ -89,8 +79,6 @@ module.exports.handleCreateGarden = async (req, res) => {
         plantFamilyArray: [...zone_details[index].plantFamilyArray],
       };
     });
-
-    // [{zoneId: 15, plantFamilyArray: [2,4]}, {zoneId: 16, plantFamilyArray: [5, 6]}]
 
     const insertionStatus = []; // table looking like [true, false, true, true], if the plantFamilyArray is empty, it should just be [null, null, null]
     zoneToPlantFamilyArray.forEach(async (elem) => {
