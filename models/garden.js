@@ -72,6 +72,13 @@ const removeAddress = async (addressId, failIfNotFound = true) => {
   return false;
 };
 
+const removeZonesForOneGarden = async (gardenId) => {
+  const res = await db.query('DELETE FROM zone WHERE garden_id = ?', [
+    gardenId,
+  ]);
+  return true;
+};
+
 // basic functions for garden table //////////////////////////
 // this function checks if a garden with the same name already exists
 const gardenAlreadyExists = async (name) => {
@@ -281,6 +288,8 @@ const validateZoneDetailsArray = async (
 
 const createZonesForGardenId = async (gardenId, zone_details) => {
   const zoneDataValidation = await validateZoneDetailsArray(zone_details);
+  console.log('zone data ok');
+  console.log('gardeId', gardenId);
 
   let valuePairsString = '';
   zone_details.forEach((zone) => {
@@ -357,6 +366,7 @@ const linkZoneToPlantFamily = async (zoneId, plantFamilyArray) => {
 
 const updateGarden = async (id, newAttributes) => {
   await validate(newAttributes, { udpatedRessourceId: id });
+
   const namedAttributes = definedAttributesToSqlSet(newAttributes);
   return db
     .query(`UPDATE garden SET ${namedAttributes} WHERE id = :id`, {
@@ -375,6 +385,7 @@ module.exports = {
   createAddress,
   getOneAddress,
   createZonesForGardenId,
+  removeZonesForOneGarden,
   linkZoneToPlantFamily,
   getZonesForOneGarden,
   getActionFeedForOneZone,
