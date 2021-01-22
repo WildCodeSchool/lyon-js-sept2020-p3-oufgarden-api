@@ -1,6 +1,6 @@
 // const Joi = require('joi');
 const db = require('../db');
-// const { RecordNotFoundError, ValidationError } = require('../error-types');
+/* const { RecordNotFoundError, ValidationError } = require('../error-types'); */
 // const definedAttributesToSqlSet = require('../helpers/definedAttributesToSQLSet.js');
 
 // this function checks is a tag with the same name already exists
