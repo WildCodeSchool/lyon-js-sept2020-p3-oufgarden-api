@@ -23,13 +23,16 @@ const validateAddress = async (
   // creating schema for validation by Joi
   const schema = Joi.object().keys({
     address_street: forUpdate
-      ? Joi.string().min(0).max(150)
+      ? Joi.string().min(0).max(150).allow('').allow(null)
       : Joi.string().min(0).max(150).required(),
     address_city: forUpdate
-      ? Joi.string().min(0).max(150)
+      ? Joi.string().min(0).max(150).allow('').allow(null)
       : Joi.string().min(0).max(150).required(),
     address_zipcode: forUpdate
-      ? Joi.string().regex(/^(?:[0-8]\d|9[0-8])\d{3}$/)
+      ? Joi.string()
+          .regex(/^(?:[0-8]\d|9[0-8])\d{3}$/)
+          .allow('')
+          .allow(null)
       : Joi.string()
           .regex(/^(?:[0-8]\d|9[0-8])\d{3}$/)
           .required(),
@@ -55,6 +58,25 @@ const createAddress = async (address) => {
     )
     .then((res) => getOneAddress(res.insertId))
     .catch(() => false);
+};
+
+const updateAddress = async (id, address) => {
+  const addressAttributes = {
+    street: address.address_street,
+    city: address.address_city,
+    zip_code: address.address_zipcode,
+  };
+
+  await validateAddress(address, { udpatedRessourceId: id });
+
+  const namedAttributes = definedAttributesToSqlSet(addressAttributes);
+
+  return db
+    .query(`UPDATE address SET ${namedAttributes} WHERE id = :id`, {
+      ...addressAttributes,
+      id,
+    })
+    .then(() => getOneAddress(id));
 };
 
 const removeAddress = async (addressId, failIfNotFound = true) => {
@@ -88,7 +110,6 @@ const getGarden = async (userId) => {
 
 // removing a garden must remove the connected address, zones, etc | everything is automativ thanks to cascade deleting, except the address //////////////////////////////
 const removeGarden = async (removedGardenId, failIfNotFound = true) => {
-  console.log(removedGardenId);
   const removedAddressId = await db
     .query('SELECT address_id FROM garden WHERE id = ?', [removedGardenId])
     .catch(() => false);
@@ -119,7 +140,7 @@ const getOneGarden = async (id, failIfNotFound = true) => {
   const rows = await db.query('SELECT * FROM garden WHERE id = ?', [id]);
   if (rows.length) {
     const address = await getOneAddress(rows[0].address_id);
-    return { ...rows[0], address: address };
+    return { ...rows[0], address };
   }
   if (failIfNotFound) throw new RecordNotFoundError('garden', id);
   return null;
@@ -288,6 +309,7 @@ const linkZoneToPlantFamily = async (zoneId, plantFamilyArray) => {
 const updateGarden = async (id, newAttributes) => {
   await validate(newAttributes, { udpatedRessourceId: id });
   const namedAttributes = definedAttributesToSqlSet(newAttributes);
+
   return db
     .query(`UPDATE garden SET ${namedAttributes} WHERE id = :id`, {
       ...newAttributes,
@@ -304,6 +326,7 @@ module.exports = {
   removeGarden,
   createAddress,
   getOneAddress,
+  updateAddress,
   createZonesForGardenId,
   linkZoneToPlantFamily,
 };

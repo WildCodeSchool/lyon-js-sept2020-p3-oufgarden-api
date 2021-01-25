@@ -5,6 +5,7 @@ const {
   updateGarden,
   removeGarden,
   createAddress,
+  updateAddress,
   createZonesForGardenId,
   linkZoneToPlantFamily,
 } = require('../models/garden');
@@ -101,11 +102,47 @@ module.exports.handleCreateGarden = async (req, res) => {
 };
 
 module.exports.handleUpdateGarden = async (req, res) => {
-  const { name } = req.body;
-  const data = await updateGarden(req.params.id, {
+  let picture;
+  let map;
+  if (!req.files.gardenPicture) {
+    picture = undefined;
+  } else {
+    picture = req.files.gardenPicture[0].path;
+  }
+  if (!req.files.zonePicture) {
+    picture = undefined;
+  } else {
+    map = req.files.zonePicture[0].path;
+  }
+
+  const {
+    address,
     name,
+    description,
+    exposition,
+    zone_quantity,
+    max_users,
+  } = JSON.parse(req.body.newData);
+  // Start to manage file upload here
+
+  const { address_id, ...rest } = address;
+  const dataAddress = await updateAddress(address.address_id, rest);
+  const updatedAddressId = dataAddress.id;
+  // we don't *absolutely* need to remove the address if creating the garden fails, there will simply be a useless address in the table - it does not have foreign keys pointing to anything
+
+  const dataGarden = await updateGarden(req.params.id, {
+    address_id: updatedAddressId,
+    name,
+    description,
+    exposition,
+    zone_quantity: +zone_quantity,
+    max_users: +max_users,
+    picture,
+    map,
   });
-  return res.status(200).send(data);
+  const createdGardenId = dataGarden.id;
+
+  return res.status(200).send(dataGarden);
 };
 
 module.exports.handleDeleteGarden = async (req, res) => {
