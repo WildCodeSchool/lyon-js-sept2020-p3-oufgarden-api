@@ -23,7 +23,6 @@ module.exports.handleGetArticles = async (req, res) => {
 };
 
 module.exports.handleGetFavorites = async (req, res) => {
-  // const { user_id } = req.query; user_id sould not come frome the req.query and should be of the current user
   if (req.currentUser.is_admin === 1) {
     const rawData = await getAllFavorites();
     return res.status(200).send(rawData);
@@ -59,9 +58,9 @@ module.exports.handleCreateArticle = async (req, res) => {
 };
 
 module.exports.handleCreateFavorite = async (req, res) => {
-  const { user_id, article_id } = req.body;
+  const { article_id } = req.body;
   const data = await createFavorite({
-    user_id,
+    user_id: req.currentUser.id,
     article_id,
   });
   return res.status(201).send(data);
