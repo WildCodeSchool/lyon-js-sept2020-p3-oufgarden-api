@@ -1,6 +1,7 @@
 const {
   getReservations,
   createReservation,
+  getGardenReservation,
   /*  createReservation, */
   // getOneTag,
   // createTag,
@@ -27,7 +28,9 @@ module.exports.handleCreateReservation = async (req, res) => {
   return res.status(201).send(data);
 };
 
-//   module.exports.handleGetOneTag = async (req, res) => {
+module.exports.handleGetGardenReservation = async (req, res) => {
+  res.send(await getGardenReservation(req.params.id));
+};
 //     res.send(await getOneTag(req.params.id));
 //   };
 
@@ -42,4 +45,3 @@ module.exports.handleCreateReservation = async (req, res) => {
 //   module.exports.handleDeleteTag = async (req, res) => {
 //     await removeTag(req.params.id);
 //     res.sendStatus(204);
-//   };

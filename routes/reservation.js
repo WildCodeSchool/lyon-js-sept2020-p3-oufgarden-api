@@ -4,6 +4,7 @@ const asyncHandler = require('express-async-handler');
 const {
   handleGetReservations,
   handleCreateReservation,
+  handleGetGardenReservation,
   //   handleGetOneTag,
   //   handleCreateTag,
   //   handleUpdateTag,
@@ -12,7 +13,11 @@ const {
 const extractCurrentUser = require('../middlewares/extractCurrentUser');
 
 reservationRouter.get('/', asyncHandler(handleGetReservations));
-// tagRouter.get('/:id', asyncHandler(handleGetOneTag));
+reservationRouter.get(
+  '/:id',
+  extractCurrentUser,
+  asyncHandler(handleGetGardenReservation)
+);
 reservationRouter.post(
   '/',
   extractCurrentUser,
