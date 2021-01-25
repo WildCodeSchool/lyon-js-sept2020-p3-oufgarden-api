@@ -6,6 +6,7 @@ const {
   handleGetZonesForOneGarden,
   handleGetActionFeedForOneZone,
   handlePostActionFeedForOneZone,
+  handleGetActionFeedForOneGarden,
   handleGetOneGarden,
   handleCreateGarden,
   handleUpdateGarden,
@@ -25,6 +26,11 @@ gardenRouter.get(
   '/:gardenId/zones/:zoneId/actionFeed',
   extractCurrentUser,
   asyncHandler(handleGetActionFeedForOneZone)
+);
+gardenRouter.get(
+  '/:gardenId/actionFeed',
+  extractCurrentUser,
+  asyncHandler(handleGetActionFeedForOneGarden)
 );
 gardenRouter.post(
   '/:gardenId/zones/:zoneId/actionFeed',

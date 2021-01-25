@@ -108,13 +108,25 @@ const getZonesForOneGarden = async (gardenId) => {
 
 const getActionFeedForOneZone = async (zoneId) => {
   const limitDate = dayjs().tz('Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
-  console.log(limitDate);
+
   const newLimitDate = dayjs(limitDate)
     .subtract(7, 'days')
     .format('YYYY-MM-DD HH:mm:ss');
   return db.query(
     'SELECT * from zoneToActionToUser WHERE zone_id=? AND date > ?',
     [zoneId, newLimitDate]
+  );
+};
+
+const getActionFeedForOneGarden = async (gardenId) => {
+  const limitDate = dayjs().tz('Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
+
+  const newLimitDate = dayjs(limitDate)
+    .subtract(7, 'days')
+    .format('YYYY-MM-DD HH:mm:ss');
+  return db.query(
+    'SELECT ZTATU.* FROM zoneToActionToUser AS ZTATU INNER JOIN zone ON ZTATU.zone_id = zone.id WHERE zone.garden_id=? AND ZTATU.date > ?',
+    [gardenId, newLimitDate]
   );
 };
 
@@ -390,4 +402,5 @@ module.exports = {
   getZonesForOneGarden,
   getActionFeedForOneZone,
   postActionFeedForOneZone,
+  getActionFeedForOneGarden,
 };
