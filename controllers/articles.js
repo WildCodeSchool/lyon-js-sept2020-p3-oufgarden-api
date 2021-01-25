@@ -93,8 +93,12 @@ module.exports.handleDeleteArticle = async (req, res) => {
 };
 
 module.exports.handleDeleteFavorite = async (req, res) => {
-  const { user_id, article_id } = req.body;
-  const removed = await removeFavorite({ user_id, article_id });
+  const { article_id } = req.body;
+
+  const removed = await removeFavorite({
+    user_id: req.currentUser.id,
+    article_id,
+  });
   if (!removed) {
     res
       .status(422)
