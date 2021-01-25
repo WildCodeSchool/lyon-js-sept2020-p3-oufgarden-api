@@ -10,7 +10,34 @@ const {
   getZonesForGardenId,
   linkZoneToPlantFamily,
   removeZonesForGardenId,
+  getActionFeedForOneZone,
+  getActionFeedForOneGarden,
+  postActionFeedForOneZone,
 } = require('../models/garden');
+
+module.exports.handleGetActionFeedForOneZone = async (req, res) => {
+  const rawData = await getActionFeedForOneZone(req.params.zoneId);
+  return res.status(200).send(rawData);
+};
+
+module.exports.handleGetActionFeedForOneGarden = async (req, res) => {
+  const rawData = await getActionFeedForOneGarden(req.params.gardenId);
+  return res.status(200).send(rawData);
+};
+
+module.exports.handlePostActionFeedForOneZone = async (req, res) => {
+  const { date, description, action_id } = req.body;
+  // we can get the zone_id from the body as well
+  const actionData = {
+    date,
+    description,
+    action_id,
+    user_id: req.currentUser.id,
+    zone_id: req.params.zoneId,
+  };
+  const rawData = await postActionFeedForOneZone(actionData);
+  return res.status(200).send(rawData);
+};
 
 module.exports.handleGetGarden = async (req, res) => {
   if (req.currentUser.is_admin === 1) {

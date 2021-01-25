@@ -5,15 +5,31 @@ const {
   handleGetGarden,
   handleGetZonesForOneGarden,
   handleUpdateZones,
-  // handleGetActionFeedForOneZone,
-  // handlePostActionFeedForOneZone,
-  // handleGetActionFeedForOneGarden,
+  handleGetActionFeedForOneZone,
+  handlePostActionFeedForOneZone,
+  handleGetActionFeedForOneGarden,
   handleGetOneGarden,
   handleCreateGarden,
   handleUpdateGarden,
   handleDeleteGarden,
 } = require('../controllers/garden');
 const uploadImg = require('../middlewares/handleGardenImageUpload');
+
+gardenRouter.get(
+  '/:gardenId/zones/:zoneId/actionFeed',
+  extractCurrentUser,
+  asyncHandler(handleGetActionFeedForOneZone)
+);
+gardenRouter.get(
+  '/:gardenId/actionFeed',
+  extractCurrentUser,
+  asyncHandler(handleGetActionFeedForOneGarden)
+);
+gardenRouter.post(
+  '/:gardenId/zones/:zoneId/actionFeed',
+  extractCurrentUser,
+  asyncHandler(handlePostActionFeedForOneZone)
+);
 
 gardenRouter.get('/', extractCurrentUser, asyncHandler(handleGetGarden));
 gardenRouter.get('/:id', asyncHandler(handleGetOneGarden));
@@ -24,21 +40,6 @@ gardenRouter.get(
   asyncHandler(handleGetZonesForOneGarden)
 );
 gardenRouter.post('/:id/zones', asyncHandler(handleUpdateZones));
-// gardenRouter.get(
-//   '/:gardenId/zones/:zoneId/actionFeed',
-//   extractCurrentUser,
-//   asyncHandler(handleGetActionFeedForOneZone)
-// );
-// gardenRouter.get(
-//   '/:gardenId/actionFeed',
-//   extractCurrentUser,
-//   asyncHandler(handleGetActionFeedForOneGarden)
-// );
-// gardenRouter.post(
-//   '/:gardenId/zones/:zoneId/actionFeed',
-//   extractCurrentUser,
-//   asyncHandler(handlePostActionFeedForOneZone)
-// );
 
 gardenRouter.post('/', uploadImg, asyncHandler(handleCreateGarden));
 gardenRouter.put('/:id', uploadImg, asyncHandler(handleUpdateGarden));

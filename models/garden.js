@@ -1,4 +1,7 @@
+const dayjs = require('dayjs');
 const Joi = require('joi');
+// const utc = require('dayjs/plugin/utc'); // dependent on utc plugin
+// const timezone = require('dayjs/plugin/timezone');
 
 const db = require('../db');
 const { RecordNotFoundError, ValidationError } = require('../error-types');
@@ -318,6 +321,73 @@ const updateGarden = async (id, newAttributes) => {
     .then(() => getOneGarden(id));
 };
 
+const validateActionFeed = async (
+  attributes,
+  options = { udpatedRessourceId: null }
+) => {
+  const { udpatedRessourceId } = options;
+  const forUpdate = !!udpatedRessourceId;
+  // creating schema for validation by Joi
+  const schema = Joi.object().keys({
+    action_id: forUpdate
+      ? Joi.number().integer()
+      : Joi.number().integer().required(),
+    user_id: forUpdate
+      ? Joi.number().integer()
+      : Joi.number().integer().required(),
+    zone_id: forUpdate
+      ? Joi.number().integer()
+      : Joi.number().integer().required(),
+    date: forUpdate ? Joi.date() : Joi.date().required(),
+    description: Joi.string().allow('').allow(null),
+  });
+
+  const { error } = schema.validate(attributes, {
+    abortEarly: false,
+  });
+  if (error) throw new ValidationError(error.details);
+};
+
+const getActionFeedForOneZone = async (zoneId) => {
+  const limitDate = dayjs().tz('Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
+
+  const newLimitDate = dayjs(limitDate)
+    .subtract(7, 'days')
+    .format('YYYY-MM-DD HH:mm:ss');
+  return db.query(
+    'SELECT * from zoneToActionToUser WHERE zone_id=? AND date > ?',
+    [zoneId, newLimitDate]
+  );
+};
+
+const getActionFeedForOneGarden = async (gardenId) => {
+  const limitDate = dayjs().tz('Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
+
+  const newLimitDate = dayjs(limitDate)
+    .subtract(7, 'days')
+    .format('YYYY-MM-DD HH:mm:ss');
+  return db.query(
+    'SELECT ZTATU.* FROM zoneToActionToUser AS ZTATU INNER JOIN zone ON ZTATU.zone_id = zone.id WHERE zone.garden_id=? AND ZTATU.date > ?',
+    [gardenId, newLimitDate]
+  );
+};
+
+const postActionFeedForOneZone = async (newAttributes) => {
+  console.log(newAttributes);
+  await validateActionFeed(newAttributes);
+  const { zone_id } = newAttributes;
+
+  return db
+    .query(
+      `INSERT INTO zoneToActionToUser SET ${definedAttributesToSqlSet(
+        newAttributes
+      )}`,
+      newAttributes
+    )
+    .then(() => getActionFeedForOneZone(zone_id))
+    .catch(() => false);
+};
+
 module.exports = {
   getGarden,
   getOneGarden,
@@ -331,4 +401,7 @@ module.exports = {
   linkZoneToPlantFamily,
   getZonesForGardenId,
   removeZonesForGardenId,
+  postActionFeedForOneZone,
+  getActionFeedForOneZone,
+  getActionFeedForOneGarden,
 };
