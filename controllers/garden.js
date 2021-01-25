@@ -42,6 +42,7 @@ module.exports.handleCreateGarden = async (req, res) => {
     description,
     exposition,
     zone_quantity,
+    max_users,
     zone_details,
   } = JSON.parse(req.body.newData);
   // Start to manage file upload here
@@ -56,6 +57,7 @@ module.exports.handleCreateGarden = async (req, res) => {
     description,
     exposition,
     zone_quantity: +zone_quantity,
+    max_users: +max_users,
     zone_details,
     picture,
     map,

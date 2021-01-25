@@ -144,6 +144,9 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
     zone_quantity: forUpdate
       ? Joi.number().integer().min(0).max(15)
       : Joi.number().integer().min(0).max(15).required(),
+    max_users: forUpdate
+      ? Joi.number().integer().min(0).max(100)
+      : Joi.number().integer().min(0).max(100).required(),
     zone_details: Joi.array(),
   });
 
