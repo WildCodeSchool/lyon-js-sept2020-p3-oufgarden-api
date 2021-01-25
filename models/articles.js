@@ -1,5 +1,10 @@
 const Joi = require('joi');
 const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc'); // dependent on utc plugin
+const timezone = require('dayjs/plugin/timezone');
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const db = require('../db');
 require('dotenv').config();
