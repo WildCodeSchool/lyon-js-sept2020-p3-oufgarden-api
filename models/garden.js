@@ -118,7 +118,8 @@ const removeGarden = async (removedGardenId, failIfNotFound = true) => {
 const getOneGarden = async (id, failIfNotFound = true) => {
   const rows = await db.query('SELECT * FROM garden WHERE id = ?', [id]);
   if (rows.length) {
-    return rows[0];
+    const address = await getOneAddress(rows[0].address_id);
+    return { ...rows[0], address: address };
   }
   if (failIfNotFound) throw new RecordNotFoundError('garden', id);
   return null;
