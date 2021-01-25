@@ -29,7 +29,6 @@ module.exports.handleCreateReservation = async (req, res) => {
 };
 
 module.exports.handleGetGardenReservation = async (req, res) => {
-  console.log(req.params.id);
   res.send(await getGardenReservation(req.params.id));
 };
 //     res.send(await getOneTag(req.params.id));
