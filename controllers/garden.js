@@ -1,18 +1,15 @@
 const {
   getGarden,
   getOneGarden,
-  getZonesForOneGarden,
-  getActionFeedForOneZone,
-  postActionFeedForOneZone,
   createGarden,
   updateGarden,
   removeGarden,
   createAddress,
   updateAddress,
   createZonesForGardenId,
-  // removeZonesForOneGarden,
-  getActionFeedForOneGarden,
+  getZonesForGardenId,
   linkZoneToPlantFamily,
+  removeZonesForGardenId,
 } = require('../models/garden');
 
 module.exports.handleGetGarden = async (req, res) => {
@@ -24,37 +21,12 @@ module.exports.handleGetGarden = async (req, res) => {
   return res.status(200).send(rawData);
 };
 
-module.exports.handleGetZonesForOneGarden = async (req, res) => {
-  const rawData = await getZonesForOneGarden(req.params.id);
-  return res.status(200).send(rawData);
-};
-
-module.exports.handleGetActionFeedForOneZone = async (req, res) => {
-  const rawData = await getActionFeedForOneZone(req.params.zoneId);
-  return res.status(200).send(rawData);
-};
-
-module.exports.handleGetActionFeedForOneGarden = async (req, res) => {
-  const rawData = await getActionFeedForOneGarden(req.params.gardenId);
-  return res.status(200).send(rawData);
-};
-
 module.exports.handleGetOneGarden = async (req, res) => {
   res.send(await getOneGarden(req.params.id));
 };
 
-module.exports.handlePostActionFeedForOneZone = async (req, res) => {
-  const { date, description, action_id } = req.body;
-  // we can get the zone_id from the body as well
-  const actionData = {
-    date,
-    description,
-    action_id,
-    user_id: req.currentUser.id,
-    zone_id: req.params.zoneId,
-  };
-  const rawData = await postActionFeedForOneZone(actionData);
-  return res.status(200).send(rawData);
+module.exports.handleGetZonesForOneGarden = async (req, res) => {
+  res.send(await getZonesForGardenId(req.params.id));
 };
 
 module.exports.handleCreateGarden = async (req, res) => {
@@ -77,9 +49,10 @@ module.exports.handleCreateGarden = async (req, res) => {
     description,
     exposition,
     zone_quantity,
-    zone_details,
     max_users,
+    zone_details,
   } = JSON.parse(req.body.newData);
+  // Start to manage file upload here
 
   const dataAddress = await createAddress(address);
   const createdAddressId = dataAddress.id;
@@ -90,15 +63,13 @@ module.exports.handleCreateGarden = async (req, res) => {
     name,
     description,
     exposition,
-    max_users: +max_users,
     zone_quantity: +zone_quantity,
+    max_users: +max_users,
     zone_details,
     picture,
     map,
   });
   const createdGardenId = dataGarden.id;
-
-  console.log(createdGardenId);
 
   if (zone_details.length > 0) {
     const dataZones = await createZonesForGardenId(
@@ -132,93 +103,50 @@ module.exports.handleCreateGarden = async (req, res) => {
         .send('Problème dans la table de jointure zone-plantFamily');
     }
   }
+
   return res.status(201).send('Jardin créé avec succès');
 };
 
-// module.exports.handleUpdateGarden = async (req, res) => {
-//   let picture;
-//   let map;
-//   if (!req.files.gardenPicture) {
-//     picture = undefined;
-//   } else {
-//     picture = req.files.gardenPicture[0].path;
-//   }
-//   if (!req.files.zonePicture) {
-//     picture = undefined;
-//   } else {
-//     map = req.files.zonePicture[0].path;
-//   }
+module.exports.handleUpdateZones = async (req, res) => {
+  const gardenId = req.params.id;
+  const { zone_details } = req.body;
 
-//   const {
-//     address,
-//     name,
-//     description,
-//     exposition,
-//     zone_quantity,
-//     max_users,
-//   } = JSON.parse(req.body.newData);
+  // first we remove all the zones for this garden id
+  await removeZonesForGardenId(gardenId);
 
-//   const dataAddress = await createAddress(address);
-//   const createdAddressId = dataAddress.id;
-//   // we don't *absolutely* need to remove the address if creating the garden fails, there will simply be a useless address in the table - it does not have foreign keys pointing to anything
+  // then we re-create new zones
+  if (zone_details.length > 0) {
+    const dataZones = await createZonesForGardenId(gardenId, zone_details);
+    const { affectedRows, firstInsertId } = dataZones;
 
-//   const dataToUpdate = {
-//     address_id: createdAddressId,
-//     name,
-//     description,
-//     exposition,
-//     max_users: +max_users,
-//     zone_quantity: +zone_quantity,
-//     picture,
-//     map,
-//   };
+    const zoneIdList = [];
+    for (let i = 0; i < affectedRows; i += 1) {
+      zoneIdList.push(firstInsertId + i);
+    }
+    const zoneToPlantFamilyArray = zoneIdList.map((zone, index) => {
+      return {
+        zoneId: zone,
+        plantFamilyArray: [...zone_details[index].plantFamilyArray],
+      };
+    });
 
-//   const dataGarden = await updateGarden(dataToUpdate);
+    const insertionStatus = []; // table looking like [true, false, true, true], if the plantFamilyArray is empty, it should just be [null, null, null]
+    zoneToPlantFamilyArray.forEach(async (elem) => {
+      const result = await linkZoneToPlantFamily(
+        elem.zoneId,
+        elem.plantFamilyArray
+      );
+      insertionStatus.push(result);
+    });
+    if (insertionStatus.includes(false)) {
+      return res
+        .status(409)
+        .send('Problème dans la table de jointure zone-plantFamily');
+    }
+  }
 
-//   return res.status(200).send(dataGarden);
-// };
-
-// module.exports.handleUpdateZoneForGarden = async (req, res) => {
-//   const gardenId = req.params.id;
-//   const { zone_details } = req.body;
-
-//   // here remove all the zones
-
-//   if (zone_details.length > 0) {
-//     const dataZones = await createZonesForGardenId(
-//       updatedGardenId,
-//       zone_details
-//     );
-//     const { affectedRows, firstInsertId } = dataZones;
-
-//     const zoneIdList = [];
-//     for (let i = 0; i < affectedRows; i += 1) {
-//       zoneIdList.push(firstInsertId + i);
-//     }
-//     const zoneToPlantFamilyArray = zoneIdList.map((zone, index) => {
-//       return {
-//         zoneId: zone,
-//         plantFamilyArray: [...zone_details[index].plantFamilyArray],
-//       };
-//     });
-
-//     const insertionStatus = []; // table looking like [true, false, true, true], if the plantFamilyArray is empty, it should just be [null, null, null]
-//     zoneToPlantFamilyArray.forEach(async (elem) => {
-//       const result = await linkZoneToPlantFamily(
-//         elem.zoneId,
-//         elem.plantFamilyArray
-//       );
-//       insertionStatus.push(result);
-//     });
-//     if (insertionStatus.includes(false)) {
-//       return res
-//         .status(409)
-//         .send('Problème dans la table de jointure zone-plantFamily');
-//     }
-//   }
-
-//   return res.status(201).send('Jardin créé avec succès');
-// };
+  return res.status(200).send('Zones mises à jour avec succès');
+};
 
 module.exports.handleUpdateGarden = async (req, res) => {
   let picture;

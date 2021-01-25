@@ -1,10 +1,4 @@
-const dayjs = require('dayjs');
 const Joi = require('joi');
-const utc = require('dayjs/plugin/utc'); // dependent on utc plugin
-const timezone = require('dayjs/plugin/timezone');
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
 
 const db = require('../db');
 const { RecordNotFoundError, ValidationError } = require('../error-types');
@@ -94,11 +88,6 @@ const removeAddress = async (addressId, failIfNotFound = true) => {
   return false;
 };
 
-const removeZonesForOneGarden = async (gardenId) => {
-  await db.query('DELETE FROM zone WHERE garden_id = ?', [gardenId]);
-  return true;
-};
-
 // basic functions for garden table //////////////////////////
 // this function checks if a garden with the same name already exists
 const gardenAlreadyExists = async (name) => {
@@ -119,81 +108,7 @@ const getGarden = async (userId) => {
   return db.query('SELECT * FROM garden');
 };
 
-const getZonesForOneGarden = async (gardenId) => {
-  return db.query(
-    'SELECT zone.*, GROUP_CONCAT(ZTPF.plantFamily_id) AS plantFamily_concat_string FROM zone LEFT JOIN zoneToPlantFamily AS ZTPF ON ZTPF.zone_id = zone.id WHERE garden_id=? GROUP BY zone.id',
-    [gardenId]
-  );
-};
-
-const getActionFeedForOneZone = async (zoneId) => {
-  const limitDate = dayjs().tz('Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
-
-  const newLimitDate = dayjs(limitDate)
-    .subtract(7, 'days')
-    .format('YYYY-MM-DD HH:mm:ss');
-  return db.query(
-    'SELECT * from zoneToActionToUser WHERE zone_id=? AND date > ?',
-    [zoneId, newLimitDate]
-  );
-};
-
-const getActionFeedForOneGarden = async (gardenId) => {
-  const limitDate = dayjs().tz('Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
-
-  const newLimitDate = dayjs(limitDate)
-    .subtract(7, 'days')
-    .format('YYYY-MM-DD HH:mm:ss');
-  return db.query(
-    'SELECT ZTATU.* FROM zoneToActionToUser AS ZTATU INNER JOIN zone ON ZTATU.zone_id = zone.id WHERE zone.garden_id=? AND ZTATU.date > ?',
-    [gardenId, newLimitDate]
-  );
-};
-
-const validateActionFeed = async (
-  attributes,
-  options = { udpatedRessourceId: null }
-) => {
-  const { udpatedRessourceId } = options;
-  const forUpdate = !!udpatedRessourceId;
-  // creating schema for validation by Joi
-  const schema = Joi.object().keys({
-    action_id: forUpdate
-      ? Joi.number().integer()
-      : Joi.number().integer().required(),
-    user_id: forUpdate
-      ? Joi.number().integer()
-      : Joi.number().integer().required(),
-    zone_id: forUpdate
-      ? Joi.number().integer()
-      : Joi.number().integer().required(),
-    date: forUpdate ? Joi.date() : Joi.date().required(),
-    description: Joi.string().allow('').allow(null),
-  });
-
-  const { error } = schema.validate(attributes, {
-    abortEarly: false,
-  });
-  if (error) throw new ValidationError(error.details);
-};
-
-const postActionFeedForOneZone = async (newAttributes) => {
-  console.log(newAttributes);
-  await validateActionFeed(newAttributes);
-  const { zone_id } = newAttributes;
-
-  return db
-    .query(
-      `INSERT INTO zoneToActionToUser SET ${definedAttributesToSqlSet(
-        newAttributes
-      )}`,
-      newAttributes
-    )
-    .then(() => getActionFeedForOneZone(zone_id))
-    .catch(() => false);
-};
-
-// removing a garden must remove the connected address, zones, etc | everything is automatic thanks to cascade deleting, except the address //
+// removing a garden must remove the connected address, zones, etc | everything is automativ thanks to cascade deleting, except the address //////////////////////////////
 const removeGarden = async (removedGardenId, failIfNotFound = true) => {
   const removedAddressId = await db
     .query('SELECT address_id FROM garden WHERE id = ?', [removedGardenId])
@@ -222,10 +137,7 @@ const removeGarden = async (removedGardenId, failIfNotFound = true) => {
 };
 
 const getOneGarden = async (id, failIfNotFound = true) => {
-  const rows = await db.query(
-    'SELECT garden.*, address.* FROM garden LEFT JOIN address ON address.id = garden.address_id WHERE garden.id = ?',
-    [id]
-  );
+  const rows = await db.query('SELECT * FROM garden WHERE id = ?', [id]);
   if (rows.length) {
     const address = await getOneAddress(rows[0].address_id);
     return { ...rows[0], address };
@@ -317,10 +229,18 @@ const validateZoneDetailsArray = async (
   // throw new ValidationError(error.details);
 };
 
+const getZonesForGardenId = async (gardenId) => {
+  return db
+    .query(
+      'SELECT zone.*, GROUP_CONCAT(ZTPF.plantFamily_id) AS plantFamily_concat_string FROM zone LEFT JOIN zoneToPlantFamily AS ZTPF ON ZTPF.zone_id = zone.id WHERE garden_id=? GROUP BY zone.id',
+      [gardenId]
+    )
+    .catch(() => false);
+};
+
 const createZonesForGardenId = async (gardenId, zone_details) => {
+  // ajouter une validation des données !
   const zoneDataValidation = await validateZoneDetailsArray(zone_details);
-  console.log('zone data ok');
-  console.log('gardeId', gardenId);
 
   let valuePairsString = '';
   zone_details.forEach((zone) => {
@@ -358,6 +278,10 @@ const createZonesForGardenId = async (gardenId, zone_details) => {
   }
 };
 
+const removeZonesForGardenId = async (gardenId) => {
+  return db.query('DELETE FROM zone WHERE garden_id = ?', [gardenId]);
+};
+
 const linkZoneToPlantFamily = async (zoneId, plantFamilyArray) => {
   if (plantFamilyArray.length > 0) {
     // const tagValidation = await validateTags(plantFamilyArray);
@@ -377,19 +301,6 @@ const linkZoneToPlantFamily = async (zoneId, plantFamilyArray) => {
         return false;
       });
 
-    // if (
-    //   // !tagValidation ||
-    //   result === false) {
-    //   removeZone(zoneId);
-    //   throw new ValidationError([
-    //     {
-    //       message:
-    //         'there was a problem to link the article to its tags, the article was removed',
-    //       path: ['tagToArticle'],
-    //       type: 'insertionError',
-    //     },
-    //   ]);
-    // }
     return result;
   }
   return null;
@@ -397,7 +308,6 @@ const linkZoneToPlantFamily = async (zoneId, plantFamilyArray) => {
 
 const updateGarden = async (id, newAttributes) => {
   await validate(newAttributes, { udpatedRessourceId: id });
-
   const namedAttributes = definedAttributesToSqlSet(newAttributes);
 
   return db
@@ -418,10 +328,7 @@ module.exports = {
   getOneAddress,
   updateAddress,
   createZonesForGardenId,
-  removeZonesForOneGarden,
   linkZoneToPlantFamily,
-  getZonesForOneGarden,
-  getActionFeedForOneZone,
-  postActionFeedForOneZone,
-  getActionFeedForOneGarden,
+  getZonesForGardenId,
+  removeZonesForGardenId,
 };
