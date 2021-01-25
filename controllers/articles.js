@@ -58,6 +58,7 @@ module.exports.handleCreateArticle = async (req, res) => {
 };
 
 module.exports.handleCreateFavorite = async (req, res) => {
+  console.log(req.body);
   const { article_id } = req.body;
   const data = await createFavorite({
     user_id: req.currentUser.id,

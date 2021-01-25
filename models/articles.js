@@ -13,13 +13,13 @@ const getArticles = async () => {
 
 const getAllFavorites = async () => {
   return db.query(
-    'SELECT fav.*, article.title AS article_title, user.firstname AS user_firstname, user.lastname AS user_lastname FROM favorite AS fav INNER JOIN article ON fav.article_id = article.id INNER JOIN user ON fav.user_id = user.id ORDER BY article_id ASC'
+    'SELECT fav.*, article.title AS article_title, article.url AS article_url, user.firstname AS user_firstname, user.lastname AS user_lastname FROM favorite AS fav INNER JOIN article ON fav.article_id = article.id INNER JOIN user ON fav.user_id = user.id ORDER BY article_id ASC'
   );
 };
 
 const getFavorites = async (user_id) => {
   return db.query(
-    'SELECT fav.*, article.title AS article_title, user.firstname AS user_firstname, user.lastname AS user_lastname FROM favorite AS fav INNER JOIN article ON fav.article_id = article.id INNER JOIN user ON fav.user_id = user.id WHERE fav.user_id=? ORDER BY article_id ASC',
+    'SELECT fav.*, article.title AS article_title, article.url AS article_url, user.firstname AS user_firstname, user.lastname AS user_lastname FROM favorite AS fav INNER JOIN article ON fav.article_id = article.id INNER JOIN user ON fav.user_id = user.id WHERE fav.user_id=? ORDER BY article_id ASC',
     [user_id]
   );
 };
