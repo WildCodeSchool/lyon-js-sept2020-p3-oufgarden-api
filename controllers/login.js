@@ -51,7 +51,7 @@ module.exports.handleLoginNormalUser = async (req, res) => {
     }
     req.session.userId = user.id;
     req.session.save(() => {
-      res.sendStatus(200);
+      res.status(200).send(req.session);
     });
     return null;
   }
