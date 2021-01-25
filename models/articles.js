@@ -117,6 +117,7 @@ const validateTags = async (tagsArray) => {
 };
 
 const validateFavorite = async (attributes) => {
+  console.log(attributes);
   let validation = true;
   const { user_id, article_id } = attributes;
 
@@ -134,13 +135,10 @@ const validateFavorite = async (attributes) => {
 
   const rawDataArticle = await db.query('SELECT id FROM article');
   const validIdsArticle = rawDataArticle.map((obj) => obj.id);
-
-  console.log(rawDataUser, rawDataArticle);
-
   if (validIdsUser.includes(user_id) === false) {
     validation = false;
   }
-  if (validIdsArticle.includes(article_id) === false) {
+  if (validIdsArticle.includes(+article_id) === false) {
     validation = false;
   }
 
@@ -253,7 +251,6 @@ const createArticle = async (newAttributes) => {
 
 const createFavorite = async (newAttributes) => {
   const validation = await validateFavorite(newAttributes);
-  console.log(newAttributes);
   const { user_id } = newAttributes;
   if (validation === false) {
     throw new ValidationError([
@@ -290,14 +287,12 @@ const updateArticle = async (id, newAttributes) => {
     .then(() => getOneArticle(id));
 };
 
-const removeFavorite = async (
-  { user_id, article_id },
-  failIfNotFound = true
-) => {
-  if (user_id && article_id) {
+const removeFavorite = async ({ user_id, id }, failIfNotFound = true) => {
+  console.log(user_id, id);
+  if (user_id && id) {
     const res = await db.query(
       'DELETE FROM favorite WHERE user_id=? AND article_id=?',
-      [user_id, article_id]
+      [user_id, id]
     );
     if (res.affectedRows !== 0) {
       return true;

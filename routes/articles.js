@@ -26,7 +26,7 @@ articleRouter.post(
   asyncHandler(handleCreateFavorite)
 );
 articleRouter.delete(
-  '/favorites',
+  '/favorites/:id',
   extractCurrentUser,
   asyncHandler(handleDeleteFavorite)
 );

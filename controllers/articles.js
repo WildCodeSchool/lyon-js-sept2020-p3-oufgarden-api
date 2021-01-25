@@ -58,7 +58,6 @@ module.exports.handleCreateArticle = async (req, res) => {
 };
 
 module.exports.handleCreateFavorite = async (req, res) => {
-  console.log(req.body);
   const { article_id } = req.body;
   const data = await createFavorite({
     user_id: req.currentUser.id,
@@ -94,11 +93,12 @@ module.exports.handleDeleteArticle = async (req, res) => {
 };
 
 module.exports.handleDeleteFavorite = async (req, res) => {
-  const { article_id } = req.body;
+  /*   const { article_id } = req.body;
+   */ const { id } = req.params;
 
   const removed = await removeFavorite({
     user_id: req.currentUser.id,
-    article_id,
+    id,
   });
   if (!removed) {
     res
