@@ -1,4 +1,5 @@
 const dayjs = require('dayjs');
+const nodemailer = require('nodemailer');
 const {
   getUsers,
   getOneUser,
@@ -7,8 +8,9 @@ const {
   removeUser,
   linkUserToGarden,
 } = require('../models/users.js');
+const creds = require('../mailConfig');
 
-module.exports.handleGetUsers = async (req, res) => {
+module.exports.handleGetUsers = async (_req, res) => {
   const rawData = await getUsers();
   return res.status(200).send(rawData);
 };
@@ -18,6 +20,7 @@ module.exports.handleGetOneUser = async (req, res) => {
 };
 
 module.exports.handleCreateUser = async (req, res) => {
+  const picture_url = req.file ? req.file.path : null;
   const {
     gender_marker,
     birthdate,
@@ -29,7 +32,7 @@ module.exports.handleCreateUser = async (req, res) => {
     membership_start,
     is_admin,
     gardenArray,
-  } = req.body;
+  } = JSON.parse(req.body.data);
 
   const user_creation = dayjs().format('YYYY-MM-DD'); // still have to check the format we will want
   const userData = await createUser({
@@ -42,6 +45,7 @@ module.exports.handleCreateUser = async (req, res) => {
     password,
     membership_start: dayjs(membership_start).format('YYYY-MM-DD'),
     user_creation,
+    picture_url,
     is_admin: is_admin ? 1 : 0,
   });
 
@@ -52,10 +56,51 @@ module.exports.handleCreateUser = async (req, res) => {
   }
   await linkUserToGarden(userData.id, gardenArray);
 
+  // sending an email with user infos
+  const transport = {
+    host: 'smtp.gmail.com', // e.g. smtp.gmail.com
+    auth: {
+      user: creds.USER,
+      pass: creds.PASS,
+    },
+  };
+
+  const transporter = nodemailer.createTransport(transport);
+
+  transporter.verify((error, success) => {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log(success);
+      console.log('All works fine, congrats!');
+    }
+  });
+
+  const mail = {
+    from: `"OufGarden" <${creds.USER}>`,
+    to: email,
+    subject: 'Bienvenue chez OufGarden !',
+
+    html: `<p>Votre compte adhérent chez OufGarden a bien été créé ! <br/> Vous pouvez y accéder en utilisant votre adresse mail, ainsi que le mot de passe : ${password}</>`,
+  };
+
+  transporter.sendMail(mail, (err, data) => {
+    if (err) {
+      console.log('fail sending user creation email');
+    } else {
+      console.log('success sending user creation email');
+      console.log(data);
+    }
+  });
+
   return res.status(201).send('User and joining table successfully created');
 };
 
 module.exports.handleUpdateUser = async (req, res) => {
+  let picture_url;
+  if (req.file) {
+    picture_url = req.file.path;
+  }
   const {
     gender_marker,
     birthdate,
@@ -67,7 +112,7 @@ module.exports.handleUpdateUser = async (req, res) => {
     membership_start,
     is_admin,
     gardenArray,
-  } = req.body;
+  } = JSON.parse(req.body.data);
 
   const userData = await updateUser(req.params.id, {
     gender_marker,
@@ -77,6 +122,7 @@ module.exports.handleUpdateUser = async (req, res) => {
     email,
     phone,
     password,
+    picture_url,
     membership_start,
     is_admin: is_admin ? 1 : 0,
   });

@@ -6,10 +6,15 @@ const {
   linkArticleToGarden,
   updateArticle,
   removeArticle,
+  getFeed,
 } = require('../models/articles.js');
 
 module.exports.handleGetArticles = async (req, res) => {
-  const rawData = await getArticles();
+  if (req.currentUser.is_admin === 1) {
+    const rawData = await getArticles();
+    return res.status(200).send(rawData);
+  }
+  const rawData = await getFeed(req.currentUser.garden_id_concat);
   return res.status(200).send(rawData);
 };
 
@@ -18,8 +23,14 @@ module.exports.handleGetOneArticle = async (req, res) => {
 };
 
 module.exports.handleCreateArticle = async (req, res) => {
+  let url;
+  if (!req.file) {
+    url = null;
+  } else {
+    url = req.file.path;
+  }
   // tagsArray is an array with the IDs of all the tags related to this article
-  const { title, content, url, tagsArray, gardenArray } = req.body;
+  const { title, content, tagsArray, gardenArray } = JSON.parse(req.body.data);
   const data = await createArticle({
     title,
     content,
@@ -34,7 +45,13 @@ module.exports.handleCreateArticle = async (req, res) => {
 };
 
 module.exports.handleUpdateArticle = async (req, res) => {
-  const { title, content, url, updated_at, tagsArray, gardenArray } = req.body;
+  let url;
+  if (req.file) {
+    url = req.file.path;
+  }
+  const { title, content, updated_at, tagsArray, gardenArray } = JSON.parse(
+    req.body.data
+  );
   const data = await updateArticle(req.params.id, {
     title,
     content,

@@ -58,6 +58,7 @@ app.use(
     },
   })
 );
+app.use('/file-storage', express.static('file-storage'));
 
 // application routes
 require('./routes')(app);
@@ -66,6 +67,7 @@ require('./routes')(app);
 app.set('x-powered-by', false);
 app.use(handleValidationEror);
 app.use(handleUnauthorizedError);
+
 // server setup
 
 // process setup

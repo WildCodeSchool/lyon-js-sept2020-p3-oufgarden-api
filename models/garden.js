@@ -76,7 +76,13 @@ const gardenAlreadyExists = async (name) => {
   return false;
 };
 
-const getGarden = async () => {
+const getGarden = async (userId) => {
+  if (userId) {
+    return db.query(
+      'SELECT garden.* FROM garden INNER JOIN userToGarden AS UTG ON garden.id = UTG.garden_id WHERE UTG.user_id= ?',
+      [userId]
+    );
+  }
   return db.query('SELECT * FROM garden');
 };
 
@@ -126,7 +132,6 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
     name: forUpdate
       ? Joi.string().min(0).max(150)
       : Joi.string().min(0).max(150).required(),
-    picture: Joi.string().min(0).max(150),
     description: forUpdate
       ? Joi.string().min(0).max(150)
       : Joi.string().min(0).max(150).required(),
@@ -134,7 +139,8 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
     address_id: forUpdate
       ? Joi.number().integer()
       : Joi.number().integer().required(),
-    map: Joi.string().min(0).max(150),
+    picture: Joi.string().min(0).max(150).allow('').allow(null),
+    map: Joi.string().min(0).max(150).allow('').allow(null),
     zone_quantity: forUpdate
       ? Joi.number().integer().min(0).max(15)
       : Joi.number().integer().min(0).max(15).required(),

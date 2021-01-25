@@ -37,6 +37,7 @@ module.exports.handleLogout = async (req, res) => {
 };
 
 module.exports.handleLoginNormalUser = async (req, res) => {
+  console.log(req.session);
   const user = await findByEmail(req.body.email, false);
   const checkedPassword = await verifyPassword(user, req.body.password);
 
@@ -50,7 +51,7 @@ module.exports.handleLoginNormalUser = async (req, res) => {
     }
     req.session.userId = user.id;
     req.session.save(() => {
-      res.status(200).send('logged');
+      res.status(200).send(req.session);
     });
     return null;
   }
