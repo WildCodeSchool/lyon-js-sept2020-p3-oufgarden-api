@@ -288,7 +288,6 @@ const updateArticle = async (id, newAttributes) => {
 };
 
 const removeFavorite = async ({ user_id, id }, failIfNotFound = true) => {
-  console.log(user_id, id);
   if (user_id && id) {
     const res = await db.query(
       'DELETE FROM favorite WHERE user_id=? AND article_id=?',
