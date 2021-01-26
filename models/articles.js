@@ -56,7 +56,7 @@ const getOneArticle = async (id, failIfNotFound = true) => {
     return tagGardenRows;
   }
   if (tagsRows.length < 1 && gardenRows < 1) {
-    return rows[0];
+    return { row: rows[0] };
   }
   if (failIfNotFound) {
     throw new RecordNotFoundError('articles', id);
