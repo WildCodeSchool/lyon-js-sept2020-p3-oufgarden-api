@@ -71,13 +71,13 @@ const removeAddress = async (addressId, failIfNotFound = true) => {
   if (failIfNotFound) throw new RecordNotFoundError('address', addressId);
   return false;
 };
-
+/* 
 const removeZonesForOneGarden = async (gardenId) => {
   const res = await db.query('DELETE FROM zone WHERE garden_id = ?', [
     gardenId,
   ]);
   return true;
-};
+}; */
 
 // basic functions for garden table //////////////////////////
 // this function checks if a garden with the same name already exists
@@ -397,7 +397,7 @@ module.exports = {
   createAddress,
   getOneAddress,
   createZonesForGardenId,
-  removeZonesForOneGarden,
+  /* removeZonesForOneGarden, */
   linkZoneToPlantFamily,
   getZonesForOneGarden,
   getActionFeedForOneZone,

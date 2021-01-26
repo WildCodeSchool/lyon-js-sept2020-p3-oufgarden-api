@@ -9,8 +9,8 @@ const {
   removeGarden,
   createAddress,
   createZonesForGardenId,
-  removeZonesForOneGarden,
-  getActionFeedForOneGarden,
+  /*   removeZonesForOneGarden,
+   */ getActionFeedForOneGarden,
   linkZoneToPlantFamily,
 } = require('../models/garden');
 
@@ -56,7 +56,7 @@ module.exports.handlePostActionFeedForOneZone = async (req, res) => {
   return res.status(200).send(rawData);
 };
 
-module.exports.handleCreateGarden = async (req, res) => {
+module.exports.handleCreateGarden = async (req) => {
   let picture;
   let map;
   if (!req.files.gardenPicture) {
@@ -99,12 +99,12 @@ module.exports.handleCreateGarden = async (req, res) => {
 
   console.log(createdGardenId);
 
-  if (zone_details.length > 0) {
+  /* if (zone_details.length > 0) {
     const dataZones = await createZonesForGardenId(
       createdGardenId,
       zone_details
     );
-    const { affectedRows, firstInsertId } = dataZones;
+     const { affectedRows, firstInsertId } = dataZones; 
   }
   //   const zoneIdList = [];
   //   for (let i = 0; i < affectedRows; i += 1) {
@@ -131,8 +131,9 @@ module.exports.handleCreateGarden = async (req, res) => {
   //       .send('Problème dans la table de jointure zone-plantFamily');
   //   }
   // }
-
+/* 
   return res.status(201).send('Jardin créé avec succès');
+}; */
 };
 
 module.exports.handleUpdateGarden = async (req, res) => {
@@ -179,14 +180,14 @@ module.exports.handleUpdateGarden = async (req, res) => {
 };
 
 module.exports.handleUpdateZoneForGarden = async (req, res) => {
-  const gardenId = req.params.id;
+  /* const gardenId = req.params.id; */
   const { zone_details } = req.body;
 
   // here remove all the zones
 
   if (zone_details.length > 0) {
     const dataZones = await createZonesForGardenId(
-      updatedGardenId,
+      /*  updatedGardenId, */
       zone_details
     );
     const { affectedRows, firstInsertId } = dataZones;
@@ -216,6 +217,7 @@ module.exports.handleUpdateZoneForGarden = async (req, res) => {
         .send('Problème dans la table de jointure zone-plantFamily');
     }
   }
+  return null;
 };
 
 module.exports.handleDeleteGarden = async (req, res) => {
