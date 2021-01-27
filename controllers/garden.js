@@ -65,7 +65,7 @@ module.exports.handleCreateGarden = async (req, res) => {
     picture = req.files.gardenPicture[0].path;
   }
   if (!req.files.zonePicture) {
-    picture = null;
+    map = null;
   } else {
     map = req.files.zonePicture[0].path;
   }
@@ -184,7 +184,7 @@ module.exports.handleUpdateGarden = async (req, res) => {
     picture = req.files.gardenPicture[0].path;
   }
   if (!req.files.zonePicture) {
-    picture = undefined;
+    map = undefined;
   } else {
     map = req.files.zonePicture[0].path;
   }
