@@ -114,6 +114,15 @@ module.exports.handleUpdateUser = async (req, res) => {
     gardenArray,
   } = JSON.parse(req.body.data);
 
+  let is_admin_database;
+  if (is_admin === undefined) {
+    is_admin_database = undefined;
+  } else if (is_admin === true) {
+    is_admin_database = 1;
+  } else if (is_admin === false) {
+    is_admin_database = 0;
+  }
+
   const userData = await updateUser(req.params.id, {
     gender_marker,
     birthdate,
@@ -124,14 +133,17 @@ module.exports.handleUpdateUser = async (req, res) => {
     password,
     picture_url,
     membership_start,
-    is_admin: is_admin ? 1 : 0,
+    is_admin: is_admin_database,
   });
   // here, wait to answer and if ok, fill the joining table
   if (!userData) {
     // problem creating the user
     return res.status(424).send('failed to create user');
   }
-  await linkUserToGarden(userData.id, gardenArray, true);
+
+  if (gardenArray) {
+    await linkUserToGarden(userData.id, gardenArray, true);
+  }
 
   return res.status(201).send('User and joining table successfully created');
 };
