@@ -16,6 +16,7 @@ const {
 } = require('../models/garden');
 
 module.exports.handleGetActionFeedForOneZone = async (req, res) => {
+  console.log(req.body);
   const rawData = await getActionFeedForOneZone(req.params.zoneId);
   return res.status(200).send(rawData);
 };
@@ -58,7 +59,6 @@ module.exports.handleGetZonesForOneGarden = async (req, res) => {
 };
 
 module.exports.handleCreateGarden = async (req, res) => {
-  console.log(req.files);
   let picture;
   let map;
   if (!req.files.gardenPicture) {
