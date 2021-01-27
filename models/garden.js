@@ -1,10 +1,7 @@
 const dayjs = require('dayjs');
 const Joi = require('joi');
-const utc = require('dayjs/plugin/utc'); // dependent on utc plugin
-const timezone = require('dayjs/plugin/timezone');
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
+// const utc = require('dayjs/plugin/utc'); // dependent on utc plugin
+// const timezone = require('dayjs/plugin/timezone');
 
 const db = require('../db');
 const { RecordNotFoundError, ValidationError } = require('../error-types');
@@ -29,13 +26,16 @@ const validateAddress = async (
   // creating schema for validation by Joi
   const schema = Joi.object().keys({
     address_street: forUpdate
-      ? Joi.string().min(0).max(150)
+      ? Joi.string().min(0).max(150).allow('').allow(null)
       : Joi.string().min(0).max(150).required(),
     address_city: forUpdate
-      ? Joi.string().min(0).max(150)
+      ? Joi.string().min(0).max(150).allow('').allow(null)
       : Joi.string().min(0).max(150).required(),
     address_zipcode: forUpdate
-      ? Joi.string().regex(/^(?:[0-8]\d|9[0-8])\d{3}$/)
+      ? Joi.string()
+          .regex(/^(?:[0-8]\d|9[0-8])\d{3}$/)
+          .allow('')
+          .allow(null)
       : Joi.string()
           .regex(/^(?:[0-8]\d|9[0-8])\d{3}$/)
           .required(),
@@ -63,6 +63,25 @@ const createAddress = async (address) => {
     .catch(() => false);
 };
 
+const updateAddress = async (id, address) => {
+  const addressAttributes = {
+    street: address.address_street,
+    city: address.address_city,
+    zip_code: address.address_zipcode,
+  };
+
+  await validateAddress(address, { udpatedRessourceId: id });
+
+  const namedAttributes = definedAttributesToSqlSet(addressAttributes);
+
+  return db
+    .query(`UPDATE address SET ${namedAttributes} WHERE id = :id`, {
+      ...addressAttributes,
+      id,
+    })
+    .then(() => getOneAddress(id));
+};
+
 const removeAddress = async (addressId, failIfNotFound = true) => {
   const res = await db.query('DELETE FROM address WHERE id = ?', [addressId]);
   if (res.affectedRows !== 0) {
@@ -71,13 +90,6 @@ const removeAddress = async (addressId, failIfNotFound = true) => {
   if (failIfNotFound) throw new RecordNotFoundError('address', addressId);
   return false;
 };
-/* 
-const removeZonesForOneGarden = async (gardenId) => {
-  const res = await db.query('DELETE FROM zone WHERE garden_id = ?', [
-    gardenId,
-  ]);
-  return true;
-}; */
 
 // basic functions for garden table //////////////////////////
 // this function checks if a garden with the same name already exists
@@ -99,83 +111,8 @@ const getGarden = async (userId) => {
   return db.query('SELECT * FROM garden');
 };
 
-const getZonesForOneGarden = async (gardenId) => {
-  return db.query(
-    'SELECT zone.*, GROUP_CONCAT(ZTPF.plantFamily_id) AS plantFamily_concat_string FROM zone LEFT JOIN zoneToPlantFamily AS ZTPF ON ZTPF.zone_id = zone.id WHERE garden_id=? GROUP BY zone.id',
-    [gardenId]
-  );
-};
-
-const getActionFeedForOneZone = async (zoneId) => {
-  const limitDate = dayjs().tz('Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
-
-  const newLimitDate = dayjs(limitDate)
-    .subtract(7, 'days')
-    .format('YYYY-MM-DD HH:mm:ss');
-  return db.query(
-    'SELECT * from zoneToActionToUser WHERE zone_id=? AND date > ?',
-    [zoneId, newLimitDate]
-  );
-};
-
-const getActionFeedForOneGarden = async (gardenId) => {
-  const limitDate = dayjs().tz('Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
-
-  const newLimitDate = dayjs(limitDate)
-    .subtract(7, 'days')
-    .format('YYYY-MM-DD HH:mm:ss');
-  return db.query(
-    'SELECT ZTATU.* FROM zoneToActionToUser AS ZTATU INNER JOIN zone ON ZTATU.zone_id = zone.id WHERE zone.garden_id=? AND ZTATU.date > ?',
-    [gardenId, newLimitDate]
-  );
-};
-
-const validateActionFeed = async (
-  attributes,
-  options = { udpatedRessourceId: null }
-) => {
-  const { udpatedRessourceId } = options;
-  const forUpdate = !!udpatedRessourceId;
-  // creating schema for validation by Joi
-  const schema = Joi.object().keys({
-    action_id: forUpdate
-      ? Joi.number().integer()
-      : Joi.number().integer().required(),
-    user_id: forUpdate
-      ? Joi.number().integer()
-      : Joi.number().integer().required(),
-    zone_id: forUpdate
-      ? Joi.number().integer()
-      : Joi.number().integer().required(),
-    date: forUpdate ? Joi.date() : Joi.date().required(),
-    description: Joi.string().allow('').allow(null),
-  });
-
-  const { error } = schema.validate(attributes, {
-    abortEarly: false,
-  });
-  if (error) throw new ValidationError(error.details);
-};
-
-const postActionFeedForOneZone = async (newAttributes) => {
-  console.log(newAttributes);
-  await validateActionFeed(newAttributes);
-  const { zone_id } = newAttributes;
-
-  return db
-    .query(
-      `INSERT INTO zoneToActionToUser SET ${definedAttributesToSqlSet(
-        newAttributes
-      )}`,
-      newAttributes
-    )
-    .then(() => getActionFeedForOneZone(zone_id))
-    .catch(() => false);
-};
-
-// removing a garden must remove the connected address, zones, etc | everything is automatic thanks to cascade deleting, except the address //
+// removing a garden must remove the connected address, zones, etc | everything is automativ thanks to cascade deleting, except the address //////////////////////////////
 const removeGarden = async (removedGardenId, failIfNotFound = true) => {
-  console.log(removedGardenId);
   const removedAddressId = await db
     .query('SELECT address_id FROM garden WHERE id = ?', [removedGardenId])
     .catch(() => false);
@@ -203,12 +140,10 @@ const removeGarden = async (removedGardenId, failIfNotFound = true) => {
 };
 
 const getOneGarden = async (id, failIfNotFound = true) => {
-  const rows = await db.query(
-    'SELECT garden.*, address.* FROM garden LEFT JOIN address ON address.id = garden.address_id WHERE garden.id = ?',
-    [id]
-  );
+  const rows = await db.query('SELECT * FROM garden WHERE id = ?', [id]);
   if (rows.length) {
-    return rows[0];
+    const address = await getOneAddress(rows[0].address_id);
+    return { ...rows[0], address };
   }
   if (failIfNotFound) throw new RecordNotFoundError('garden', id);
   return null;
@@ -226,9 +161,6 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
       ? Joi.string().min(0).max(150)
       : Joi.string().min(0).max(150).required(),
     exposition: Joi.string().min(0).max(150),
-    max_users: forUpdate
-      ? Joi.number().integer().min(0).max(15)
-      : Joi.number().integer().min(0).max(15).required(),
     address_id: forUpdate
       ? Joi.number().integer()
       : Joi.number().integer().required(),
@@ -237,6 +169,9 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
     zone_quantity: forUpdate
       ? Joi.number().integer().min(0).max(15)
       : Joi.number().integer().min(0).max(15).required(),
+    max_users: forUpdate
+      ? Joi.number().integer().min(0).max(100)
+      : Joi.number().integer().min(0).max(100).required(),
     zone_details: Joi.array(),
   });
 
@@ -283,7 +218,6 @@ const validateZoneDetailsArray = async (
 ) => {
   const { udpatedRessourceId } = options;
   // eslint-disable-next-line no-unused-vars
-  // eslint-disable-next-line
   const forUpdate = !!udpatedRessourceId;
   // creating schema for validation by Joi
   const schema = Joi.array().items(Joi.object());
@@ -298,10 +232,18 @@ const validateZoneDetailsArray = async (
   // throw new ValidationError(error.details);
 };
 
+const getZonesForGardenId = async (gardenId) => {
+  return db
+    .query(
+      'SELECT zone.*, GROUP_CONCAT(ZTPF.plantFamily_id) AS plantFamily_concat_string FROM zone LEFT JOIN zoneToPlantFamily AS ZTPF ON ZTPF.zone_id = zone.id WHERE garden_id=? GROUP BY zone.id',
+      [gardenId]
+    )
+    .catch(() => false);
+};
+
 const createZonesForGardenId = async (gardenId, zone_details) => {
+  // ajouter une validation des données !
   const zoneDataValidation = await validateZoneDetailsArray(zone_details);
-  console.log('zone data ok');
-  console.log('gardeId', gardenId);
 
   let valuePairsString = '';
   zone_details.forEach((zone) => {
@@ -339,6 +281,10 @@ const createZonesForGardenId = async (gardenId, zone_details) => {
   }
 };
 
+const removeZonesForGardenId = async (gardenId) => {
+  return db.query('DELETE FROM zone WHERE garden_id = ?', [gardenId]);
+};
+
 const linkZoneToPlantFamily = async (zoneId, plantFamilyArray) => {
   if (plantFamilyArray.length > 0) {
     // const tagValidation = await validateTags(plantFamilyArray);
@@ -358,19 +304,6 @@ const linkZoneToPlantFamily = async (zoneId, plantFamilyArray) => {
         return false;
       });
 
-    // if (
-    //   // !tagValidation ||
-    //   result === false) {
-    //   removeZone(zoneId);
-    //   throw new ValidationError([
-    //     {
-    //       message:
-    //         'there was a problem to link the article to its tags, the article was removed',
-    //       path: ['tagToArticle'],
-    //       type: 'insertionError',
-    //     },
-    //   ]);
-    // }
     return result;
   }
   return null;
@@ -378,14 +311,81 @@ const linkZoneToPlantFamily = async (zoneId, plantFamilyArray) => {
 
 const updateGarden = async (id, newAttributes) => {
   await validate(newAttributes, { udpatedRessourceId: id });
-
   const namedAttributes = definedAttributesToSqlSet(newAttributes);
+
   return db
     .query(`UPDATE garden SET ${namedAttributes} WHERE id = :id`, {
       ...newAttributes,
       id,
     })
     .then(() => getOneGarden(id));
+};
+
+const validateActionFeed = async (
+  attributes,
+  options = { udpatedRessourceId: null }
+) => {
+  const { udpatedRessourceId } = options;
+  const forUpdate = !!udpatedRessourceId;
+  // creating schema for validation by Joi
+  const schema = Joi.object().keys({
+    action_id: forUpdate
+      ? Joi.number().integer()
+      : Joi.number().integer().required(),
+    user_id: forUpdate
+      ? Joi.number().integer()
+      : Joi.number().integer().required(),
+    zone_id: forUpdate
+      ? Joi.number().integer()
+      : Joi.number().integer().required(),
+    date: forUpdate ? Joi.date() : Joi.date().required(),
+    description: Joi.string().allow('').allow(null),
+  });
+
+  const { error } = schema.validate(attributes, {
+    abortEarly: false,
+  });
+  if (error) throw new ValidationError(error.details);
+};
+
+const getActionFeedForOneZone = async (zoneId) => {
+  const limitDate = dayjs().tz('Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
+
+  const newLimitDate = dayjs(limitDate)
+    .subtract(7, 'days')
+    .format('YYYY-MM-DD HH:mm:ss');
+  return db.query(
+    'SELECT ZTATU.*, U.firstname, U.lastname, U.picture_url from zoneToActionToUser AS ZTATU INNER JOIN user AS U ON U.id=ZTATU.user_id WHERE zone_id=? AND date > ?',
+    [zoneId, newLimitDate]
+  );
+};
+
+const getActionFeedForOneGarden = async (gardenId) => {
+  const limitDate = dayjs().tz('Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
+
+  const newLimitDate = dayjs(limitDate)
+    .subtract(7, 'days')
+    .format('YYYY-MM-DD HH:mm:ss');
+  return db.query(
+    'SELECT ZTATU.* FROM zoneToActionToUser AS ZTATU INNER JOIN zone ON ZTATU.zone_id = zone.id WHERE zone.garden_id=? AND ZTATU.date > ?',
+    [gardenId, newLimitDate]
+  );
+};
+
+const postActionFeedForOneZone = async (newAttributes) => {
+  console.log(newAttributes);
+  await validateActionFeed(newAttributes);
+  const { zone_id } = newAttributes;
+
+  return db
+    .query(
+      `INSERT INTO zoneToActionToUser SET ${definedAttributesToSqlSet(
+        newAttributes
+      )}`,
+      newAttributes
+    )
+    .then(() => getActionFeedForOneZone(zone_id))
+    .catch(() => false);
 };
 
 module.exports = {
@@ -396,11 +396,12 @@ module.exports = {
   removeGarden,
   createAddress,
   getOneAddress,
+  updateAddress,
   createZonesForGardenId,
-  /* removeZonesForOneGarden, */
   linkZoneToPlantFamily,
-  getZonesForOneGarden,
-  getActionFeedForOneZone,
+  getZonesForGardenId,
+  removeZonesForGardenId,
   postActionFeedForOneZone,
+  getActionFeedForOneZone,
   getActionFeedForOneGarden,
 };

@@ -7,6 +7,7 @@ const { tagRouter } = require('./tags');
 const { gardenRouter } = require('./garden');
 const { plantFamilyRouter } = require('./plantFamily.js');
 const { frontLogin } = require('./login');
+const { commentRouter } = require('./comments');
 const { timeSlotRouter } = require('./timeSlots');
 const { reservationRouter } = require('./reservation');
 const { actionRouter } = require('./action');
@@ -24,6 +25,7 @@ module.exports = (app) => {
   app.use('/login', adminLogin);
   app.use('/plantFamily', requireCurrentUser, plantFamilyRouter);
   app.use('/app/login', frontLogin);
+  app.use('/comments', requireCurrentUser, commentRouter);
   app.use('/timeSlots', requireCurrentUser, timeSlotRouter);
   app.use('/reservation', requireCurrentUser, reservationRouter);
 };

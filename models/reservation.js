@@ -1,6 +1,8 @@
 // const Joi = require('joi');
 const db = require('../db');
-// const { RecordNotFoundError, ValidationError } = require('../error-types');
+const definedAttributesToSqlSet = require('../helpers/definedAttributesToSQLSet.js');
+
+/* const { RecordNotFoundError, ValidationError } = require('../error-types'); */
 // const definedAttributesToSqlSet = require('../helpers/definedAttributesToSQLSet.js');
 
 // this function checks is a tag with the same name already exists
@@ -37,6 +39,30 @@ const getReservations = async () => {
   return newData;
 };
 
+const createReservation = async (newAttributes) => {
+  /*  await validate(newAttributes); */
+  const res = await db
+    .query(
+      `INSERT INTO reservation SET ${definedAttributesToSqlSet(newAttributes)}`,
+      newAttributes
+    )
+    .catch((err) => {
+      console.log(err);
+      return false;
+    });
+  if (!res) {
+    return false;
+  }
+  return { id: res.insertId };
+};
+
+const getGardenReservation = async (id) => {
+  return db.query(
+    'SELECT R.*, U.firstname, U.lastname, TS.start_time, TS.end_time FROM reservation as R  JOIN user AS U ON R.user_id = U.id JOIN time_slot as TS ON R.time_slot_id=TS.id WHERE garden_id = ?',
+    [id]
+  );
+};
+
 // const validate = async (attributes, options = { udpatedRessourceId: null }) => {
 //   const { udpatedRessourceId } = options;
 //   const forUpdate = !!udpatedRessourceId;
@@ -71,16 +97,6 @@ const getReservations = async () => {
 //   }
 // };
 
-// const createTag = async (newAttributes) => {
-//   await validate(newAttributes);
-//   return db
-//     .query(
-//       `INSERT INTO tag SET ${definedAttributesToSqlSet(newAttributes)}`,
-//       newAttributes
-//     )
-//     .then((res) => getOneTag(res.insertId));
-// };
-
 // const updateTag = async (id, newAttributes) => {
 //   await validate(newAttributes, { udpatedRessourceId: id });
 //   const namedAttributes = definedAttributesToSqlSet(newAttributes);
@@ -103,6 +119,8 @@ const getReservations = async () => {
 
 module.exports = {
   getReservations,
+  createReservation,
+  getGardenReservation,
   //   getOneTag,
   //   createTag,
   //   updateTag,

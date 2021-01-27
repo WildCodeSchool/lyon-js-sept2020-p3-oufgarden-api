@@ -4,6 +4,7 @@ const extractCurrentUser = require('../middlewares/extractCurrentUser');
 const {
   handleGetGarden,
   handleGetZonesForOneGarden,
+  handleUpdateZones,
   handleGetActionFeedForOneZone,
   handlePostActionFeedForOneZone,
   handleGetActionFeedForOneGarden,
@@ -14,14 +15,6 @@ const {
 } = require('../controllers/garden');
 const uploadImg = require('../middlewares/handleGardenImageUpload');
 
-gardenRouter.get('/', extractCurrentUser, asyncHandler(handleGetGarden));
-gardenRouter.get('/:id', asyncHandler(handleGetOneGarden));
-
-gardenRouter.get(
-  '/:id/zones',
-  extractCurrentUser,
-  asyncHandler(handleGetZonesForOneGarden)
-);
 gardenRouter.get(
   '/:gardenId/zones/:zoneId/actionFeed',
   extractCurrentUser,
@@ -38,8 +31,18 @@ gardenRouter.post(
   asyncHandler(handlePostActionFeedForOneZone)
 );
 
+gardenRouter.get('/', extractCurrentUser, asyncHandler(handleGetGarden));
+gardenRouter.get('/:id', asyncHandler(handleGetOneGarden));
+
+gardenRouter.get(
+  '/:id/zones',
+  extractCurrentUser,
+  asyncHandler(handleGetZonesForOneGarden)
+);
+gardenRouter.post('/:id/zones', asyncHandler(handleUpdateZones));
+
 gardenRouter.post('/', uploadImg, asyncHandler(handleCreateGarden));
-gardenRouter.put('/:id', asyncHandler(handleUpdateGarden));
+gardenRouter.put('/:id', uploadImg, asyncHandler(handleUpdateGarden));
 gardenRouter.delete('/:id', asyncHandler(handleDeleteGarden));
 
 module.exports = { gardenRouter };
