@@ -10,6 +10,7 @@ const { frontLogin } = require('./login');
 const { commentRouter } = require('./comments');
 const { timeSlotRouter } = require('./timeSlots');
 const { reservationRouter } = require('./reservation');
+const router = require('./currentUser');
 const { actionRouter } = require('./action');
 const requireCurrentUser = require('../middlewares/requireCurrentUser');
 
@@ -28,4 +29,5 @@ module.exports = (app) => {
   app.use('/comments', requireCurrentUser, commentRouter);
   app.use('/timeSlots', requireCurrentUser, timeSlotRouter);
   app.use('/reservation', requireCurrentUser, reservationRouter);
+  app.use('/currentUser', requireCurrentUser, router);
 };
