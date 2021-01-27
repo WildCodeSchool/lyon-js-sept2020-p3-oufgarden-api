@@ -57,6 +57,7 @@ module.exports.handleGetZonesForOneGarden = async (req, res) => {
 };
 
 module.exports.handleCreateGarden = async (req, res) => {
+  console.log(req.files);
   let picture;
   let map;
   if (!req.files.gardenPicture) {
@@ -65,7 +66,7 @@ module.exports.handleCreateGarden = async (req, res) => {
     picture = req.files.gardenPicture[0].path;
   }
   if (!req.files.zonePicture) {
-    picture = null;
+    map = null;
   } else {
     map = req.files.zonePicture[0].path;
   }
@@ -176,7 +177,7 @@ module.exports.handleUpdateZones = async (req, res) => {
 };
 
 module.exports.handleUpdateGarden = async (req, res) => {
-  let picture;
+  let picture = '';
   let map;
   if (!req.files.gardenPicture) {
     picture = undefined;
@@ -184,7 +185,7 @@ module.exports.handleUpdateGarden = async (req, res) => {
     picture = req.files.gardenPicture[0].path;
   }
   if (!req.files.zonePicture) {
-    picture = undefined;
+    map = undefined;
   } else {
     map = req.files.zonePicture[0].path;
   }
@@ -203,7 +204,6 @@ module.exports.handleUpdateGarden = async (req, res) => {
   const dataAddress = await updateAddress(address.address_id, rest);
   const updatedAddressId = dataAddress.id;
   // we don't *absolutely* need to remove the address if creating the garden fails, there will simply be a useless address in the table - it does not have foreign keys pointing to anything
-
   const dataGarden = await updateGarden(req.params.id, {
     address_id: updatedAddressId,
     name,
