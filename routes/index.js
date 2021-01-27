@@ -20,7 +20,7 @@ module.exports = (app) => {
   app.use('/articles', requireCurrentUser, articleRouter);
   app.use('/tagToArticle', requireCurrentUser, tagToArticleRouter);
   app.use('/tags', requireCurrentUser, tagRouter);
-  app.use('/garden', gardenRouter);
+  app.use('/garden', requireCurrentUser, gardenRouter);
   app.use('/actions', requireCurrentUser, actionRouter);
   app.use('/login', adminLogin);
   app.use('/plantFamily', requireCurrentUser, plantFamilyRouter);
