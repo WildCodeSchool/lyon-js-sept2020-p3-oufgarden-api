@@ -140,7 +140,10 @@ const removeGarden = async (removedGardenId, failIfNotFound = true) => {
 };
 
 const getOneGarden = async (id, failIfNotFound = true) => {
-  const rows = await db.query('SELECT * FROM garden WHERE id = ?', [id]);
+  const rows = await db.query(
+    'SELECT G.*, A.street, A.city, A.zip_code FROM garden AS G INNER JOIN address AS A ON A.id=G.address_id WHERE G.id = ?',
+    [id]
+  );
   if (rows.length) {
     const address = await getOneAddress(rows[0].address_id);
     return { ...rows[0], address };
@@ -340,6 +343,7 @@ const validateActionFeed = async (
       : Joi.number().integer().required(),
     date: forUpdate ? Joi.date() : Joi.date().required(),
     description: Joi.string().allow('').allow(null),
+    time: Joi.string().required(),
   });
 
   const { error } = schema.validate(attributes, {
@@ -355,7 +359,7 @@ const getActionFeedForOneZone = async (zoneId) => {
     .subtract(7, 'days')
     .format('YYYY-MM-DD HH:mm:ss');
   return db.query(
-    'SELECT ZTATU.*, U.firstname, U.lastname, U.picture_url from zoneToActionToUser AS ZTATU INNER JOIN user AS U ON U.id=ZTATU.user_id WHERE zone_id=? AND date > ?',
+    'SELECT ZTATU.*, A.name, U.firstname, U.lastname, U.picture_url from zoneToActionToUser AS ZTATU INNER JOIN user AS U ON U.id=ZTATU.user_id INNER JOIN action AS A ON A.id=ZTATU.action_id WHERE zone_id=? AND date > ? ORDER BY A.name',
     [zoneId, newLimitDate]
   );
 };

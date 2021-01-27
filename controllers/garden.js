@@ -26,9 +26,10 @@ module.exports.handleGetActionFeedForOneGarden = async (req, res) => {
 };
 
 module.exports.handlePostActionFeedForOneZone = async (req, res) => {
-  const { date, description, action_id } = req.body;
+  const { time, date, description, action_id } = req.body;
   // we can get the zone_id from the body as well
   const actionData = {
+    time,
     date,
     description,
     action_id,
