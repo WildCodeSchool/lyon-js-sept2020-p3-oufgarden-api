@@ -313,7 +313,6 @@ const linkZoneToPlantFamily = async (zoneId, plantFamilyArray) => {
 };
 
 const updateGarden = async (id, newAttributes) => {
-  console.log(newAttributes);
   await validate(newAttributes, { udpatedRessourceId: id });
   const namedAttributes = definedAttributesToSqlSet(newAttributes);
 
@@ -378,7 +377,6 @@ const getActionFeedForOneGarden = async (gardenId) => {
 };
 
 const postActionFeedForOneZone = async (newAttributes) => {
-  console.log(newAttributes);
   await validateActionFeed(newAttributes);
   const { zone_id } = newAttributes;
 

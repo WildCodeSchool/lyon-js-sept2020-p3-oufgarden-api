@@ -19,7 +19,6 @@ module.exports.handleGetOneComment = async (req, res) => {
 module.exports.handleCreateComment = async (req, res) => {
   // tagsArray is an array with the IDs of all the tags related to this article
   const { message, article_id } = req.body;
-  console.log({ message, article_id });
   const data = await createComment({
     message,
     article_id,

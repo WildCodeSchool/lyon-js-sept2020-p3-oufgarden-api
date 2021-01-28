@@ -16,7 +16,6 @@ const {
 } = require('../models/garden');
 
 module.exports.handleGetActionFeedForOneZone = async (req, res) => {
-  console.log(req.body);
   const rawData = await getActionFeedForOneZone(req.params.zoneId);
   return res.status(200).send(rawData);
 };
