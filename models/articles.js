@@ -46,7 +46,7 @@ const getOneArticle = async (id, failIfNotFound = true) => {
     'SELECT G.name, ATG.garden_id FROM articleToGarden as ATG JOIN garden AS G ON ATG.garden_id=G.id JOIN article AS A ON ATG.article_id=A.id WHERE A.id = ?',
     [id]
   );
-  console.log(gardenRows, tagsRows);
+
   if (tagsRows.length || gardenRows.length) {
     const tagGardenRows = {
       tag: tagsRows,
@@ -122,7 +122,7 @@ const validateTags = async (tagsArray) => {
 };
 
 const validateFavorite = async (attributes) => {
-  console.log(attributes);
+
   let validation = true;
   const { user_id, article_id } = attributes;
 

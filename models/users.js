@@ -5,7 +5,6 @@ const { RecordNotFoundError, ValidationError } = require('../error-types');
 const definedAttributesToSqlSet = require('../helpers/definedAttributesToSQLSet.js');
 const definedAttributesToSQLSetNoNull = require('../helpers/definedAttributesToSQLSetNoNull.js');
 
-// On check ici si l'email existe déjà
 const emailAlreadyExists = async (email) => {
   const rows = await db.query('SELECT * FROM user WHERE email = ?', [email]);
   if (rows.length) {
@@ -14,7 +13,6 @@ const emailAlreadyExists = async (email) => {
   return false;
 };
 
-// Trouver un utilisateur par l'email
 const findByEmail = async (email, failIfNotFound = true) => {
   const rows = await db.query(`SELECT * FROM user WHERE email = ?`, [email]);
   if (rows.length) {

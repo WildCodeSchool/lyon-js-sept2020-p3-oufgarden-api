@@ -37,7 +37,6 @@ module.exports.handleLogout = async (req, res) => {
 };
 
 module.exports.handleLoginNormalUser = async (req, res) => {
-  console.log(req.session);
   const user = await findByEmail(req.body.email, false);
   const checkedPassword = await verifyPassword(user, req.body.password);
 

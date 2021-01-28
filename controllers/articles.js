@@ -48,8 +48,6 @@ module.exports.handleCreateArticle = async (req, res) => {
     title,
     content,
     url,
-    // created_at,
-    // updated_at,
   });
   const createdArticleId = data.id;
   await linkArticleToTags(createdArticleId, tagsArray);
