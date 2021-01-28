@@ -1,4 +1,5 @@
 const dayjs = require('dayjs');
+require('dotenv').config();
 const nodemailer = require('nodemailer');
 const {
   getUsers,
@@ -8,7 +9,6 @@ const {
   removeUser,
   linkUserToGarden,
 } = require('../models/users.js');
-const creds = require('../mailConfig');
 
 module.exports.handleGetUsers = async (_req, res) => {
   const rawData = await getUsers();
@@ -60,8 +60,8 @@ module.exports.handleCreateUser = async (req, res) => {
   const transport = {
     host: 'smtp.gmail.com', // e.g. smtp.gmail.com
     auth: {
-      user: creds.USER,
-      pass: creds.PASS,
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
     },
   };
 
@@ -77,7 +77,7 @@ module.exports.handleCreateUser = async (req, res) => {
   });
 
   const mail = {
-    from: `"OufGarden" <${creds.USER}>`,
+    from: `"OufGarden" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: 'Bienvenue chez OufGarden !',
 
