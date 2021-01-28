@@ -21,12 +21,7 @@ userRouter.post(
   requireRequestBody,
   asyncHandler(handleCreateUser)
 );
-userRouter.put(
-  '/:id',
-  mainUploadImage,
-  requireIsAdmin,
-  asyncHandler(handleUpdateUser)
-);
+userRouter.put('/:id', mainUploadImage, asyncHandler(handleUpdateUser));
 userRouter.delete('/:id', requireIsAdmin, asyncHandler(handleDeleteUser));
 // test du login
 

@@ -1,4 +1,3 @@
-// const { removeArticle } = require('../models/articles.js');
 const {
   getComments,
   getOneComment,
@@ -20,7 +19,6 @@ module.exports.handleGetOneComment = async (req, res) => {
 module.exports.handleCreateComment = async (req, res) => {
   // tagsArray is an array with the IDs of all the tags related to this article
   const { message, article_id } = req.body;
-  console.log({ message, article_id });
   const data = await createComment({
     message,
     article_id,
@@ -33,7 +31,7 @@ module.exports.handleCreateComment = async (req, res) => {
 
 module.exports.handleUpdateComment = async (req, res) => {
   const { message } = req.body; // only the message can be updated in a comment
-  // still have to make sure we will use a different route and thus will have access to a req.params.id
+
   const data = await updateComment(req.params.id, {
     message,
   });

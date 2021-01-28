@@ -11,16 +11,14 @@ const getComments = async (article_id) => {
   // it is possible to filter comments by article id
   // 'get/comments?article_id=12'
   const filterArray = [];
-  let query = 'SELECT * FROM comment';
+  let query =
+    'SELECT comment.*, user.picture_url, user.lastname, user.firstname FROM comment INNER JOIN user ON user.id= comment.user_id';
   if (article_id) {
-    query += ` WHERE article_id= ?`;
+    query += ` WHERE comment.article_id= ?`;
     filterArray.push(article_id);
   }
 
   query += ' ORDER BY date DESC;';
-
-  console.log(query);
-  console.log(filterArray);
 
   return db.query(query, filterArray);
 };

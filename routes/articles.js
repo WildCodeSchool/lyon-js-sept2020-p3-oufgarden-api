@@ -9,11 +9,34 @@ const {
   handleCreateArticle,
   handleUpdateArticle,
   handleDeleteArticle,
+  handleGetFavorites,
+  handleCreateFavorite,
+  handleDeleteFavorite,
 } = require('../controllers/articles');
 const mainUploadImage = require('../middlewares/handleImageUpload');
 
+articleRouter.get(
+  '/favorites',
+  extractCurrentUser,
+  asyncHandler(handleGetFavorites)
+);
+articleRouter.post(
+  '/favorites',
+  extractCurrentUser,
+  asyncHandler(handleCreateFavorite)
+);
+articleRouter.delete(
+  '/favorites/:id',
+  extractCurrentUser,
+  asyncHandler(handleDeleteFavorite)
+);
+
 articleRouter.get('/', extractCurrentUser, asyncHandler(handleGetArticles));
-articleRouter.get('/:id', asyncHandler(handleGetOneArticle));
+articleRouter.get(
+  '/:id',
+  extractCurrentUser,
+  asyncHandler(handleGetOneArticle)
+);
 articleRouter.post(
   '/',
   mainUploadImage,

@@ -1,5 +1,10 @@
 const Joi = require('joi');
 const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc'); // dependent on utc plugin
+const timezone = require('dayjs/plugin/timezone');
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const db = require('../db');
 require('dotenv').config();
@@ -9,6 +14,19 @@ const definedAttributesToSqlSet = require('../helpers/definedAttributesToSQLSet.
 
 const getArticles = async () => {
   return db.query('SELECT * FROM article ORDER BY created_at DESC');
+};
+
+const getAllFavorites = async () => {
+  return db.query(
+    'SELECT fav.*, article.title AS article_title, article.url AS article_url, user.firstname AS user_firstname, user.lastname AS user_lastname FROM favorite AS fav INNER JOIN article ON fav.article_id = article.id INNER JOIN user ON fav.user_id = user.id ORDER BY article_id ASC'
+  );
+};
+
+const getFavorites = async (user_id) => {
+  return db.query(
+    'SELECT fav.*, article.title AS article_title, article.url AS article_url, user.firstname AS user_firstname, user.lastname AS user_lastname FROM favorite AS fav INNER JOIN article ON fav.article_id = article.id INNER JOIN user ON fav.user_id = user.id WHERE fav.user_id=? ORDER BY article_id ASC',
+    [user_id]
+  );
 };
 
 const getFeed = async (gardenIdConcat) => {
@@ -28,7 +46,7 @@ const getOneArticle = async (id, failIfNotFound = true) => {
     'SELECT G.name, ATG.garden_id FROM articleToGarden as ATG JOIN garden AS G ON ATG.garden_id=G.id JOIN article AS A ON ATG.article_id=A.id WHERE A.id = ?',
     [id]
   );
-  console.log(gardenRows, tagsRows);
+
   if (tagsRows.length || gardenRows.length) {
     const tagGardenRows = {
       tag: tagsRows,
@@ -38,7 +56,7 @@ const getOneArticle = async (id, failIfNotFound = true) => {
     return tagGardenRows;
   }
   if (tagsRows.length < 1 && gardenRows < 1) {
-    return rows[0];
+    return { row: rows[0] };
   }
   if (failIfNotFound) {
     throw new RecordNotFoundError('articles', id);
@@ -99,6 +117,35 @@ const validateTags = async (tagsArray) => {
       validation = false;
     }
   });
+
+  return validation;
+};
+
+const validateFavorite = async (attributes) => {
+
+  let validation = true;
+  const { user_id, article_id } = attributes;
+
+  const schema = Joi.object().keys({
+    user_id: Joi.number().integer().required(),
+    article_id: Joi.number().integer().required(),
+  });
+  const { error } = schema.validate(attributes, {
+    abortEarly: false,
+  });
+  if (error) throw new ValidationError(error.details);
+
+  const rawDataUser = await db.query('SELECT id FROM user');
+  const validIdsUser = rawDataUser.map((obj) => obj.id);
+
+  const rawDataArticle = await db.query('SELECT id FROM article');
+  const validIdsArticle = rawDataArticle.map((obj) => obj.id);
+  if (validIdsUser.includes(user_id) === false) {
+    validation = false;
+  }
+  if (validIdsArticle.includes(+article_id) === false) {
+    validation = false;
+  }
 
   return validation;
 };
@@ -207,6 +254,27 @@ const createArticle = async (newAttributes) => {
     .then((res) => getOneArticle(res.insertId));
 };
 
+const createFavorite = async (newAttributes) => {
+  const validation = await validateFavorite(newAttributes);
+  const { user_id } = newAttributes;
+  if (validation === false) {
+    throw new ValidationError([
+      {
+        message:
+          'there is no such article, or no such user (an id does not exist)',
+        path: ['favorite'],
+        type: 'insertionError',
+      },
+    ]);
+  }
+  return db
+    .query(
+      `INSERT INTO favorite SET ${definedAttributesToSqlSet(newAttributes)}`,
+      { ...newAttributes }
+    )
+    .then(() => getFavorites(user_id));
+};
+
 const updateArticle = async (id, newAttributes) => {
   await validate(newAttributes, { udpatedRessourceId: id });
   const namedAttributes = definedAttributesToSqlSet(newAttributes);
@@ -224,13 +292,32 @@ const updateArticle = async (id, newAttributes) => {
     .then(() => getOneArticle(id));
 };
 
+const removeFavorite = async ({ user_id, id }, failIfNotFound = true) => {
+  if (user_id && id) {
+    const res = await db.query(
+      'DELETE FROM favorite WHERE user_id=? AND article_id=?',
+      [user_id, id]
+    );
+    if (res.affectedRows !== 0) {
+      return true;
+    }
+    if (failIfNotFound) throw new RecordNotFoundError('favorite', user_id);
+    return false;
+  }
+  return null;
+};
+
 module.exports = {
   getArticles,
+  getAllFavorites,
   getOneArticle,
   createArticle,
   linkArticleToTags,
   linkArticleToGarden,
   updateArticle,
   removeArticle,
+  getFavorites,
+  createFavorite,
+  removeFavorite,
   getFeed,
 };
