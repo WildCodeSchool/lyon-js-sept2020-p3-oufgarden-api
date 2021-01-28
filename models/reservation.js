@@ -18,7 +18,7 @@ const getReservations = async () => {
   const currentReservations = await db.query(
     'SELECT garden_id, COUNT(id) AS current_reservations FROM reservation GROUP BY reservation.garden_id'
   );
-  console.log(currentReservations);
+
   const reservationData = await db.query(
     'SELECT reservation.*, garden.max_users FROM reservation INNER JOIN garden ON garden.id = reservation.garden_id'
   );

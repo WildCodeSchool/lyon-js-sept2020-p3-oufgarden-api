@@ -11,7 +11,6 @@ module.exports.handleGetActions = async (req, res) => {
   return res.status(200).send(rawData);
 };
 
-// haven't checked the below functions
 module.exports.handleGetOneAction = async (req, res) => {
   res.send(await getOneAction(req.params.id));
 };

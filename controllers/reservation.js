@@ -2,11 +2,6 @@ const {
   getReservations,
   createReservation,
   getGardenReservation,
-  /*  createReservation, */
-  // getOneTag,
-  // createTag,
-  // updateTag,
-  // removeTag,
 } = require('../models/reservation.js');
 
 module.exports.handleGetReservations = async (req, res) => {
@@ -31,17 +26,3 @@ module.exports.handleCreateReservation = async (req, res) => {
 module.exports.handleGetGardenReservation = async (req, res) => {
   res.send(await getGardenReservation(req.params.id));
 };
-//     res.send(await getOneTag(req.params.id));
-//   };
-
-//   module.exports.handleUpdateTag = async (req, res) => {
-//     const { name } = req.body;
-//     const data = await updateTag(req.params.id, {
-//       name,
-//     });
-//     return res.status(200).send(data);
-//   };
-
-//   module.exports.handleDeleteTag = async (req, res) => {
-//     await removeTag(req.params.id);
-//     res.sendStatus(204);
