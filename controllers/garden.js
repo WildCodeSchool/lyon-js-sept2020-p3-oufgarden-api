@@ -26,9 +26,10 @@ module.exports.handleGetActionFeedForOneGarden = async (req, res) => {
 };
 
 module.exports.handlePostActionFeedForOneZone = async (req, res) => {
-  const { date, description, action_id } = req.body;
+  const { time, date, description, action_id } = req.body;
   // we can get the zone_id from the body as well
   const actionData = {
+    time,
     date,
     description,
     action_id,
@@ -176,7 +177,7 @@ module.exports.handleUpdateZones = async (req, res) => {
 };
 
 module.exports.handleUpdateGarden = async (req, res) => {
-  let picture;
+  let picture = '';
   let map;
   if (!req.files.gardenPicture) {
     picture = undefined;
@@ -203,7 +204,6 @@ module.exports.handleUpdateGarden = async (req, res) => {
   const dataAddress = await updateAddress(address.address_id, rest);
   const updatedAddressId = dataAddress.id;
   // we don't *absolutely* need to remove the address if creating the garden fails, there will simply be a useless address in the table - it does not have foreign keys pointing to anything
-
   const dataGarden = await updateGarden(req.params.id, {
     address_id: updatedAddressId,
     name,

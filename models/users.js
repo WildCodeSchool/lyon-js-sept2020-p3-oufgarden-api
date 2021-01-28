@@ -94,7 +94,6 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
   if (attributes.email) {
     let shouldThrow = false;
     if (forUpdate) {
-      console.log(udpatedRessourceId);
       const toUpdate = await getOneUser(udpatedRessourceId);
       shouldThrow =
         !(toUpdate.email === attributes.email) &&
