@@ -79,9 +79,9 @@ module.exports.handleCreateUser = async (req, res) => {
   const mail = {
     from: `"OufGarden" <${process.env.EMAIL_USER}>`,
     to: email,
-    subject: 'Bienvenue chez OufGarden !',
+    subject: 'Bienvenue chez OUF !',
 
-    html: `<p>Votre compte adhérent chez OufGarden a bien été créé ! <br/> Vous pouvez y accéder en utilisant votre adresse mail, ainsi que le mot de passe : ${password}</>`,
+    html: `<p>Votre compte adhérent chez OUF a bien été créé ! <br/> Vous pouvez y accéder en utilisant votre adresse mail, ainsi que le mot de passe : ${password}</>`,
   };
 
   transporter.sendMail(mail, (err, data) => {
