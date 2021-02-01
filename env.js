@@ -26,6 +26,9 @@ const DB_USER = getEnv(`DB_USER${inTestEnv ? '_TEST' : ''}`);
 const DB_PASS = getEnv(`DB_PASS${inTestEnv ? '_TEST' : ''}`);
 const DB_NAME = getEnv(`DB_NAME${inTestEnv ? '_TEST' : ''}`);
 
+const SENDINBLUE_API_KEY = getEnv(`SENDINBLUE_API_KEY`);
+const MAIL_TO = getEnv(`MAIL_TO`);
+
 module.exports = {
   getEnv,
   inTestEnv,
@@ -40,5 +43,7 @@ module.exports = {
   SESSION_COOKIE_SECRET,
   CORS_ALLOWED_ORINGINS,
   SESSION_COOKIE_NAME,
+  SENDINBLUE_API_KEY,
+  MAIL_TO,
   SESSION_COOKIE_DOMAIN,
 };
