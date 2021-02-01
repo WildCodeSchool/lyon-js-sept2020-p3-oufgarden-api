@@ -58,7 +58,8 @@ module.exports.handleCreateUser = async (req, res) => {
 
   // sending an email with user infos
   const transport = {
-    host: 'smtp.gmail.com', // e.g. smtp.gmail.com
+    // host: 'smtp.gmail.com', // e.g. smtp.gmail.com
+    service: 'gmail',
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
