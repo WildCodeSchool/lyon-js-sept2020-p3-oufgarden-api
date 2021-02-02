@@ -10,6 +10,8 @@ const {
   linkUserToGarden,
 } = require('../models/users.js');
 
+const { sendMail } = require('./contact');
+
 module.exports.handleGetUsers = async (_req, res) => {
   const rawData = await getUsers();
   return res.status(200).send(rawData);
@@ -56,7 +58,7 @@ module.exports.handleCreateUser = async (req, res) => {
   }
   await linkUserToGarden(userData.id, gardenArray);
 
-  // sending an email with user infos
+/*   // sending an email with user infos
   const transport = {
     // host: 'smtp.gmail.com', // e.g. smtp.gmail.com
     service: 'gmail',
@@ -92,7 +94,9 @@ module.exports.handleCreateUser = async (req, res) => {
       console.log('success sending user creation email');
       console.log(data);
     }
-  });
+  }); */
+
+  sendMail(email, password);
 
   return res.status(201).send('User and joining table successfully created');
 };
