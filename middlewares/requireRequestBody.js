@@ -1,5 +1,5 @@
-const isEmpty = require('lodash/isEmpty');
-const isObject = require('lodash/isObject');
+const isEmpty = require("lodash/isEmpty");
+const isObject = require("lodash/isObject");
 
 module.exports = (req, res, next) => {
   if (!isObject(req.body) || isEmpty(req.body)) {

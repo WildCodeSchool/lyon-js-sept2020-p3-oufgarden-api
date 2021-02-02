@@ -2,7 +2,7 @@ const {
   getReservations,
   createReservation,
   getGardenReservation,
-} = require('../models/reservation.js');
+} = require("../models/reservation.js");
 
 module.exports.handleGetReservations = async (req, res) => {
   const rawData = await getReservations();
