@@ -49,7 +49,7 @@ module.exports.handleCreateArticle = async (req, res) => {
     content,
     url,
   });
-  const createdArticleId = data.id;
+  const createdArticleId = data.row.id;
   await linkArticleToTags(createdArticleId, tagsArray);
   await linkArticleToGarden(createdArticleId, gardenArray);
   return res.status(201).send(data);
@@ -78,7 +78,6 @@ module.exports.handleUpdateArticle = async (req, res) => {
     url,
     updated_at,
   });
-
   const createdArticleId = req.params.id;
   await linkArticleToTags(createdArticleId, tagsArray);
   await linkArticleToGarden(createdArticleId, gardenArray);
