@@ -88,8 +88,16 @@ module.exports.handleUpdateArticle = async (req, res) => {
     updated_at,
   });
   const createdArticleId = req.params.id;
+  const queryToAllGardenId = await getGarden();
+  const arrayWithAllGardenId = queryToAllGardenId.map((garden) => garden.id);
   await linkArticleToTags(createdArticleId, tagsArray);
-  await linkArticleToGarden(createdArticleId, gardenArray);
+  if (gardenArray.length > 0) {
+    await linkArticleToGarden(createdArticleId, gardenArray);
+  }
+  if (gardenArray.length === 0) {
+    await linkArticleToGarden(createdArticleId, arrayWithAllGardenId);
+  }
+
   return res.status(200).send(data);
 };
 
