@@ -1,8 +1,8 @@
-const articleRouter = require('express').Router();
-const asyncHandler = require('express-async-handler');
-const requireIsAdmin = require('../middlewares/requireAdmin');
+const articleRouter = require("express").Router();
+const asyncHandler = require("express-async-handler");
+const requireIsAdmin = require("../middlewares/requireAdmin");
 // const requireCurrentUser = require('../middlewares/requireCurrentUser');
-const extractCurrentUser = require('../middlewares/extractCurrentUser');
+const extractCurrentUser = require("../middlewares/extractCurrentUser");
 const {
   handleGetArticles,
   handleGetOneArticle,
@@ -12,43 +12,43 @@ const {
   handleGetFavorites,
   handleCreateFavorite,
   handleDeleteFavorite,
-} = require('../controllers/articles');
-const mainUploadImage = require('../middlewares/handleImageUpload');
+} = require("../controllers/articles");
+const mainUploadImage = require("../middlewares/handleImageUpload");
 
 articleRouter.get(
-  '/favorites',
+  "/favorites",
   extractCurrentUser,
   asyncHandler(handleGetFavorites)
 );
 articleRouter.post(
-  '/favorites',
+  "/favorites",
   extractCurrentUser,
   asyncHandler(handleCreateFavorite)
 );
 articleRouter.delete(
-  '/favorites/:id',
+  "/favorites/:id",
   extractCurrentUser,
   asyncHandler(handleDeleteFavorite)
 );
 
-articleRouter.get('/', extractCurrentUser, asyncHandler(handleGetArticles));
+articleRouter.get("/", extractCurrentUser, asyncHandler(handleGetArticles));
 articleRouter.get(
-  '/:id',
+  "/:id",
   extractCurrentUser,
   asyncHandler(handleGetOneArticle)
 );
 articleRouter.post(
-  '/',
+  "/",
   mainUploadImage,
   requireIsAdmin,
   asyncHandler(handleCreateArticle)
 );
 articleRouter.put(
-  '/:id',
+  "/:id",
   mainUploadImage,
   requireIsAdmin,
   asyncHandler(handleUpdateArticle)
 );
-articleRouter.delete('/:id', requireIsAdmin, asyncHandler(handleDeleteArticle));
+articleRouter.delete("/:id", requireIsAdmin, asyncHandler(handleDeleteArticle));
 
 module.exports = { articleRouter };

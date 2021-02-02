@@ -1,4 +1,4 @@
-const { ValidationError } = require('../error-types');
+const { ValidationError } = require("../error-types");
 
 // eslint-disable-next-line
 module.exports = (error, req, res, next) => {

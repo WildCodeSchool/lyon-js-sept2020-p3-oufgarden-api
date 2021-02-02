@@ -18,7 +18,8 @@
     "test:migrate-db": "db-migrate up -e test",
     "wait-for-db": "node ./scripts/wait10s.js",
     "test:setup-and-run": "npm-run-all test:setup-db wait-for-db test:migrate-db test",
-    "lint": "eslint --fix ."
+    "lint": "eslint --fix .",
+    "format": "prettier --write \"**/*.+(js|jsx|json|yml|yaml|css|md|vue)\""
   },
   "husky": {
     "hooks": {
@@ -47,6 +48,7 @@
     "express-mysql-session": "^2.1.5",
     "express-session": "^1.17.1",
     "faker": "^5.1.0",
+    "googleapis": "^67.0.0",
     "joi": "^17.3.0",
     "lodash": "^4.17.20",
     "multer": "^1.4.2",
@@ -70,6 +72,7 @@
     "jest": "^26.6.3",
     "jest-circus": "^26.6.3",
     "nodemon": "^2.0.6",
+    "prettier": "2.2.1",
     "supertest": "^4.0.2"
   }
 }

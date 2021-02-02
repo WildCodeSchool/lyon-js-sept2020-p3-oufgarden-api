@@ -1,12 +1,12 @@
-const Joi = require('joi');
-const argon2 = require('argon2');
-const db = require('../db');
-const { RecordNotFoundError, ValidationError } = require('../error-types');
-const definedAttributesToSqlSet = require('../helpers/definedAttributesToSQLSet.js');
-const definedAttributesToSQLSetNoNull = require('../helpers/definedAttributesToSQLSetNoNull.js');
+const Joi = require("joi");
+const argon2 = require("argon2");
+const db = require("../db");
+const { RecordNotFoundError, ValidationError } = require("../error-types");
+const definedAttributesToSqlSet = require("../helpers/definedAttributesToSQLSet.js");
+const definedAttributesToSQLSetNoNull = require("../helpers/definedAttributesToSQLSetNoNull.js");
 
 const emailAlreadyExists = async (email) => {
-  const rows = await db.query('SELECT * FROM user WHERE email = ?', [email]);
+  const rows = await db.query("SELECT * FROM user WHERE email = ?", [email]);
   if (rows.length) {
     return true;
   }
@@ -25,20 +25,20 @@ const findByEmail = async (email, failIfNotFound = true) => {
 // get user by id
 const getOneUser = async (id, failIfNotFound = true) => {
   const rows = await db.query(
-    'SELECT user.*, GROUP_CONCAT(userToGarden.garden_id) as garden_id_concat FROM user LEFT JOIN userToGarden ON userToGarden.user_id=user.id WHERE id = ? GROUP BY user.id ;',
+    "SELECT user.*, GROUP_CONCAT(userToGarden.garden_id) as garden_id_concat FROM user LEFT JOIN userToGarden ON userToGarden.user_id=user.id WHERE id = ? GROUP BY user.id ;",
     [id]
   );
   if (rows.length) {
     return rows[0];
   }
-  if (failIfNotFound) throw new RecordNotFoundError('users', id);
+  if (failIfNotFound) throw new RecordNotFoundError("users", id);
   return null;
 };
 
 // Methode qui permet de retrouver l'admin
 const findAdmin = async (id, failIfNotFound = true) => {
   const rows = await db.query(
-    'SELECT * FROM user WHERE id = ? AND is_Admin = 1',
+    "SELECT * FROM user WHERE id = ? AND is_Admin = 1",
     [id]
   );
   if (rows.length) return rows[0];
@@ -57,26 +57,26 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
   const schema = Joi.object().keys({
     birthdate: Joi.date(),
     membership_start: Joi.date(),
-    picture_url: Joi.string().min(0).max(150).allow('').allow(null),
+    picture_url: Joi.string().min(0).max(150).allow("").allow(null),
     user_creation: forUpdate ? Joi.date() : Joi.date().required(),
-    phone: Joi.string().length(10).allow('').allow(null),
+    phone: Joi.string().length(10).allow("").allow(null),
     gender_marker: forUpdate
-      ? Joi.string().allow('madame', 'monsieur', 'inconnu')
-      : Joi.string().allow('madame', 'monsieur', 'inconnu').required(),
+      ? Joi.string().allow("madame", "monsieur", "inconnu")
+      : Joi.string().allow("madame", "monsieur", "inconnu").required(),
     firstname: forUpdate
-      ? Joi.string().min(0).max(150).allow('').allow(null)
+      ? Joi.string().min(0).max(150).allow("").allow(null)
       : Joi.string().min(0).max(150).required(),
     lastname: forUpdate
-      ? Joi.string().min(0).max(150).allow('').allow(null)
+      ? Joi.string().min(0).max(150).allow("").allow(null)
       : Joi.string().min(0).max(150).required(),
     email: forUpdate ? Joi.string().email() : Joi.string().email().required(),
     password: forUpdate
       ? Joi.string()
-          .pattern(new RegExp('^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$'))
-          .allow('')
+          .pattern(new RegExp("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$"))
+          .allow("")
           .allow(null)
       : Joi.string()
-          .pattern(new RegExp('^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$'))
+          .pattern(new RegExp("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$"))
           .required()
           .label("Password doesn't match requirement"),
     //  Careful! \ may need to be escaped in regex because of ESlint
@@ -127,15 +127,15 @@ const createUser = async (newAttributes) => {
 
 const linkUserToGarden = async (userId, gardenArray, forUpdate = false) => {
   if (forUpdate) {
-    await db.query('DELETE FROM userToGarden WHERE user_id = ?', [userId]);
+    await db.query("DELETE FROM userToGarden WHERE user_id = ?", [userId]);
   }
   // to fix map problem on member creation put a if with !gardenArray
-  let valuePairsString = '';
+  let valuePairsString = "";
   let result;
   if (gardenArray !== undefined) {
     if (gardenArray.length > 0) {
       // const gardenValidation = await validateTags(gardenArray);
-      valuePairsString = '';
+      valuePairsString = "";
       gardenArray.forEach((garden) => {
         valuePairsString += `(${+userId}, ${+garden}),`; // + to convert it to number or make sure it's a number
       });
@@ -152,9 +152,9 @@ const linkUserToGarden = async (userId, gardenArray, forUpdate = false) => {
     if (/* !gardenValidation || */ result === false) {
       throw new ValidationError([
         {
-          message: 'there was a problem to the user to gardens',
-          path: ['userToGarden'],
-          type: 'insertionError',
+          message: "there was a problem to the user to gardens",
+          path: ["userToGarden"],
+          type: "insertionError",
         },
       ]);
     }
@@ -169,7 +169,7 @@ const verifyPassword = async (user, plainPassword) => {
 // get all users
 const getUsers = async () => {
   return db.query(
-    'SELECT user.*, GROUP_CONCAT(userToGarden.garden_id) AS garden_id_concat FROM user LEFT JOIN userToGarden ON userToGarden.user_id=user.id GROUP BY user.id ;'
+    "SELECT user.*, GROUP_CONCAT(userToGarden.garden_id) AS garden_id_concat FROM user LEFT JOIN userToGarden ON userToGarden.user_id=user.id GROUP BY user.id ;"
   );
 };
 
@@ -194,11 +194,11 @@ const updateUser = async (id, newAttributes) => {
 };
 // Methode pour supprimer un user
 const removeUser = async (id, failIfNotFound = true) => {
-  const res = await db.query('DELETE FROM user WHERE id = ?', [id]);
+  const res = await db.query("DELETE FROM user WHERE id = ?", [id]);
   if (res.affectedRows !== 0) {
     return true;
   }
-  if (failIfNotFound) throw new RecordNotFoundError('users', id);
+  if (failIfNotFound) throw new RecordNotFoundError("users", id);
   return false;
 };
 
