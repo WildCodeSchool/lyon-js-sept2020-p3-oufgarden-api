@@ -12,8 +12,9 @@ const {
   SESSION_COOKIE_SECRET,
   CORS_ALLOWED_ORINGINS,
   SESSION_COOKIE_NAME,
-} = require("./env");
-const sessionStore = require("./sessionStore");
+  SESSION_COOKIE_DOMAIN,
+} = require('./env');
+const sessionStore = require('./sessionStore');
 
 const handleValidationEror = require("./middlewares/handleValidationError");
 const handleUnauthorizedError = require("./middlewares/handleUnauthorizedError");
@@ -50,7 +51,11 @@ app.use(
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
-    cookie: { sameSite: true },
+    cookie: {
+      sameSite: true,
+      secure: inProdEnv,
+      domain: SESSION_COOKIE_DOMAIN,
+    },
   })
 );
 app.use("/file-storage", express.static("file-storage"));

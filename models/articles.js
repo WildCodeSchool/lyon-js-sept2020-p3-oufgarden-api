@@ -46,7 +46,6 @@ const getOneArticle = async (id, failIfNotFound = true) => {
     "SELECT G.name, ATG.garden_id FROM articleToGarden as ATG JOIN garden AS G ON ATG.garden_id=G.id JOIN article AS A ON ATG.article_id=A.id WHERE A.id = ?",
     [id]
   );
-
   if (tagsRows.length || gardenRows.length) {
     const tagGardenRows = {
       tag: tagsRows,

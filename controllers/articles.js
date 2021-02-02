@@ -13,6 +13,8 @@ const {
   getFeed,
 } = require("../models/articles.js");
 
+const { getGarden } = require('../models/garden');
+
 module.exports.handleGetArticles = async (req, res) => {
   if (req.currentUser.is_admin === 1) {
     const rawData = await getArticles();
@@ -44,14 +46,22 @@ module.exports.handleCreateArticle = async (req, res) => {
   }
   // tagsArray is an array with the IDs of all the tags related to this article
   const { title, content, tagsArray, gardenArray } = JSON.parse(req.body.data);
+
   const data = await createArticle({
     title,
     content,
     url,
   });
-  const createdArticleId = data.id;
+  const queryToAllGardenId = await getGarden();
+  const arrayWithAllGardenId = queryToAllGardenId.map((garden) => garden.id);
+  const createdArticleId = data.row.id;
   await linkArticleToTags(createdArticleId, tagsArray);
-  await linkArticleToGarden(createdArticleId, gardenArray);
+  if (gardenArray.length > 0) {
+    await linkArticleToGarden(createdArticleId, gardenArray);
+  }
+  if (gardenArray.length === 0) {
+    await linkArticleToGarden(createdArticleId, arrayWithAllGardenId);
+  }
   return res.status(201).send(data);
 };
 
@@ -78,10 +88,17 @@ module.exports.handleUpdateArticle = async (req, res) => {
     url,
     updated_at,
   });
-
   const createdArticleId = req.params.id;
+  const queryToAllGardenId = await getGarden();
+  const arrayWithAllGardenId = queryToAllGardenId.map((garden) => garden.id);
   await linkArticleToTags(createdArticleId, tagsArray);
-  await linkArticleToGarden(createdArticleId, gardenArray);
+  if (gardenArray.length > 0) {
+    await linkArticleToGarden(createdArticleId, gardenArray);
+  }
+  if (gardenArray.length === 0) {
+    await linkArticleToGarden(createdArticleId, arrayWithAllGardenId);
+  }
+
   return res.status(200).send(data);
 };
 

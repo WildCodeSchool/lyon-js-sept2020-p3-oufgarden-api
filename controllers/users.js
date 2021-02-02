@@ -151,7 +151,11 @@ module.exports.handleUpdateUser = async (req, res) => {
     await linkUserToGarden(userData.id, gardenArray, true);
   }
 
+<<<<<<< HEAD
   return res.status(201).send("User and joining table successfully created");
+=======
+  return res.status(201).send(userData);
+>>>>>>> dev
 };
 
 module.exports.handleDeleteUser = async (req, res) => {
