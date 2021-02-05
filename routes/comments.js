@@ -1,6 +1,6 @@
-const commentRouter = require('express').Router();
-const asyncHandler = require('express-async-handler');
-const extractCurrentUser = require('../middlewares/extractCurrentUser');
+const commentRouter = require("express").Router();
+const asyncHandler = require("express-async-handler");
+const extractCurrentUser = require("../middlewares/extractCurrentUser");
 
 const {
   handleGetComments,
@@ -8,22 +8,22 @@ const {
   handleCreateComment,
   handleUpdateComment,
   handleDeleteComment,
-} = require('../controllers/comments');
+} = require("../controllers/comments");
 
-commentRouter.get('/', extractCurrentUser, asyncHandler(handleGetComments));
+commentRouter.get("/", extractCurrentUser, asyncHandler(handleGetComments));
 commentRouter.get(
-  '/:id',
+  "/:id",
   extractCurrentUser,
   asyncHandler(handleGetOneComment)
 );
-commentRouter.post('/', extractCurrentUser, asyncHandler(handleCreateComment));
+commentRouter.post("/", extractCurrentUser, asyncHandler(handleCreateComment));
 commentRouter.put(
-  '/:id',
+  "/:id",
   extractCurrentUser,
   asyncHandler(handleUpdateComment)
 );
 commentRouter.delete(
-  '/:id',
+  "/:id",
   extractCurrentUser,
   asyncHandler(handleDeleteComment)
 );

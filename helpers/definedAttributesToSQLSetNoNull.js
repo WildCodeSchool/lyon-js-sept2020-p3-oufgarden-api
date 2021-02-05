@@ -1,10 +1,10 @@
-const omitBy = require('lodash/omitBy');
+const omitBy = require("lodash/omitBy");
 
 const definedAttributesToSQLSetNoNull = (attributes) =>
   Object.keys(
-    omitBy(attributes, (item) => typeof item === 'undefined' || item === '')
+    omitBy(attributes, (item) => typeof item === "undefined" || item === "")
   )
     .map((k) => `${k} = :${k}`)
-    .join(', ');
+    .join(", ");
 
 module.exports = definedAttributesToSQLSetNoNull;

@@ -4,7 +4,7 @@ const {
   createAction,
   updateAction,
   removeAction,
-} = require('../models/actions.js');
+} = require("../models/actions.js");
 
 module.exports.handleGetActions = async (req, res) => {
   const rawData = await getActions();

@@ -1,11 +1,11 @@
-const Joi = require('joi');
-const db = require('../db');
-const { RecordNotFoundError, ValidationError } = require('../error-types');
-const definedAttributesToSqlSet = require('../helpers/definedAttributesToSQLSet.js');
+const Joi = require("joi");
+const db = require("../db");
+const { RecordNotFoundError, ValidationError } = require("../error-types");
+const definedAttributesToSqlSet = require("../helpers/definedAttributesToSQLSet.js");
 
 // this function checks is a action with the same name already exists
 const actionAlreadyExists = async (name) => {
-  const rows = await db.query('SELECT * FROM action WHERE name = ?', [name]);
+  const rows = await db.query("SELECT * FROM action WHERE name = ?", [name]);
   if (rows.length) {
     return true;
   }
@@ -14,15 +14,15 @@ const actionAlreadyExists = async (name) => {
 
 // only the getActions function was really checked
 const getActions = async () => {
-  return db.query('SELECT * FROM action');
+  return db.query("SELECT * FROM action");
 };
 
 const getOneAction = async (id, failIfNotFound = true) => {
-  const rows = await db.query('SELECT * FROM action WHERE id = ?', [id]);
+  const rows = await db.query("SELECT * FROM action WHERE id = ?", [id]);
   if (rows.length) {
     return rows[0];
   }
-  if (failIfNotFound) throw new RecordNotFoundError('actions', id);
+  if (failIfNotFound) throw new RecordNotFoundError("actions", id);
   return null;
 };
 
@@ -54,7 +54,7 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
     }
     if (shouldThrow) {
       throw new ValidationError([
-        { message: 'action_already_exists', path: ['action'], type: 'unique' },
+        { message: "action_already_exists", path: ["action"], type: "unique" },
       ]);
     }
   }
@@ -82,11 +82,11 @@ const updateAction = async (id, newAttributes) => {
 };
 
 const removeAction = async (id, failIfNotFound = true) => {
-  const res = await db.query('DELETE FROM action WHERE id = ?', [id]);
+  const res = await db.query("DELETE FROM action WHERE id = ?", [id]);
   if (res.affectedRows !== 0) {
     return true;
   }
-  if (failIfNotFound) throw new RecordNotFoundError('action', id);
+  if (failIfNotFound) throw new RecordNotFoundError("action", id);
   return false;
 };
 
