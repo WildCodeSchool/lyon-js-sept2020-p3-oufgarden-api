@@ -13,8 +13,8 @@ const {
   CORS_ALLOWED_ORINGINS,
   SESSION_COOKIE_NAME,
   SESSION_COOKIE_DOMAIN,
-} = require('./env');
-const sessionStore = require('./sessionStore');
+} = require("./env");
+const sessionStore = require("./sessionStore");
 
 const handleValidationEror = require("./middlewares/handleValidationError");
 const handleUnauthorizedError = require("./middlewares/handleUnauthorizedError");

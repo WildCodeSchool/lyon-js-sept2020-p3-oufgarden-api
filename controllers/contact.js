@@ -15,7 +15,7 @@ const sendMail = (email, password) => {
   sendSmtpEmail.subject = "Bienvenue chez OUF !";
   sendSmtpEmail.htmlContent = `<p>Votre compte adhérent chez OUF a bien été créé ! <br/> Vous pouvez y accéder en utilisant votre adresse mail, ainsi que le mot de passe : ${password}</>`;
   sendSmtpEmail.sender = { name: "OUFGarden", email: process.env.EMAIL_USER };
-  sendSmtpEmail.to = [{ email: email }];
+  sendSmtpEmail.to = [{ email }];
   sendSmtpEmail.replyTo = { email: "contact@oufgarden.com", name: `OUF` }; // ?
 
   try {

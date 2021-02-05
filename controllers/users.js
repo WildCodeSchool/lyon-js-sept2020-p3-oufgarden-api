@@ -2,7 +2,8 @@ const dayjs = require("dayjs");
 require("dotenv").config();
 const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
-const OAuth2 = google.auth.OAuth2;
+
+const { OAuth2 } = google.auth;
 const {
   getUsers,
   getOneUser,
@@ -11,9 +12,11 @@ const {
   removeUser,
   linkUserToGarden,
 } = require("../models/users.js");
-const { AUTH_EMAIL_ID,
+const {
+  AUTH_EMAIL_ID,
   AUTH_EMAIL_SECRET,
-    AUTH_EMAIL_REFRESH_TOKEN } = require("../env");
+  AUTH_EMAIL_REFRESH_TOKEN,
+} = require("../env");
 
 module.exports.handleGetUsers = async (_req, res) => {
   const rawData = await getUsers();
@@ -61,44 +64,46 @@ module.exports.handleCreateUser = async (req, res) => {
   }
   await linkUserToGarden(userData.id, gardenArray);
 
-  console.log(AUTH_EMAIL_ID,
-  AUTH_EMAIL_SECRET,
-    AUTH_EMAIL_REFRESH_TOKEN);
+  console.log(AUTH_EMAIL_ID, AUTH_EMAIL_SECRET, AUTH_EMAIL_REFRESH_TOKEN);
 
-  const myOAuth2Client = new OAuth2(AUTH_EMAIL_ID, AUTH_EMAIL_SECRET,"https://developers.google.com/oauthplayground");
+  const myOAuth2Client = new OAuth2(
+    AUTH_EMAIL_ID,
+    AUTH_EMAIL_SECRET,
+    "https://developers.google.com/oauthplayground"
+  );
 
-  myOAuth2Client.setCredentials({refresh_token:AUTH_EMAIL_REFRESH_TOKEN});
+  myOAuth2Client.setCredentials({ refresh_token: AUTH_EMAIL_REFRESH_TOKEN });
 
-  const myAccessToken = myOAuth2Client.getAccessToken()
+  const myAccessToken = myOAuth2Client.getAccessToken();
 
   const transport = nodemailer.createTransport({
     service: "gmail",
     auth: {
-         type: "OAuth2",
-         user: "teamoufgarden@gmail.com", //your gmail account you used to set the project up in google cloud console"
-         clientId: AUTH_EMAIL_ID,
-         clientSecret: AUTH_EMAIL_SECRET,
-         refreshToken: AUTH_EMAIL_REFRESH_TOKEN,
-         accessToken: myAccessToken //access token variable we defined earlier
-    }});
-
-    const mailOptions = {
-      from: 'teamoufgarden@gmail.com', // sender
-      to: email, // receiver
-      subject: 'Bienvenue chez OUF !', // Subject
-      html: `<p>Votre compte adhérent chez OUF a bien été créé ! <br/> Vous pouvez y accéder en utilisant votre adresse mail, ainsi que le mot de passe : ${password}</p>`// html body
-      }
-
-    transport.sendMail(mailOptions, function (err, result) {
-      if (err) {
-        console.log(err);
-      } else {
-        transport.close();
-        console.log("Email has been sent: check your inbox!");
-      }
+      type: "OAuth2",
+      user: "teamoufgarden@gmail.com", // your gmail account you used to set the project up in google cloud console"
+      clientId: AUTH_EMAIL_ID,
+      clientSecret: AUTH_EMAIL_SECRET,
+      refreshToken: AUTH_EMAIL_REFRESH_TOKEN,
+      accessToken: myAccessToken, // access token variable we defined earlier
+    },
   });
- 
-  
+
+  const mailOptions = {
+    from: "teamoufgarden@gmail.com", // sender
+    to: email, // receiver
+    subject: "Bienvenue chez OUF !", // Subject
+    html: `<p>Votre compte adhérent chez OUF a bien été créé ! <br/> Vous pouvez y accéder en utilisant votre adresse mail, ainsi que le mot de passe : ${password}</p>`, // html body
+  };
+
+  transport.sendMail(mailOptions, function (err) {
+    if (err) {
+      console.log(err);
+    } else {
+      transport.close();
+      console.log("Email has been sent: check your inbox!");
+    }
+  });
+
   return res.status(201).send("User and joining table successfully created");
 };
 
