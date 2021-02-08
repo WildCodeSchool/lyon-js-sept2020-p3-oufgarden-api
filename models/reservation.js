@@ -49,8 +49,18 @@ const getGardenReservation = async (id) => {
     [id]
   );
 };
+
+// pour test
+
+const getMultipleGardenReservation = async (gardenIdContat) => {
+  return db.query(
+    'SELECT R.*, U.firstname, U.lastname, TS.start_time, TS.end_time, G.name FROM reservation AS R INNER JOIN user AS U ON U.id = R.user_id INNER JOIN time_slot AS TS ON TS.id = R.time_slot_id INNER JOIN garden AS G ON G.id = R.garden_id WHERE R.garden_id IN (?)',
+    [gardenIdContat]
+  );
+};
 module.exports = {
   getReservations,
   createReservation,
   getGardenReservation,
+  getMultipleGardenReservation,
 };
