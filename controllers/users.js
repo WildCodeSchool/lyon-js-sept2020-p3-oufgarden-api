@@ -1,7 +1,7 @@
-const dayjs = require("dayjs");
-require("dotenv").config();
-const nodemailer = require("nodemailer");
-const { google } = require("googleapis");
+const dayjs = require('dayjs');
+require('dotenv').config();
+const nodemailer = require('nodemailer');
+const { google } = require('googleapis');
 
 const { OAuth2 } = google.auth;
 const {
@@ -11,12 +11,12 @@ const {
   updateUser,
   removeUser,
   linkUserToGarden,
-} = require("../models/users.js");
+} = require('../models/users.js');
 const {
   AUTH_EMAIL_ID,
   AUTH_EMAIL_SECRET,
   AUTH_EMAIL_REFRESH_TOKEN,
-} = require("../env");
+} = require('../env');
 
 module.exports.handleGetUsers = async (_req, res) => {
   const rawData = await getUsers();
@@ -42,7 +42,7 @@ module.exports.handleCreateUser = async (req, res) => {
     gardenArray,
   } = JSON.parse(req.body.data);
 
-  const user_creation = dayjs().format("YYYY-MM-DD"); // still have to check the format we will want
+  const user_creation = dayjs().format('YYYY-MM-DD'); // still have to check the format we will want
   const userData = await createUser({
     gender_marker,
     birthdate,
@@ -51,7 +51,7 @@ module.exports.handleCreateUser = async (req, res) => {
     email,
     phone,
     password,
-    membership_start: dayjs(membership_start).format("YYYY-MM-DD"),
+    membership_start: dayjs(membership_start).format('YYYY-MM-DD'),
     user_creation,
     picture_url,
     is_admin: is_admin ? 1 : 0,
@@ -60,7 +60,7 @@ module.exports.handleCreateUser = async (req, res) => {
   // here, wait to answer and if ok, fill the joining table
   if (!userData) {
     // problem creating the user
-    return res.status(424).send("failed to create user");
+    return res.status(424).send('failed to create user');
   }
   await linkUserToGarden(userData.id, gardenArray);
 
@@ -69,7 +69,7 @@ module.exports.handleCreateUser = async (req, res) => {
   const myOAuth2Client = new OAuth2(
     AUTH_EMAIL_ID,
     AUTH_EMAIL_SECRET,
-    "https://developers.google.com/oauthplayground"
+    'https://developers.google.com/oauthplayground'
   );
 
   myOAuth2Client.setCredentials({ refresh_token: AUTH_EMAIL_REFRESH_TOKEN });
@@ -77,10 +77,10 @@ module.exports.handleCreateUser = async (req, res) => {
   const myAccessToken = myOAuth2Client.getAccessToken();
 
   const transport = nodemailer.createTransport({
-    service: "gmail",
+    service: 'gmail',
     auth: {
-      type: "OAuth2",
-      user: "teamoufgarden@gmail.com", // your gmail account you used to set the project up in google cloud console"
+      type: 'OAuth2',
+      user: 'teamoufgarden@gmail.com', // your gmail account you used to set the project up in google cloud console"
       clientId: AUTH_EMAIL_ID,
       clientSecret: AUTH_EMAIL_SECRET,
       refreshToken: AUTH_EMAIL_REFRESH_TOKEN,
@@ -89,10 +89,11 @@ module.exports.handleCreateUser = async (req, res) => {
   });
 
   const mailOptions = {
-    from: "teamoufgarden@gmail.com", // sender
+    from: 'teamoufgarden@gmail.com', // sender
     to: email, // receiver
-    subject: "Bienvenue chez OUF !", // Subject
-    html: `<p>Votre compte adhérent chez OUF a bien été créé ! <br/> Vous pouvez y accéder en utilisant votre adresse mail, ainsi que le mot de passe : ${password}</p>`, // html body
+    subject: 'Bienvenue chez OUF !', // Subject
+    html: `<p>Bienvenu dans les rangs de l'équipe de OUF U+1F60A <br/> Nous vons remercions pour votre adhésion et nous vous souhaitons un moment tout green dans votre nouveau jardin U+1F609 <br/> Vous pouvez accéder à votre espace adhérant et gérer votre jardin en utilisant votre adresse mail, ainsi que ce mot de passe : ${password} <br/> 
+    Toute l'équipe de OUF vous souhaite une belle journée U+1F49A</p>`, // html body
   };
 
   transport.sendMail(mailOptions, function (err) {
@@ -100,11 +101,11 @@ module.exports.handleCreateUser = async (req, res) => {
       console.log(err);
     } else {
       transport.close();
-      console.log("Email has been sent: check your inbox!");
+      console.log('Email has been sent: check your inbox!');
     }
   });
 
-  return res.status(201).send("User and joining table successfully created");
+  return res.status(201).send('User and joining table successfully created');
 };
 
 module.exports.handleUpdateUser = async (req, res) => {
@@ -149,7 +150,7 @@ module.exports.handleUpdateUser = async (req, res) => {
   // here, wait to answer and if ok, fill the joining table
   if (!userData) {
     // problem creating the user
-    return res.status(424).send("failed to create user");
+    return res.status(424).send('failed to create user');
   }
 
   if (gardenArray) {
