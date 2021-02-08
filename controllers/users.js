@@ -92,7 +92,7 @@ module.exports.handleCreateUser = async (req, res) => {
     from: 'teamoufgarden@gmail.com', // sender
     to: email, // receiver
     subject: 'Bienvenue chez OUF !', // Subject
-    html: `<p>Bienvenu dans les rangs de l'équipe de OUF U+1F60A <br/> Nous vons remercions pour votre adhésion et nous vous souhaitons un moment tout green dans votre nouveau jardin U+1F609 <br/> Vous pouvez accéder à votre espace adhérant et gérer votre jardin en utilisant votre adresse mail, ainsi que ce mot de passe : ${password} <br/> 
+    html: `<p>Bienvenue dans les rangs de l'équipe de OUF U+1F60A <br/> Nous vons remercions pour votre adhésion et nous vous souhaitons un moment tout green dans votre nouveau jardin U+1F609 <br/> Vous pouvez accéder à votre espace adhérent et gérer votre jardin en utilisant votre adresse mail, ainsi que ce mot de passe : ${password} <br/> 
     Toute l'équipe de OUF vous souhaite une belle journée U+1F49A</p>`, // html body
   };
 
