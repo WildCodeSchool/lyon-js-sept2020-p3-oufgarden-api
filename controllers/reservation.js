@@ -2,6 +2,7 @@ const {
   getReservations,
   createReservation,
   getGardenReservation,
+  getMultipleGardenReservation,
 } = require('../models/reservation.js');
 
 module.exports.handleGetReservations = async (req, res) => {
@@ -25,4 +26,9 @@ module.exports.handleCreateReservation = async (req, res) => {
 
 module.exports.handleGetGardenReservation = async (req, res) => {
   res.send(await getGardenReservation(req.params.id));
+};
+
+module.exports.handleGetMultipleGardenReservation = async (req, res) => {
+  console.log(req.body);
+  res.send(await getMultipleGardenReservation(req.params.id));
 };

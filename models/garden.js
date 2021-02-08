@@ -359,7 +359,7 @@ const getActionFeedForOneZone = async (zoneId) => {
     .subtract(7, 'days')
     .format('YYYY-MM-DD HH:mm:ss');
   return db.query(
-    'SELECT ZTATU.*, A.name, U.firstname, U.lastname, U.picture_url from zoneToActionToUser AS ZTATU INNER JOIN user AS U ON U.id=ZTATU.user_id INNER JOIN action AS A ON A.id=ZTATU.action_id WHERE zone_id=? AND ZTATU.date > ? ORDER BY A.name',
+    'SELECT ZTATU.*, A.name, U.firstname, U.lastname, U.picture_url from zoneToActionToUser AS ZTATU INNER JOIN user AS U ON U.id=ZTATU.user_id INNER JOIN action AS A ON A.id=ZTATU.action_id WHERE zone_id=? AND ZTATU.date > ? ORDER BY date DESC',
     [zoneId, newLimitDate]
   );
 };

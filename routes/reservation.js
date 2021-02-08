@@ -5,6 +5,7 @@ const {
   handleGetReservations,
   handleCreateReservation,
   handleGetGardenReservation,
+  handleGetMultipleGardenReservation,
 } = require('../controllers/reservation');
 const extractCurrentUser = require('../middlewares/extractCurrentUser');
 
@@ -13,6 +14,11 @@ reservationRouter.get(
   '/:id',
   extractCurrentUser,
   asyncHandler(handleGetGardenReservation)
+);
+reservationRouter.get(
+  '/multiple/:id',
+  extractCurrentUser,
+  asyncHandler(handleGetMultipleGardenReservation)
 );
 reservationRouter.post(
   '/',
