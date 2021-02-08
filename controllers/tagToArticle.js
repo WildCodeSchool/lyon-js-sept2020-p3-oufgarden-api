@@ -1,4 +1,4 @@
-const { getTagToArticle } = require('../models/tagToArticle.js');
+const { getTagToArticle } = require("../models/tagToArticle.js");
 
 module.exports.handleGetTagToArticle = async (req, res) => {
   const rawData = await getTagToArticle();

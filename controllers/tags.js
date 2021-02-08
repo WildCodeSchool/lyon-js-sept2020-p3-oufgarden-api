@@ -4,7 +4,7 @@ const {
   createTag,
   updateTag,
   removeTag,
-} = require('../models/tags.js');
+} = require("../models/tags.js");
 
 module.exports.handleGetTags = async (req, res) => {
   const rawData = await getTags();

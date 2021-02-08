@@ -4,7 +4,7 @@ const {
   createComment,
   updateComment,
   removeComment,
-} = require('../models/comments.js');
+} = require("../models/comments.js");
 
 module.exports.handleGetComments = async (req, res) => {
   const { article_id } = req.query;

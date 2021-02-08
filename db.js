@@ -1,4 +1,4 @@
-const mysql = require('mysql2');
+const mysql = require("mysql2");
 const {
   inTestEnv,
   DB_HOST,
@@ -6,7 +6,7 @@ const {
   DB_USER,
   DB_PASS,
   DB_NAME,
-} = require('./env');
+} = require("./env");
 
 class Database {
   init() {
@@ -47,9 +47,9 @@ class Database {
 
   async deleteAllData() {
     if (!inTestEnv)
-      throw new Error('Cannot truncate all table if not in test env !');
+      throw new Error("Cannot truncate all table if not in test env !");
     const truncates = await this.getTableNames().then((tableNames) =>
-      tableNames.map((name) => `TRUNCATE ${name};`).join(' ')
+      tableNames.map((name) => `TRUNCATE ${name};`).join(" ")
     );
     const sql = `SET FOREIGN_KEY_CHECKS=0; ${truncates} SET FOREIGN_KEY_CHECKS=1;`;
     return this.query(sql);
@@ -60,7 +60,7 @@ class Database {
       this.tableNames = (
         await this.query(
           `SELECT table_name FROM information_schema.tables where LOWER(table_schema) = '${
-            process.env.DB_NAME_TEST || 'contact_api_database_test'
+            process.env.DB_NAME_TEST || "contact_api_database_test"
           }' AND table_name != 'migrations'`
         )
       ).map((row) => row.table_name || row.TABLE_NAME);

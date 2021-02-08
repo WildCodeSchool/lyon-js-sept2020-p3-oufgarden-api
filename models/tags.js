@@ -1,11 +1,11 @@
-const Joi = require('joi');
-const db = require('../db');
-const { RecordNotFoundError, ValidationError } = require('../error-types');
-const definedAttributesToSqlSet = require('../helpers/definedAttributesToSQLSet.js');
+const Joi = require("joi");
+const db = require("../db");
+const { RecordNotFoundError, ValidationError } = require("../error-types");
+const definedAttributesToSqlSet = require("../helpers/definedAttributesToSQLSet.js");
 
 // this function checks is a tag with the same name already exists
 const tagAlreadyExists = async (name) => {
-  const rows = await db.query('SELECT * FROM tag WHERE name = ?', [name]);
+  const rows = await db.query("SELECT * FROM tag WHERE name = ?", [name]);
   if (rows.length) {
     return true;
   }
@@ -13,15 +13,15 @@ const tagAlreadyExists = async (name) => {
 };
 
 const getTags = async () => {
-  return db.query('SELECT * FROM tag');
+  return db.query("SELECT * FROM tag");
 };
 
 const getOneTag = async (id, failIfNotFound = true) => {
-  const rows = await db.query('SELECT * FROM tag WHERE id = ?', [id]);
+  const rows = await db.query("SELECT * FROM tag WHERE id = ?", [id]);
   if (rows.length) {
     return rows[0];
   }
-  if (failIfNotFound) throw new RecordNotFoundError('tags', id);
+  if (failIfNotFound) throw new RecordNotFoundError("tags", id);
   return null;
 };
 
@@ -53,7 +53,7 @@ const validate = async (attributes, options = { udpatedRessourceId: null }) => {
     }
     if (shouldThrow) {
       throw new ValidationError([
-        { message: 'tag_already_exists', path: ['tag'], type: 'unique' },
+        { message: "tag_already_exists", path: ["tag"], type: "unique" },
       ]);
     }
   }
@@ -81,11 +81,11 @@ const updateTag = async (id, newAttributes) => {
 };
 
 const removeTag = async (id, failIfNotFound = true) => {
-  const res = await db.query('DELETE FROM tag WHERE id = ?', [id]);
+  const res = await db.query("DELETE FROM tag WHERE id = ?", [id]);
   if (res.affectedRows !== 0) {
     return true;
   }
-  if (failIfNotFound) throw new RecordNotFoundError('tag', id);
+  if (failIfNotFound) throw new RecordNotFoundError("tag", id);
   return false;
 };
 

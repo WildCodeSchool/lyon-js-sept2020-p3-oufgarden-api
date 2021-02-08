@@ -1,13 +1,13 @@
-const db = require('../db');
-const definedAttributesToSqlSet = require('../helpers/definedAttributesToSQLSet.js');
+const db = require("../db");
+const definedAttributesToSqlSet = require("../helpers/definedAttributesToSQLSet.js");
 
 const getReservations = async () => {
   const currentReservations = await db.query(
-    'SELECT garden_id, COUNT(id) AS current_reservations FROM reservation GROUP BY reservation.garden_id'
+    "SELECT garden_id, COUNT(id) AS current_reservations FROM reservation GROUP BY reservation.garden_id"
   );
 
   const reservationData = await db.query(
-    'SELECT reservation.*, garden.max_users FROM reservation INNER JOIN garden ON garden.id = reservation.garden_id'
+    "SELECT reservation.*, garden.max_users FROM reservation INNER JOIN garden ON garden.id = reservation.garden_id"
   );
 
   const newData = reservationData.map((reservation) => {
@@ -45,7 +45,7 @@ const createReservation = async (newAttributes) => {
 
 const getGardenReservation = async (id) => {
   return db.query(
-    'SELECT R.*, U.firstname, U.lastname, TS.start_time, TS.end_time FROM reservation as R  JOIN user AS U ON R.user_id = U.id JOIN time_slot as TS ON R.time_slot_id=TS.id WHERE garden_id = ?',
+    "SELECT R.*, U.firstname, U.lastname, TS.start_time, TS.end_time FROM reservation as R  JOIN user AS U ON R.user_id = U.id JOIN time_slot as TS ON R.time_slot_id=TS.id WHERE garden_id = ?",
     [id]
   );
 };

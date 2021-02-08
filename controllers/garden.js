@@ -13,7 +13,7 @@ const {
   getActionFeedForOneZone,
   getActionFeedForOneGarden,
   postActionFeedForOneZone,
-} = require('../models/garden');
+} = require("../models/garden");
 
 module.exports.handleGetActionFeedForOneZone = async (req, res) => {
   const rawData = await getActionFeedForOneZone(req.params.zoneId);
@@ -128,11 +128,11 @@ module.exports.handleCreateGarden = async (req, res) => {
     if (insertionStatus.includes(false)) {
       return res
         .status(409)
-        .send('Problème dans la table de jointure zone-plantFamily');
+        .send("Problème dans la table de jointure zone-plantFamily");
     }
   }
 
-  return res.status(201).send('Jardin créé avec succès');
+  return res.status(201).send("Jardin créé avec succès");
 };
 
 module.exports.handleUpdateZones = async (req, res) => {
@@ -169,15 +169,15 @@ module.exports.handleUpdateZones = async (req, res) => {
     if (insertionStatus.includes(false)) {
       return res
         .status(409)
-        .send('Problème dans la table de jointure zone-plantFamily');
+        .send("Problème dans la table de jointure zone-plantFamily");
     }
   }
 
-  return res.status(200).send('Zones mises à jour avec succès');
+  return res.status(200).send("Zones mises à jour avec succès");
 };
 
 module.exports.handleUpdateGarden = async (req, res) => {
-  let picture = '';
+  let picture = "";
   let map;
   if (!req.files.gardenPicture) {
     picture = undefined;

@@ -1,6 +1,6 @@
-const db = require('../db.js');
-const app = require('../app.js');
-const sessionStore = require('../sessionStore.js');
+const db = require("../db.js");
+const app = require("../app.js");
+const sessionStore = require("../sessionStore.js");
 
 const deleteAllDBData = async () => {
   await db.deleteAllData();

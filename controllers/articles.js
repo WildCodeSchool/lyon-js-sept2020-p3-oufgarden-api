@@ -11,7 +11,8 @@ const {
   createFavorite,
   removeFavorite,
   getFeed,
-} = require('../models/articles.js');
+} = require("../models/articles.js");
+
 const { getGarden } = require('../models/garden');
 
 module.exports.handleGetArticles = async (req, res) => {
@@ -118,7 +119,7 @@ module.exports.handleDeleteFavorite = async (req, res) => {
     res
       .status(422)
       .send(
-        'error deleting favorite, check that you send a correct user AND article id'
+        "error deleting favorite, check that you send a correct user AND article id"
       );
   }
 
