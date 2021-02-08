@@ -29,6 +29,5 @@ module.exports.handleGetGardenReservation = async (req, res) => {
 };
 
 module.exports.handleGetMultipleGardenReservation = async (req, res) => {
-  console.log(req.body);
   res.send(await getMultipleGardenReservation(req.params.id));
 };
